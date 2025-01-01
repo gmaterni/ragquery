@@ -1,0 +1,211 @@
+<div class="text">
+    <p class="center"> Comandi barra superiore </p>
+    <div>
+        Pulsante Menu
+        <p> Apre/chiude il Menu comandi </p>
+    </div>
+    <div>
+        Uploa dFiles
+        <p>
+            Fa l'upload di un file locale. Sono accettati i file pdf, docx e txt.
+            Controlla se il file è in archivio, per non sovrascriverlo.
+        </p>
+    </div>
+    <div>
+        Upload Dir:
+        <p>
+            Per fare l'upload dei files di una dri. Sono accettati i files pdf, docx e txt.
+            I file in archivio con lo stesso nome non vengono sovrascritti.
+        </p>
+    </div>
+    <div>
+        Log:
+        <p>
+            Attiva/Disattiva la visualizzazione del Log.
+            Nel Log sono visualizzate le query con le dimensioni delle parti di documento analizzata.
+        </p>
+    </div>
+
+    <!--  -->
+    <hr>
+    <!--  -->
+    <div>
+        <p class="center"> Comandi lato destro in alto: </p>
+    </div>
+    <div>
+        Copia:
+        <p> Copia il testo dell'output negli appunti. </p>
+    </div>
+    <div>
+        Apri:
+        <p>
+            Visualizza il testo in una finestra più grande.
+        </p>
+    </div>
+    <hr>
+    <!--  -->
+    <div>
+        <p class="center"> Comandi lato destro in basso: </p>
+    </div>
+    <div>
+        Documeti => RAG => Contesto => Query: (Pulsante Rosso)
+        <p>
+            Input per la query da utilizzare per la elaborazione RAG.
+            <br>
+            Ogni documento in archivio è diviso in parti compatibili con l'ampiezza della finestra
+            di input sel Model utilizzato.
+        </p>
+        <p>
+            Per ogni parte esegue una query utilizzandola per estrarre informazioni/concetti pertinenti alla stessa.
+        </p>
+        <p>
+            Il risultato di ogni query è archiviato nella memoria locale.
+        </p>
+        <p>
+            All fine della sequenza di elaborazioni esegue uan query che produce
+            un contesto riepilogativo delle risposte archviate.
+        </p>
+        <p>
+            Infine esegue la query utilizzzando il conesto creato e visualizza la risposta ella finestra di output.
+        </p>
+    </div>
+    <div>
+        Contesto => Query: (Pulsante Verde / Invio)
+        <p>
+            Input per query che utilizzano il contesto creato con l'elaborazione RAG.
+            Inizia una conversazione.
+        </p>
+        <p>
+            La conversazioe ha senso relativamente all'elaborazione RAG se ogni query è una variazione / approfondimento della query iiziale.
+        </p>
+    </div>
+    <div>
+        Cancela Conversazione:
+        <p>
+            Cancella la storia della conversazione attiva.
+            Non vengoo cancellati i dati dell'laborazione RAG
+        </p>
+        Per andare a capo: Maiusc. + Invio
+    </div>
+    <!--  -->
+    <hr>
+    <!--  -->
+    <div>
+        <p class=" center"> Comandi del Menu: </p>
+    </div>
+    <div>
+        README
+        <p>
+            Presenta una spiegazione della implemntazione della
+            tecnologia RAG utilizzata.
+        </p>
+    </div>
+    <div>
+        Risposta:
+        <p> Visualizza lq risposta ottenuta alla fine della elaborazione RAG </p>
+    </div>
+    <div>
+        Query iniziale:
+        <p> Visualizza lq query utilizzata per l'elaborazione RAG </p>
+    </div>
+    <div>
+        Elenco Risposte:
+        <p>
+            Visualizza l'elenco delle risposte per ogni parte documento utilizzata fino alla riposta che genera il contesto.
+        </p>
+    </div>
+    <div>
+        Contesto RAG:
+        <p>
+            Visualizza il contesto creato utilizzando le risposte elaborate.
+        </p>
+    </div>
+    <div>
+        Dati ARchviati:
+        <p>
+            Visualizza i ati in archivio e le lroro dimensioni:
+        </p>
+    </div>
+    <div>
+        Elenco Documenti:
+        <p>
+            Visualizza la lista dei documenti achviati ed utilizzabili per l'elaborazione.<br>
+            Con il clic del mouse sul nome di un documento si visualizza.
+        </p>
+    </div>
+
+    <div>
+        Numero query:
+        <p>
+            Calcola le query necessarie per ogni documento e le Query totali,
+            necessaire per analizzare tutti i documenti caricati.
+        </p>
+    </div>
+
+
+    <div>
+        Cancella Dati:
+        <p>
+            Cancella i dati delle elaborazion salvati nell'archivio.
+            NON cancella i documenti caricati.
+        </p>
+    </div>
+
+    <div>
+        Cancella Documenti:
+        <p>
+            Cancella i documenti caricati e tutti i dati archviati locamente.
+        </p>
+    </div>
+
+    <!--  -->
+
+    <p class="center">Sequenza Comandi Interrogazione -Conversazione</p>
+    <div>
+        Archivia nella memoria locale uno o più documenti:
+        <p>
+            Utilizza i dati di esempio per le prme prove.
+            Utilizza upload file o upload dir per i documenti da leggere dal tuo computer.
+        </p>
+    </div>
+    <div>
+        Digita uan query CHE SI RIFERISCA hai documenti archiviati.
+        <p>
+            La qury saraà utilizzata come crrtero di selezione di infoemazioni dai documenti archvitati.
+        </p>
+    </div>
+
+    <div>
+        Click sul bottone rosso in basso a destrai.DOcuento => RAG =>Contetso => QURY
+        <p>
+            Viene lanciata una sequenzaa di elaborazione per analizzare i documeti sulla base della query.
+            Se il log è attivo vedrai la sequnza di elaborazione. 
+            <br>
+            Il loro numero dipende dalle dimensioni dei documenti.
+            <br>
+            l menu puoi utilizzare il comando "Num Query" per vedere quante elaborazioni saranno fatte per ogi documento.
+            <br>
+            Alla fine del proesso sarà visualizzata la risposta.
+        </p>
+    </div>
+
+    <div>
+        Click sul bottone verdo in basso a destra (oppure Invio). Contesto => Query
+        <p>
+            Inizia una comnversazione utilizzando le informazion precedentemnete raccolte dai documeti-
+            Puoi inviare domande successive di approfondimento e chiarmento .
+            <br>
+            È FONDAMENTALE che le query siano approfondimenti e/o chairimenti della query iniziale.
+            In caso conrtario non si sfrutta il Contesto creato dall'elaborazione precdente.
+            <br>
+            Quindi per una query completamnete nuova (sempre relativa ai documeti archviati) è necessario inizare una nuova elaborazione.
+            <br>
+            Il comando cancella, oltre a cancellare il campo di input canella anche la sequnza query-risposte della
+            conversazione. 
+            <br>
+            NON cancell i dati dell'elaborazione iniziale.
+        </p>
+    </div>
+
+
+</div>
