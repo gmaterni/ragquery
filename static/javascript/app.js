@@ -196,10 +196,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const VERS = "0.1.02 (01-01-2025)";
+const VERS = "0.1.03 (02-01-2025)";
 
-// var xlog = console.log;
-var xlog=function(){};
+var xlog = console.log;
+// var xlog=function(){};
 
 const cancelRequest = () => {
   const ok = confirm("Confermi Cancellazione Richeista ?");
