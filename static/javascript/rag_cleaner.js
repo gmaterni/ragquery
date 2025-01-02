@@ -4,49 +4,11 @@ function removeTag(txt) {
   txt = txt.replace(/<</g, "").replace(/>>/g, "");
   return txt;
 }
-// function uniteBrokenWords(txt) {
-//   const regex = /-\n/g;
-//   const unitedText = txt.replace(regex, "");
-//   return unitedText;
-// }
 
-// function cleanDoc(txt) {
-//   try {
-//     txt = removeTag(txt);
-//     //unisce le parole spezzate a di fine riga
-//     txt = txt.replace(/-\n/g, "");
-//     // Rimuove caratteri non stampabili specifici
-//     const charsRm = /[\u00AD\u200B\u200C\u200D\u2060\uFEFF]/g;
-//     txt = txt.replace(charsRm, "");
-//     // Sostituisce spazi non standard e altri caratteri con uno spazio
-//     const charsSrp = /[\u00A0\u2000-\u200A\u202F\u205F\u3000\t\r\f\v]/g;
-//     txt = txt.replace(charsSrp, " ");
-//     // Mantieni le sequenze di escape comuni
-//     txt = txt.replace(/\\([nrtfb])/g, "$1");
-//     // Mantieni le sequenze Unicode
-//     txt = txt.replace(/\\(u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2})/g, "$1");
-//     // Mantieni i backslash nei path di file
-//     txt = txt.replace(/\\([a-zA-Z]:\\|\\\\[a-zA-Z0-9_]+\\)/g, "\\\\$1");
-//     // Rimuovi tutti gli altri backslash
-//     txt = txt.replace(/\\/g, "");
-//     // Uniforma i caratteri di quotazione
-//     txt = txt.replace(/“/g, '"').replace(/”/g, '"');
-//     // Rimuove spazi prima della punteggiatura
-//     txt = txt.replace(/ +([.,;:!?])/g, "$1");
-//     // Rimuove linee vuote multiple
-//     txt = txt.replace(/\n\s*\n/g, "\n\n");
-//     txt = txt.replace(/\n{3,}/g, "\n\n");
-//     // Rimuove spazi multipli
-//     txt = txt.replace(/ +/g, " ");
-//     return txt.trim();
-//   } catch (e) {
-//     console.error(e);
-//     return "Errore di codifica del documento";
-//   }
-// }
 
 function cleanDoc(s) {
   try {
+      // Rimuove i tag HTML
       s = removeTag(s);
 
       // Unisce le parole divise dal trattino a fine riga
@@ -60,35 +22,21 @@ function cleanDoc(s) {
       const charsSrp = /[\u00A0\u2000-\u200A\u202F\u205F\u3000\t\r\f\v]/g;
       s = s.replace(charsSrp, ' ');
 
-      // Mantieni le sequenze di escape comuni
-      s = s.replace(/\\([nrtfb])/g, '$1');
-
-      // Mantieni le sequenze Unicode
-      s = s.replace(/\\(u[0-9a-fA-F]{4}|x[0-9a-fA-F]{2})/g, '$1');
-
-      // Mantieni i backslash nei path di file
-      s = s.replace(/\\([a-zA-Z]:\\|\\\\[a-zA-Z0-9_]+\\)/g, '\\$1');
-
-      // Rimuovi tutti gli altri backslash
-      s = s.replace(/\\/g, '');
-
       // Uniforma i caratteri di quotazione
-      s = s.replace('“', '"').replace('”', '"');
-
-      // Rimpiazza newline
-      s = s.replace(/\n/g, ' ');
+      s = s.replace(/[“”]/g, '"');
 
       // Rimuove spazi prima della punteggiatura
       s = s.replace(/ +([.,;:!?])/g, '$1');
 
-      // Divide il testo in frasi
-      const sentences = s.split(/(?<=[.?!])\s+/);
-      const minLen = 5;
-      s = sentences.filter(sentence => sentence.trim().length >= minLen).map(sentence => sentence.trim()).join('\n');
-
       // Rimuove spazi multipli
       s = s.replace(/ +/g, ' ');
 
+      // Divide il testo in frasi
+      const sentences = s.split(/(?<=[.?!])\s+/);
+      const minLen = 5; // Ridotto a 5 per includere frasi più brevi ma valide
+      s = sentences.filter(sentence => sentence.trim().length >= minLen).map(sentence => sentence.trim()).join('\n');
+
+      // Rimuove spazi iniziali e finali
       return s.trim();
   } catch (e) {
       console.error(e);
