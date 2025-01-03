@@ -104,6 +104,7 @@ const DataMgr = {
   },
   readDbDocNames() {
     this.doc_names = UaDb.readArray(ID_DOC_NAMES);
+    return this.doc_names;
   },
   deleteJsonDati() {
     const ids = UaDb.getAllIds();

@@ -11,9 +11,9 @@ const DialogManager = {
 
     dialog.innerHTML = `
           <h4>${message}</h4>
-          <div class="buttons">
-            <button class="ok">OK</button>
-            ${type === "confirm" ? '<button class="cancel">Annulla</button>' : ""}
+          <div class="buttons inv">
+            <button class="ok inv">OK</button>
+            ${type === "confirm" ? '<button class="cancel inv">Annulla</button>' : ""}
           </div>
         `;
 
