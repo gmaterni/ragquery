@@ -34,7 +34,6 @@ const MistralApiClient = (apiKey, options = {}) => {
         details: "Il payload deve essere un oggetto valido",
       });
     }
-
     return null;
   };
 
@@ -101,7 +100,6 @@ const MistralApiClient = (apiKey, options = {}) => {
     payload["model"] = model;
     abortController = new AbortController();
     const timeoutId = setTimeout(() => abortController.abort(), requestTimeout * 1000);
-
     try {
       const response = await fetch(_buildUrl("/chat/completions"), {
         method: "POST",
@@ -115,10 +113,7 @@ const MistralApiClient = (apiKey, options = {}) => {
       if (!response.ok) {
         return [null, await _handleHttpError(response)];
       }
-      //AAA attivazione log response
-      // infoResponse.reset();
       const data = await response.json();
-      // console.log(data);
       if (!data?.choices?.[0]?.message?.content) {
         return [
           null,
@@ -130,10 +125,10 @@ const MistralApiClient = (apiKey, options = {}) => {
           }),
         ];
       }
-      infoResponse.set(data);
-      return [data.choices[0].message.content, null];
+      // AAA ritorna tre elementi [text,null,data]
+      return [data.choices[0].message.content, null,data];
     } catch (error) {
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId);      
       return [null, _handleNetworkError(error, requestTimeout)];
     }
   };
@@ -191,23 +186,8 @@ const error = {
 */
 
 const infoError = {
-  defaultError: {
-    message: "",
-    type: "",
-    code: 0,
-    details: {
-      object: "",
-      message: "",
-      type: "",
-      param: null,
-      code: null,
-    },
-  },
   set(error) {
     this.error = error;
-  },
-  reset() {
-    this.error = this.defaultError;
   },
   get_message() {
     return this.error.message;
@@ -233,46 +213,8 @@ const infoError = {
 };
 
 const infoResponse = {
-  defaultResponse: {
-    id: "",
-    object: "",
-    created: 0,
-    model: "",
-    choices: [
-      {
-        index: 0,
-        message: {
-          role: "",
-          tool_calls: null,
-          content: "",
-        },
-        finish_reason: "",
-      },
-    ],
-    usage: {
-      prompt_tokens: 0,
-      total_tokens: 0,
-      completion_tokens: 0,
-    },
-    total_tokens: 0,
-    completion_tokens: 0,
-  },
-  init() {
-    this.response = this.defaultResponse;
-    this.total_tokens = 0;
-    this.completion_tokens = 0;
-  },
-  reset() {
-    this.response = this.defaultResponse;
-  },
   set(response) {
     this.response = response;
-    this.total_tokens += this.response.usage.total_tokens;
-    this.completion_tokens += this.response.usage.completion_tokens;
-  },
-  log_tokens(){
-    console.log("total_tokens:",this.total_tokens);
-    console.log("completion_tokens:",this.completion_tokens);
   },
   get_id() {
     return this.response.id;
@@ -306,5 +248,25 @@ const infoResponse = {
   },
   get_completion_tokens() {
     return this.response.usage.completion_tokens;
+  },
+};
+
+const calcTokens = {
+  sum_input_tokens: 0,
+  sum_generate_tokens: 0,
+  init() {
+    this.sum_input_tokens = 0;
+    this.sum_generate_tokens = 0;
+  },
+  add(response) {
+    if (!response) return;
+    this.sum_input_tokens += response.usage.total_tokens;
+    this.sum_generate_tokens += response.usage.completion_tokens;
+  },
+  get_sum_input_tokens() {
+    return this.sum_input_tokens;
+  },
+  get_sum_generate_tokens() {
+    return this.sum_generate_tokens;
   },
 };

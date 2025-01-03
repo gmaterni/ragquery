@@ -106,9 +106,9 @@ const Rag = {
   doc: "",
   doc_part: "",
   init() {
-    infoResponse.init();
     this.readRespsFromDb();
     this.readFromDb();
+    calcTokens.init();
   },
   returnOk() {
     const ok = this.ragContext.length > 10;
@@ -178,9 +178,9 @@ const Rag = {
           ragLog(`${j}) ${ndoc},${npart}`, lft.length, rgt.length, this.answers);
           prompt = promptDoc(lft, query, docName);
           const payload = getPayloadDoc(prompt);
-          const rs = await client.chat(MODEL, payload, 90);
-          answer = rs[0];
-          const err = rs[1];
+          const der = await client.chat(MODEL, payload, 90);
+          answer = der[0];
+          const err = der[1];
           if (err) {
             console.error(`ERR1\n`, err);
             const code = err.code;
@@ -201,8 +201,10 @@ const Rag = {
               throw err;
             }
           } // end err
-
           if (!answer) return "";
+          //ha ritornato 3 elemnti, il terz è response
+          const rsp=der[2];
+          calcTokens.add(rsp);
           npart++;
           j++;
           doc = rgt;
@@ -220,9 +222,9 @@ const Rag = {
         while (true) {
           prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
           const payload = getPayloadBuildContext(prompt);
-          const rs = await client.chat(MODEL, payload, 90);
-          docContext = rs[0];
-          const err = rs[1];
+          const der = await client.chat(MODEL, payload, 90);
+          docContext = der[0];
+          const err = der[1];
           if (err) {
             console.error(`ERR2\n`, err);
             const code = err.code;
@@ -244,8 +246,10 @@ const Rag = {
               throw err;
             }
           } // end err
-
           if (!docContext) return "";
+          //ritornata respèonse
+          const rsp=der[2];
+          calcTokens.add(rsp);
           break;
         } //end while
 
@@ -267,9 +271,9 @@ const Rag = {
         while (true) {
           let prompt = promptWithContext(context, query);
           const payload = getPayloadWithContext(prompt);
-          const rs = await client.chat(MODEL, payload, 90);
-          answer = rs[0];
-          const err = rs[1];
+          const der = await client.chat(MODEL, payload, 90);
+          answer = der[0];
+          const err = der[1];
           if (err) {
             console.error(`ERR3\n`, err);
             const code = err.code;
@@ -292,6 +296,9 @@ const Rag = {
             }
           } //end err
           if (!answer) return "";
+          //retrun di tre elementi
+          const rsp=der[2];
+          calcTokens.add(rsp);
           break;
         }
         answer = cleanResponse(answer);
@@ -300,11 +307,10 @@ const Rag = {
         ThreadMgr.init();
         this.saveToDb();
         UaLog.log(`Risposta: (${this.ragAnswer.length})`);
-
-        const tks=infoResponse.total_tokens;
-        const cks=infoResponse.completion_tokens;
-        UaLog.log(`tokens: ${tks}  ${cks}`);
-        infoResponse.log_tokens();
+        // log del totale tokens
+        const itks=calcTokens.get_sum_input_tokens()
+        const gtks=calcTokens.get_sum_generate_tokens()
+        UaLog.log(`Tokens: ${itks} ${gtks}`)
 
       } catch (err) {
         console.error(err);
@@ -333,9 +339,9 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const rs = await client.chat(MODEL, payload, 90);
-          text = rs[0];
-          const err = rs[1];
+          const der = await client.chat(MODEL, payload, 90);
+          text = der[0];
+          const err = der[1];
           if (err) {
             console.error(`ERR4\n`, err);
             const code = err.code;
@@ -358,6 +364,9 @@ const Rag = {
             }
           }
           if (!text) return "";
+          //return di 3 elemti
+          const rsp=der[2];
+          calcTokens.add(rsp);
           break;
         }
         text = cleanResponse(text);
@@ -379,9 +388,9 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const rs = await client.chat(MODEL, payload, 90);
-          text = rs[0];
-          const err = rs[1];
+          const der = await client.chat(MODEL, payload, 90);
+          text = der[0];
+          const err = der[1];
           if (err) {
             console.error(`ERR5\n`, err);
             const code = err.code;
@@ -403,6 +412,9 @@ const Rag = {
             }
           }
           if (!text) return "";
+          //return 3 elementi
+          const rsp=der[2];
+          calcTokens.add(rsp);
           break;
         }
         text = cleanResponse(text);
