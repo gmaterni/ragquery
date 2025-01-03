@@ -10,7 +10,7 @@ const DialogManager = {
     overlay.className = "overlay";
 
     dialog.innerHTML = `
-          <h2>${message}</h2>
+          <h4>${message}</h4>
           <div class="buttons">
             <button class="ok">OK</button>
             ${type === "confirm" ? '<button class="cancel">Annulla</button>' : ""}
