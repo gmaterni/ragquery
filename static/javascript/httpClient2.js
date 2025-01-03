@@ -126,9 +126,9 @@ const MistralApiClient = (apiKey, options = {}) => {
         ];
       }
       // AAA ritorna 3 elementi [text,null,data]
-      return [data.choices[0].message.content, null,data];
+      return [data.choices[0].message.content, null, data];
     } catch (error) {
-      clearTimeout(timeoutId);      
+      clearTimeout(timeoutId);
       return [null, _handleNetworkError(error, requestTimeout)];
     }
   };
@@ -269,4 +269,14 @@ const calcTokens = {
   get_sum_generate_tokens() {
     return this.sum_generate_tokens;
   },
+};
+
+const errorDumps = (err) => {
+  const s = JSON.stringify(err, null, 2);
+  return s;
+};
+
+const errorMsg = (err) => {
+  const s = err.details.message;
+  return s;
 };

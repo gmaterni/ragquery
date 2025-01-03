@@ -190,20 +190,17 @@ const Rag = {
                 decr += PROMPT_DECR;
                 continue;
               } else {
-                UaLog.log(`Error ${err}`);
                 throw err;
               }
             } else if (code == 408) {
-              UaLog.log(`Error timeout Doc`);
               continue;
             } else {
-              UaLog.log(`Error ${err}`);
               throw err;
             }
           } // end err
           if (!answer) return "";
           //ha ritornato 3 elemnti, il terz è response
-          const rsp=der[2];
+          const rsp = der[2];
           calcTokens.add(rsp);
           npart++;
           j++;
@@ -235,20 +232,17 @@ const Rag = {
                 // docAnswresTxt = setMaxLen(docAnswresTxt);
                 continue;
               } else {
-                UaLog.log(`Error ${err}`);
                 throw err;
               }
             } else if (code == 408) {
-              UaLog.log(`Error timeout build Context`);
               continue;
             } else {
-              UaLog.log(`Error ${err}`);
               throw err;
             }
           } // end err
           if (!docContext) return "";
           //ritornata respèonse
-          const rsp=der[2];
+          const rsp = der[2];
           calcTokens.add(rsp);
           break;
         } //end while
@@ -258,9 +252,9 @@ const Rag = {
         this.docContextLst.push(docContext);
       } // end for document
     } catch (err) {
-      console.error("end for douments\nr", err);
+      console.error("ERR3\n", err);
       throw err;
-    }    
+    }
     this.ragContext = this.docContextLst.join("\n\n");
     this.saveToDb();
     // queryWithContext finale che utilizza context e genera la prima risposta
@@ -275,7 +269,7 @@ const Rag = {
           answer = der[0];
           const err = der[1];
           if (err) {
-            console.error(`ERR3\n`, err);
+            console.error(`ERR4\n`, err);
             const code = err.code;
             if (code == 400) {
               if (isTooLarge(err)) {
@@ -284,20 +278,18 @@ const Rag = {
                 // context = setMaxLen(context);
                 continue;
               } else {
-                UaLog.log(`Error ${err}`);
                 throw err;
               }
             } else if (code == 408) {
               UaLog.log(`Error timeout Context`);
               continue;
             } else {
-              UaLog.log(`Error ${err}`);
               throw err;
             }
           } //end err
           if (!answer) return "";
           //retrun di tre elementi
-          const rsp=der[2];
+          const rsp = der[2];
           calcTokens.add(rsp);
           break;
         }
@@ -308,17 +300,14 @@ const Rag = {
         this.saveToDb();
         UaLog.log(`Risposta: (${this.ragAnswer.length})`);
         // log del totale tokens
-        const itks=calcTokens.get_sum_input_tokens()
-        const gtks=calcTokens.get_sum_generate_tokens()
-        UaLog.log(`Tokens: ${itks} ${gtks}`)
-
-      } catch (err) {
-        console.error(err);
-        answer = `${err}`;
-        throw err;
-      } finally {
+        const itks = calcTokens.get_sum_input_tokens();
+        const gtks = calcTokens.get_sum_generate_tokens();
+        UaLog.log(`Tokens: ${itks} ${gtks}`);
         return answer;
-      }
+      } catch (err) {
+        console.error("ERR5\n",err);
+        throw err;
+      } 
     } // end query
   },
   //richiesta iniziale della conversazione
@@ -343,7 +332,7 @@ const Rag = {
           text = der[0];
           const err = der[1];
           if (err) {
-            console.error(`ERR4\n`, err);
+            console.error(`ERR6\n`, err);
             const code = err.code;
             if (code == 400) {
               if (isTooLarge(err)) {
@@ -352,20 +341,18 @@ const Rag = {
                 // context = setMaxLen(context);
                 continue;
               } else {
-                UaLog.log(`Error ${err}`);
                 throw err;
               }
             } else if (code == 408) {
               UaLog.log(`Error timeout Context`);
               continue;
             } else {
-              UaLog.log(`Error ${err}`);
               throw err;
             }
           }
           if (!text) return "";
           //return di 3 elemti
-          const rsp=der[2];
+          const rsp = der[2];
           calcTokens.add(rsp);
           break;
         }
@@ -373,13 +360,11 @@ const Rag = {
         ThreadMgr.add(query, text);
         text = ThreadMgr.getThread();
         UaLog.log(`Inizio Conversazione (${prompt.length})`);
-      } catch (err) {
-        console.error(err);
-        text = `${err}`;
-        throw err;
-      } finally {
         return text;
-      }
+      } catch (err) {
+        console.error("ERR7\n",err);
+        throw err;
+      } 
     } else {
       try {
         let context = this.ragContext;
@@ -392,7 +377,7 @@ const Rag = {
           text = der[0];
           const err = der[1];
           if (err) {
-            console.error(`ERR5\n`, err);
+            console.error(`ERR8\n`, err);
             const code = err.code;
             if (code == 400) {
               if (isTooLarge(err)) {
@@ -400,20 +385,18 @@ const Rag = {
                 context = truncateInput(context, PROMPT_DECR);
                 continue;
               } else {
-                UaLog.log(`Error ${err}`);
                 throw err;
               }
             } else if (code == 408) {
               UaLog.log(`Error timeout Context`);
               continue;
             } else {
-              UaLog.log(`Error ${err}`);
               throw err;
             }
           }
           if (!text) return "";
           //return 3 elementi
-          const rsp=der[2];
+          const rsp = der[2];
           calcTokens.add(rsp);
           break;
         }
@@ -421,13 +404,11 @@ const Rag = {
         ThreadMgr.add(query, text);
         text = ThreadMgr.getThread();
         UaLog.log(`Conversazione  (${prompt.length})`);
-      } catch (err) {
-        console.error(err);
-        text = `${err}`;
-        throw err;
-      } finally {
         return text;
-      }
+      } catch (err) {
+        console.error("ERR9\n",err);
+        throw err;
+      } 
     }
   },
 };
@@ -455,7 +436,7 @@ const ThreadMgr = {
     for (const ua of this.rows) {
       const u = ua[0];
       const a = ua[1];
-      if(!u)continue;
+      if (!u) continue;
       rows.push(`${USER}\n${u}\n${LLM}\n${a}\n`);
     }
     return rows.join("\n\n");

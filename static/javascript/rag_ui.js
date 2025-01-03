@@ -286,10 +286,10 @@ const TextInput = {
       this.inp.value = "";
       UaLog.close();
     } catch (err) {
-      const msg = `send\n${err}`;
-      console.error(msg);
-      alert(msg);
-      setOutText(msg);
+      const s = errorDumps(err);
+      console.error(s);
+      alert(s);
+      // setOutText("");
     }
     hideSpinner();
   },
@@ -316,10 +316,10 @@ const TextInput = {
       setOutText(text);
       this.inp.value = "";
     } catch (err) {
-      const msg = `send2\n${err}`;
-      console.error(msg);
-      alert(msg);
-      setOutText(msg);
+      console.error("Error send2", err);
+      const s = errorDumps(err);
+      alert(s);
+      // setOutText(s);
     }
     hideSpinner();
   },
