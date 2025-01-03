@@ -1,0 +1,70 @@
+@background-color: #121212;
+@text-color: #e0e0e0;
+@button-background-color: #6200ea;
+@button-hover-background-color: #3700b3;
+@dialog-background-color: #373737;
+@dialog-button-background-color: #ff4500; // Arancione
+@dialog-button-hover-background-color: #ff4500; // Arancione scuro
+@overlay-background-color: rgba(128, 128, 128, 0.5); // Grigio medio semi-trasparente
+
+
+.confirm-dialog,
+.alert-dialog {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: @dialog-background-color;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+
+  &.show {
+    display: block;
+  }
+
+  h2 {
+    margin: 0 0 20px;
+    color: @text-color;
+  }
+
+  button {
+    background-color: @dialog-button-background-color;
+    color: @text-color;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+
+    &:hover {
+      background-color: @dialog-button-hover-background-color;
+    }
+
+    &.cancel {
+      background-color: @text-color;
+      color: @background-color;
+
+      &:hover {
+        background-color: darken(@text-color, 10%);
+      }
+    }
+  }
+}
+
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: @overlay-background-color;
+  z-index: 999;
+
+  &.show {
+    display: block;
+  }
+}

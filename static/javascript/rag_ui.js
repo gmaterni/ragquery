@@ -273,7 +273,7 @@ const TextInput = {
     }
 
     if (!!Rag.ragContext) {
-      const ok = confirm("Vuoi iniziare una nuova elabrazione ?");
+      const ok = await confirm("Vuoi iniziare una nuova elabrazione ?");
       if (!ok) return "";
     }
     showSpinner();
@@ -323,8 +323,8 @@ const TextInput = {
     }
     hideSpinner();
   },
-  clear() {
-    const ok = confirm("Confermi cancellazione conversazione? ");
+  async clear() {
+    const ok = await confirm("Confermi cancellazione conversazione? ");
     if (!ok) return;
     this.inp.value = "";
     setOutText("");
