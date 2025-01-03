@@ -41,8 +41,8 @@ var UaLog = {
       this.wind.drag();
     }
     const h = `
-           <button type="button" class="clear" onclick="javascript:UaLog.cls();">Clear</button>
-           <button type="button" class="close" onclick="javascript:UaLog.close();">Close</button>
+           <button type="button" class="clear inv" onclick="javascript:UaLog.cls();">Clear</button>
+           <button type="button" class="close inv" onclick="javascript:UaLog.close();">Close</button>
            <pre id="ualogmsg_" ></pre>`;
     this.wind.setHtml(h);
     // this.wind.addClassStyle("ualog");
