@@ -125,7 +125,7 @@ const MistralApiClient = (apiKey, options = {}) => {
           }),
         ];
       }
-      // AAA ritorna tre elementi [text,null,data]
+      // AAA ritorna 3 elementi [text,null,data]
       return [data.choices[0].message.content, null,data];
     } catch (error) {
       clearTimeout(timeoutId);      

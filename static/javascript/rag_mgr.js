@@ -325,8 +325,8 @@ const Rag = {
   async requestContext(query) {
     let text = "";
     if (!this.ragContext) {
-      const ok = await confirm("Contesto vuoto. Vuoi continuare?");
-      if (!ok) return "";
+      // const ok = await confirm("Contesto vuoto. Vuoi continuare?");
+      // if (!ok) return "";
       // HACK gestisce il pulsante verde che ha accettao il contetso vuoto
       this.ragContext = "Sei un assitente AI dispoibile a soddisfare tutte le mi richieste";
     }
@@ -455,6 +455,7 @@ const ThreadMgr = {
     for (const ua of this.rows) {
       const u = ua[0];
       const a = ua[1];
+      if(!u)continue;
       rows.push(`${USER}\n${u}\n${LLM}\n${a}\n`);
     }
     return rows.join("\n\n");

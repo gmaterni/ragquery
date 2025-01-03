@@ -267,6 +267,11 @@ const TextInput = {
       alert("Ricorda di scrivere la Query  ");
       return;
     }
+    if (DataMgr.docs.length == 0) {
+      alert("Non vi sono documenti da elaborare.\n  Se vuoi iniziare una conversazione usa il pulsante verde o return  ");
+      return;
+    }
+
     if (!!Rag.ragContext) {
       const ok = confirm("Vuoi iniziare una nuova elabrazione ?");
       if (!ok) return "";
