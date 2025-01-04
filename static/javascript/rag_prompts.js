@@ -4,31 +4,54 @@
 
 function promptDoc(testo, domanda, docName) {
   return `
-SYSTEM: Sei un assistente AI specializzato nell'analisi documentale e nell'estrazione mirata di informazioni. Rispondi esclusivamente in italiano.
+## SYSTEM
+Sei un assistente AI specializzato nell'analisi documentale e nell'estrazione mirata di informazioni. Rispondi esclusivamente in italiano.
 
-TASK: Analizza il testo estratto dal documento "${docName}" e identifica gli elementi rilevanti per rispondere alla domanda: "${domanda}".
+## TASK
+Selezionare gli elemeti di un testo pertinenti ad una determinata domanda.
 
-INSTRUCTIONS:
-1. Analizza attentamente il testo fornito compreso fra i marker <<<INIZIO_TESTO>>> e <<<FINE_TESTO>>> .
-2. Identifica gli elementi utili per rispondere alla domanda:"${domanda}".
-3. Per ogni elemento individuato, fornisci un titolo ed una descrizione sintetica ma completa.
-4. Riporta dettagli specifici (dati, citazioni, eventi, personaggi, luoghi, ..) se corelati alla domanda.
-5. Se non ci sono informazioni rilevanti, rispondi con "NESSUNA INFORMAZIONE RILEVANTE".
-6. Assicurati di generare la risposta esattamente secondo il formato di output specificato.
+## INSTRUCTIONS
+1. Analizza il testo compreso fra i marcatori ## INIZIO_TESTO e ## FINE_TESTO.
+2. Identifica gli elementi pertinenti alla domanda seguente: "${domanda}"
+3. Considera sempre la domanda come riferita esclusivamento al contenuto del testo. 
+4. Fornisci un titolo e una descrizione sintetica per ogni elemento.
+5. Includi dettagli specifici (dati, citazioni, eventi, personaggi, luoghi, ecc.) se correlati alla domanda.
 
-DOMANDA: ${domanda}
-
-TESTO DA ANALIZZARE:
-<<<INIZIO_TESTO>>>
+## TESTO
+## INIZIO_TESTO>
 ${testo}
-<<<FINE_TESTO>>>
+## FINE_TESTO
 
-OUTPUT_FORMAT: Genera una risposta strutturata come un elenco nel quale ogni elemento è costituito da un breve titolo e da una descrizione concisa ma completa.
+## OUTPUT_FORMAT
+Genera un  elenco, nel quale ogni elemento è costituito da un titolo e una descrizione concisa. 
 
-RESPONSE:
-`;
+## RESPONSE
+  `;
 }
 
+function promptDoc2(testo, domanda, query2 = "") {
+  return `
+## SYSTEM
+Sei un assistente AI specializzato nell'analisi documentale e nell'estrazione mirata di informazioni. Rispondi esclusivamente in italiano.
+
+## TASK
+Analizzare un testo e identificare gli elementi utili per rispondere ad una determinata domanda.
+
+## ISTRUCTIONS
+1. Analizza il testo fornito.
+2. Identifica e descrivi gli elementi rilevanti per la domanda: ${domanda}.
+3. Fornisci una descrizione sintetica per ogni elemento.
+4. Includi dettagli specifici (dati, citazioni, eventi, personaggi, luoghi, ecc.) se correlati alla domanda.
+
+## OUTPUT_FORMAT
+Genera un testo piano e lineare. Assicurati che tutte le risposte siano in italiano.
+
+## TESTO
+${testo}
+
+## RESPONSE
+`;
+}
 
 function promptBuildContext(informazioni, domanda = "") {
   return `
@@ -121,58 +144,85 @@ RESPONSE:
 `;
 }
 
-
-function getPayloadDoc(prompt) {
-  return  {
-      model: "",
-      messages: [
-          { role: "user", content: prompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 512,
-      stream: false,
-      safe_prompt: false,
-      random_seed: 42
+function xgetPayloadDoc(prompt) {
+  return {
+    model: "",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.3,
+    max_tokens: 512,
+    stream: false,
+    safe_prompt: false,
+    random_seed: 42,
   };
 }
+function getPayloadDoc(prompt) {
+  return {
+    model: "",
+    temperature: 0.3,
+    //top_p": 1,
+    max_tokens: 1000,
+    stream: false,
+    //stop: "string",
+    random_seed: 42,
+    messages: [
+      {
+        role: "user",
+        content: prompt,
+      },
+    ],
+    response_format: {
+      type: "text",
+    },
+    // tools: [
+    //     {
+    //     type: "function",
+    //     function: {
+    //         name: "string",
+    //         description: "",
+    //         parameters: {}
+    //     }
+    //     }
+    // ],
+    // tool_choice: "auto",
+    presence_penalty: 0,
+    frequency_penalty: 0,
+    // n: 1,
+    safe_prompt: false,
+  };
+}
+
 function getPayloadBuildContext(prompt) {
   return {
-      model: "",
-      messages: [
-          { role: "user", content: prompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 512,
-      stream: false,
-      safe_prompt: false,
-      random_seed: 42
+    model: "",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0,
+    max_tokens: 1024,
+    stream: false,
+    safe_prompt: false,
+    random_seed: 42,
   };
 }
 
 function getPayloadWithContext(prompt) {
-  return  {
-      model: "",
-      messages: [
-          { role: "user", content: prompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 512,
-      stream: false,
-      safe_prompt: false,
-      random_seed: 42
+  return {
+    model: "",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.7,
+    max_tokens: 512,
+    stream: false,
+    safe_prompt: false,
+    random_seed: 42,
   };
 }
 
 function getPayloadThread(prompt) {
-  return  {
-      model: "",
-      messages: [
-          { role: "user", content: prompt }
-      ],
-      temperature: 0.7,
-      max_tokens: 512,
-      stream: false,
-      safe_prompt: false,
-      random_seed: 42
+  return {
+    model: "",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.7,
+    max_tokens: 512,
+    stream: false,
+    safe_prompt: false,
+    random_seed: 42,
   };
 }

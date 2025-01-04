@@ -125,10 +125,11 @@ const MistralApiClient = (apiKey, options = {}) => {
           }),
         ];
       }
-      //AAA return [data.choices[0].message.content, null, data];
-      return [data,null]
+      console.log("Response:\n",data);
+      // AAA ritorna 3 elementi [text,null,data]
+      return [data.choices[0].message.content, null, data];
     } catch (error) {
-      // console.error("ERROR:\n",error);
+      console.error("ERROR:\n",error);
       clearTimeout(timeoutId);
       return [null, _handleNetworkError(error, requestTimeout)];
     }

@@ -21,47 +21,42 @@ const MODEL = "open-mixtral-8x7b";
 
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 
-const client = MistralApiClient(APIKEY, {
-  timeout: 60,
-});
+/////////////////////
+const client = new MistralClient(
+  APIKEY,
+  undefined, //'https://api.mistral.ai',
+  5, // maxRetries: numero massimo di tentativi
+  60 // timeout in secondi
+);
+
+async function getResponse(model, payload) {
+  try {
+    payload["model"] = model;
+    const response = await client.chat(payload);
+    console.log("Response:\n", response);
+    const content = response.choices[0].message.content;
+    return [content, null, response];
+  } catch (error) {
+    console.error(`Error in getResponse: ${error}`);
+    return [null, error];
+  }
+}
+
+//////////////////
 
 function cancelClientRequest() {
   client.cancelRequest();
 }
 
-// function wait(seconds) {
-//   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-// }
-
-const getPromptTokens = (err) => {
-  const msg = err.details.message;
-  const match = msg.match(/Prompt contains (\d+) tokens/);
-  return match ? parseInt(match[1], 10) : null;
-};
-
-const getModelToken = (err) => {
-  const msg = err.details.message;
-  const match = msg.match(/model with (\d+) maximum context length/);
-  return match ? parseInt(match[1], 10) : null;
-};
+function wait(seconds) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
 
 const isTooLarge = (err) => {
   const msg = err.details.message;
   const tks = msg.includes("too large");
   return tks;
 };
-
-const getResponse = async (model, payload) => {
-  const rs = await client.chat(model, payload);
-  const error = rs[1];
-  if (error) {
-    return [null, error, null];
-  }
-  const response = rs[0];
-  const content = response.choices[0].message.content;
-  return [content, null, response];
-};
-
 const truncateInput = (txt, decr) => {
   const tl = txt.length;
   const lim = tl - decr;
@@ -70,10 +65,10 @@ const truncateInput = (txt, decr) => {
 };
 
 //setta il prompt al limite massimo
-// const setMaxLen = (s) => {
-//   const lim = MAX_PROMPT_LENGTH - 1000;
-//   return s.substring(0, lim);
-// };
+const setMaxLen = (s) => {
+  const lim = MAX_PROMPT_LENGTH - 1000;
+  return s.substring(0, lim);
+};
 
 const getPartSize = (document, prompt, decrement) => {
   // Funzione interna per trovare un punto nel documento a partire da una certa posizione
@@ -133,7 +128,7 @@ const Rag = {
   init() {
     this.readRespsFromDb();
     this.readFromDb();
-    calcTokens.init();
+    // calcTokens.init();
   },
   returnOk() {
     const ok = this.ragContext.length > 10;
@@ -204,8 +199,11 @@ const Rag = {
           prompt = promptDoc(lft, query, docName);
           this.addPrompt(prompt);
           const payload = getPayloadDoc(prompt);
-          // const der = await client.chat(MODEL, payload, 90);
+
+          //   const der = await client.chat(MODEL, payload, 90);
           const der = await getResponse(MODEL, payload, 90);
+
+          answer = der[0];
           const err = der[1];
           if (err) {
             console.error(`ERR1\n`, err);
@@ -215,21 +213,19 @@ const Rag = {
                 UaLog.log(`Error tokens Doc ${prompt.length}`);
                 decr += PROMPT_DECR;
                 continue;
-              } else throw err;
+              } else {
+                throw err;
+              }
             } else if (code == 408) {
-              UaLog.log(`Error timeout Context`);
               continue;
-            } else throw err;
-          }
-          answer = der[0];
-          const rsp = der[2];
+            } else {
+              throw err;
+            }
+          } // end err
           if (!answer) return "";
-
-          const itks = calcTokens.get_sum_input_tokens();
-          const gtks = calcTokens.get_sum_generate_tokens();
-          console.log(`Tokens: ${itks} ${gtks}`);
-
-          calcTokens.add(rsp);
+          //ha ritornato 3 elemnti, il terz è response
+          const rsp = der[2];
+          // calcTokens.add(rsp);
           npart++;
           j++;
           doc = rgt;
@@ -247,7 +243,10 @@ const Rag = {
         while (true) {
           prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
           const payload = getPayloadBuildContext(prompt);
+          //   const der = await client.chat(MODEL, payload, 90);
           const der = await getResponse(MODEL, payload, 90);
+
+          docContext = der[0];
           const err = der[1];
           if (err) {
             console.error(`ERR2\n`, err);
@@ -256,19 +255,24 @@ const Rag = {
               if (isTooLarge(err)) {
                 UaLog.log(`Error tokens build Context ${prompt.length}`);
                 docAnswresTxt = truncateInput(docAnswresTxt, PROMPT_DECR);
+                // docAnswresTxt = setMaxLen(docAnswresTxt);
                 continue;
-              } else throw err;
+              } else {
+                throw err;
+              }
             } else if (code == 408) {
-              UaLog.log(`Error timeout Context`);
               continue;
-            } else throw err;
-          }
-          docContext = der[0];
-          const rsp = der[2];
+            } else {
+              throw err;
+            }
+          } // end err
           if (!docContext) return "";
-          calcTokens.add(rsp);
+          //ritornata respèonse
+          const rsp = der[2];
+          // calcTokens.add(rsp);
           break;
         } //end while
+
         UaLog.log(`context  ${docAnswersLen} => ${docContext.length}`);
         docContext = `\n### DOCUMENTO: ${docName}\n ${docContext}`;
         this.docContextLst.push(docContext);
@@ -287,8 +291,10 @@ const Rag = {
         while (true) {
           let prompt = promptWithContext(context, query);
           const payload = getPayloadWithContext(prompt);
-          // const der = await client.chat(MODEL, payload, 90);
+          //   const der = await client.chat(MODEL, payload, 90);
           const der = await getResponse(MODEL, payload, 90);
+
+          answer = der[0];
           const err = der[1];
           if (err) {
             console.error(`ERR4\n`, err);
@@ -299,16 +305,20 @@ const Rag = {
                 context = truncateInput(context, PROMPT_DECR);
                 // context = setMaxLen(context);
                 continue;
-              } else throw err;
+              } else {
+                throw err;
+              }
             } else if (code == 408) {
               UaLog.log(`Error timeout Context`);
               continue;
-            } else throw err;
-          }
-          answer = der[0];
-          const rsp = der[2];
+            } else {
+              throw err;
+            }
+          } //end err
           if (!answer) return "";
-          calcTokens.add(rsp);
+          //retrun di tre elementi
+          const rsp = der[2];
+          // calcTokens.add(rsp);
           break;
         }
         answer = cleanResponse(answer);
@@ -318,9 +328,9 @@ const Rag = {
         this.saveToDb();
         UaLog.log(`Risposta: (${this.ragAnswer.length})`);
         // log del totale tokens
-        const itks = calcTokens.get_sum_input_tokens();
-        const gtks = calcTokens.get_sum_generate_tokens();
-        UaLog.log(`Tokens: ${itks} ${gtks}`);
+        // const itks = calcTokens.get_sum_input_tokens();
+        // const gtks = calcTokens.get_sum_generate_tokens();
+        // UaLog.log(`Tokens: ${itks} ${gtks}`);
         return answer;
       } catch (err) {
         console.error("ERR5\n", err);
@@ -346,7 +356,9 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const der = await client.chat(MODEL, payload, 90);
+          //   const der = await client.chat(MODEL, payload, 90);
+          const der = await getResponse(MODEL, payload, 90);
+          text = der[0];
           const err = der[1];
           if (err) {
             console.error(`ERR6\n`, err);
@@ -357,14 +369,20 @@ const Rag = {
                 context = truncateInput(context, PROMPT_DECR);
                 // context = setMaxLen(context);
                 continue;
-              } else throw err;
-            } else if (code == 408) continue;
-            else throw err;
+              } else {
+                throw err;
+              }
+            } else if (code == 408) {
+              UaLog.log(`Error timeout Context`);
+              continue;
+            } else {
+              throw err;
+            }
           }
-          text = der[0];
-          const rsp = der[2];
           if (!text) return "";
-          calcTokens.add(rsp);
+          //return di 3 elemti
+          const rsp = der[2];
+          // calcTokens.add(rsp);
           break;
         }
         text = cleanResponse(text);
@@ -384,7 +402,10 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const der = await client.chat(MODEL, payload, 90);
+          //   const der = await client.chat(MODEL, payload, 90);
+          const der = await getResponse(MODEL, payload, 90);
+
+          text = der[0];
           const err = der[1];
           if (err) {
             console.error(`ERR8\n`, err);
@@ -394,16 +415,20 @@ const Rag = {
                 UaLog.log(`Error tokens with Context ${prompt.length}`);
                 context = truncateInput(context, PROMPT_DECR);
                 continue;
-              } else throw err;
+              } else {
+                throw err;
+              }
             } else if (code == 408) {
               UaLog.log(`Error timeout Context`);
               continue;
-            } else throw err;
+            } else {
+              throw err;
+            }
           }
-          text = der[0];
-          const rsp = der[2];
           if (!text) return "";
-          calcTokens.add(rsp);
+          //return 3 elementi
+          const rsp = der[2];
+          // calcTokens.add(rsp);
           break;
         }
         text = cleanResponse(text);

@@ -286,8 +286,8 @@ const TextInput = {
       this.inp.value = "";
       UaLog.close();
     } catch (err) {
+      console.error("ERROR Send",err);
       const s = errorDumps(err);
-      console.error(s);
       alert(s);
       // setOutText("");
     }
