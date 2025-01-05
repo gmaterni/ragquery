@@ -6,17 +6,23 @@ const ID_RESPONSES = "id_responses";
 const ID_DOC_NAMES = "id_doc_names";
 const ID_DOCS = "id_docs;";
 
-const MAX_PROMPT_LENGTH = 1024 * 95;
 const PROMPT_DECR = 1024 * 10;
 
-// const MODEL = "mistral-large-latest"
-// const MODEL="mistral-tiny-2312"
-// const MODEL="open-mistral-7b"
-// const MODEL = "mistral-tiny-latest"
-// const MODEL = "open-mistral-nemo-2407";
-// const MODEL="mistral-small-2409"
-const MODEL = "open-mixtral-8x7b";
+// const MAX_PROMPT_LENGTH = 1024 * 95;
+const MAX_PROMPT_LENGTH = 132000 * 3;
+// const MAX_PROMPT_LENGTH = 32000 * 3;
 
+//131000
+// const MODEL = "mistral-large-2411"
+const MODEL = "open-mistral-nemo-2407";
+// const MODEL = "ministral-8b-2410";
+// const MODEL = "ministral-3b-2410";
+
+//32000
+// const MODEL = "open-mistral-7b";
+// const MODEL = "open-mixtral-8x7b";
+
+//64000
 // const MODEL="open-mixtral-8x22b-2404"
 
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
@@ -50,6 +56,20 @@ const isTooLarge = (err) => {
   const tks = msg.includes("too large");
   return tks;
 };
+
+// utilizzato per httpClientMst
+// const getResponse = async (model, payload) => {
+//   try {
+//     payload["model"] = model;
+//     const response = await client.chat(payload);
+//     console.log("Response:\n", response);
+//     const content = response.choices[0].message.content;
+//     return [content, null, response];
+//   } catch (error) {
+//     console.error(`Error in getResponse: ${error}`);
+//     return [null, error];
+//   }
+// };
 
 const getResponse = async (model, payload) => {
   const rs = await client.chat(model, payload);
@@ -164,7 +184,7 @@ const Rag = {
 
   // UA
   addPrompt(p) {
-    this.prompts.push(p);
+    // this.prompts.push(p);
   },
 
   // documenti => risposte RAG => context
@@ -224,10 +244,14 @@ const Rag = {
           answer = der[0];
           const rsp = der[2];
           if (!answer) return "";
-
-          const itks = calcTokens.get_sum_input_tokens();
-          const gtks = calcTokens.get_sum_generate_tokens();
-          console.log(`Tokens: ${itks} ${gtks}`);
+          //AAA
+          let itks = calcTokens.get_sum_input_tokens();
+          let gtks = calcTokens.get_sum_generate_tokens();
+          console.log(`Sum Tokens: ${itks} ${gtks}`);
+          infoResponse.set(rsp);
+          itks = infoResponse.get_total_tokens();
+          gtks = infoResponse.get_completion_tokens();
+          console.log(`Response Tokens: ${itks} ${gtks}`);
 
           calcTokens.add(rsp);
           npart++;
@@ -317,10 +341,12 @@ const Rag = {
         ThreadMgr.init();
         this.saveToDb();
         UaLog.log(`Risposta: (${this.ragAnswer.length})`);
-        // log del totale tokens
+
+        //AAA/ log del totale tokens
         const itks = calcTokens.get_sum_input_tokens();
         const gtks = calcTokens.get_sum_generate_tokens();
         UaLog.log(`Tokens: ${itks} ${gtks}`);
+
         return answer;
       } catch (err) {
         console.error("ERR5\n", err);
