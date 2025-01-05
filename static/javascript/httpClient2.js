@@ -26,7 +26,7 @@ const MistralApiClient = (apiKey, options = {}) => {
       });
     }
 
-    if (!payload || typeof payload !== "object") {
+    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       return _createError({
         message: "Payload non valido",
         type: "ValidationError",
@@ -73,20 +73,11 @@ const MistralApiClient = (apiKey, options = {}) => {
       });
     }
 
-    if (error instanceof TypeError && error.message === "Failed to fetch") {
-      return _createError({
-        message: "Errore di rete",
-        type: "NetworkError",
-        code: 0,
-        details: "Impossibile raggiungere il server. Controlla la connessione.",
-      });
-    }
-
     return _createError({
-      message: "Errore imprevisto",
-      type: error.name || "UnknownError",
-      code: 500,
-      details: error.message,
+      message: "Errore di rete",
+      type: "NetworkError",
+      code: 0,
+      details: "Impossibile raggiungere il server. Controlla la connessione.",
     });
   };
 
@@ -100,6 +91,7 @@ const MistralApiClient = (apiKey, options = {}) => {
     payload["model"] = model;
     abortController = new AbortController();
     const timeoutId = setTimeout(() => abortController.abort(), requestTimeout * 1000);
+
     try {
       const response = await fetch(_buildUrl("/chat/completions"), {
         method: "POST",
@@ -127,9 +119,10 @@ const MistralApiClient = (apiKey, options = {}) => {
       }
       return [data, null];
     } catch (error) {
-      // console.error("ERROR:\n",error);
       clearTimeout(timeoutId);
       return [null, _handleNetworkError(error, requestTimeout)];
+    } finally {
+      abortController = null;
     }
   };
 

@@ -14,8 +14,8 @@ const MAX_PROMPT_LENGTH = 132000 * 3;
 
 //131000
 // const MODEL = "mistral-large-2411"
-const MODEL = "open-mistral-nemo-2407";
-// const MODEL = "ministral-8b-2410";
+// const MODEL = "open-mistral-nemo-2407";
+const MODEL = "ministral-8b-2410";
 // const MODEL = "ministral-3b-2410";
 
 //32000

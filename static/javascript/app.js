@@ -202,8 +202,9 @@ const VERS = "0.1.04 (03-01-2025)";
 var xlog = function () {};
 
 const cancelRequest = () => {
-  const ok = confirm("Confermi Cancellazione Richeista ?");
-  if (!ok) return;
+  // AAA cancelRequest
+  // const ok = confirm("Confermi Cancellazione Richeista ?");
+  // if (!ok) return;
   cancelClientRequest();
   hideSpinner();
 };
