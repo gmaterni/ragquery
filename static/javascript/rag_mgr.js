@@ -71,15 +71,31 @@ const isTooLarge = (err) => {
 //   }
 // };
 
+// const getResponse = async (model, payload) => {
+//   const rs = await client.chat(model, payload);
+//   const error = rs[1];
+//   if (error) {
+//     return [null, error, null];
+//   }
+//   const response = rs[0];
+//   const content = response.choices[0].message.content;
+//   return [content, null, response];
+// };
+
 const getResponse = async (model, payload) => {
-  const rs = await client.chat(model, payload);
-  const error = rs[1];
-  if (error) {
+  try {
+    const rs = await client.chat(model, payload);
+    const error = rs[1];
+    if (error) {
+      throw error;
+    }
+    const response = rs[0];
+    const content = response.choices[0].message.content;
+    return [content, null, response];
+  } catch (error) {
+    console.error(`Error in getResponse: ${error}`);
     return [null, error, null];
   }
-  const response = rs[0];
-  const content = response.choices[0].message.content;
-  return [content, null, response];
 };
 
 const truncateInput = (txt, decr) => {
@@ -88,12 +104,6 @@ const truncateInput = (txt, decr) => {
   const s = txt.substring(0, lim);
   return s;
 };
-
-//setta il prompt al limite massimo
-// const setMaxLen = (s) => {
-//   const lim = MAX_PROMPT_LENGTH - 1000;
-//   return s.substring(0, lim);
-// };
 
 const getPartSize = (document, prompt, decrement) => {
   // Funzione interna per trovare un punto nel documento a partire da una certa posizione
@@ -182,7 +192,7 @@ const Rag = {
     this.answers = UaDb.readArray(ID_RESPONSES);
   },
 
-  // UA
+  // AAA visualizzazione prompts
   addPrompt(p) {
     // this.prompts.push(p);
   },
@@ -215,10 +225,8 @@ const Rag = {
         let docAnswersLst = [];
 
         while (true) {
-          let partSize = getPartSize(doc, promptDoc("", query, ""), decr);
-          if (partSize < 10) {
-            break;
-          }
+          const partSize = getPartSize(doc, promptDoc("", query, ""), decr);
+          if (partSize < 10) break;
           [lft, rgt] = getPartDoc(doc, partSize);
           ragLog(`${j}) ${ndoc},${npart}`, lft.length, rgt.length, this.answers);
           prompt = promptDoc(lft, query, docName);
@@ -244,7 +252,7 @@ const Rag = {
           answer = der[0];
           const rsp = der[2];
           if (!answer) return "";
-          //AAA
+          //AAA log rokens
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);
@@ -252,7 +260,7 @@ const Rag = {
           itks = infoResponse.get_total_tokens();
           gtks = infoResponse.get_completion_tokens();
           console.log(`Response Tokens: ${itks} ${gtks}`);
-
+          //
           calcTokens.add(rsp);
           npart++;
           j++;
@@ -293,6 +301,7 @@ const Rag = {
           calcTokens.add(rsp);
           break;
         } //end while
+
         UaLog.log(`context  ${docAnswersLen} => ${docContext.length}`);
         docContext = `\n### DOCUMENTO: ${docName}\n ${docContext}`;
         this.docContextLst.push(docContext);
@@ -311,7 +320,6 @@ const Rag = {
         while (true) {
           let prompt = promptWithContext(context, query);
           const payload = getPayloadWithContext(prompt);
-          // const der = await client.chat(MODEL, payload, 90);
           const der = await getResponse(MODEL, payload, 90);
           const err = der[1];
           if (err) {
@@ -321,7 +329,6 @@ const Rag = {
               if (isTooLarge(err)) {
                 UaLog.log(`Error tokens with Context ${prompt.length}`);
                 context = truncateInput(context, PROMPT_DECR);
-                // context = setMaxLen(context);
                 continue;
               } else throw err;
             } else if (code == 408) {
@@ -342,7 +349,7 @@ const Rag = {
         this.saveToDb();
         UaLog.log(`Risposta: (${this.ragAnswer.length})`);
 
-        //AAA/ log del totale tokens
+        //log del totale tokens
         const itks = calcTokens.get_sum_input_tokens();
         const gtks = calcTokens.get_sum_generate_tokens();
         UaLog.log(`Tokens: ${itks} ${gtks}`);
@@ -358,9 +365,7 @@ const Rag = {
   async requestContext(query) {
     let text = "";
     if (!this.ragContext) {
-      // const ok = await confirm("Contesto vuoto. Vuoi continuare?");
-      // if (!ok) return "";
-      // HACK gestisce il pulsante verde che ha accettao il contetso vuoto
+      // gestisce il pulsante verde che ha accettao il contetso vuoto
       this.ragContext = "Sei un assitente AI dispoibile a soddisfare tutte le mi richieste";
     }
     if (ThreadMgr.isFirst()) {
@@ -381,7 +386,6 @@ const Rag = {
               if (isTooLarge(err)) {
                 UaLog.log(`Error tokens with Context ${prompt.length}`);
                 context = truncateInput(context, PROMPT_DECR);
-                // context = setMaxLen(context);
                 continue;
               } else throw err;
             } else if (code == 408) continue;

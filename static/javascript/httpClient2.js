@@ -125,7 +125,6 @@ const MistralApiClient = (apiKey, options = {}) => {
           }),
         ];
       }
-      //AAA return [data.choices[0].message.content, null, data];
       return [data, null];
     } catch (error) {
       // console.error("ERROR:\n",error);
@@ -278,7 +277,7 @@ const errorDumps = (err) => {
   return s;
 };
 
-const errorMsg = (err) => {
-  const s = err.details.message;
-  return s;
-};
+// const errorMsg = (err) => {
+//   const s = err.details.message;
+//   return s;
+// };

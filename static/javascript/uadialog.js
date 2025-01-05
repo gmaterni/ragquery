@@ -1,6 +1,5 @@
 /** @format */
 
-// Oggetto letterale per gestire i dialoghi
 const DialogManager = {
   createDialog(type, message) {
     const dialog = document.createElement("div");
@@ -56,17 +55,22 @@ const nativeAlert = window.alert;
 const nativeConfirm = window.confirm;
 
 // Sovrascriviamo alert
+// window.alert = function (message) {
+//   return DialogManager.showDialog("alert", message);
+// };
+
 window.alert = function (message) {
+  if (message instanceof Error) {
+    message = message.message;
+  }
   return DialogManager.showDialog("alert", message);
 };
+
 
 // Sovrascriviamo confirm
 window.confirm = function (message) {
   return DialogManager.showDialog("confirm", message);
 };
 
-// Funzione di test che usa la sintassi nativa
-// async function testConfirm() {
-//   const result = await confirm("Vuoi continuare?");
-//   await alert(result);
-// }
+
+
