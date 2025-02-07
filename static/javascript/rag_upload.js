@@ -65,7 +65,7 @@ const RagUpload = {
       const msg = `<br><br> ${fileName}<br><br>caricato e salvato nella memoria locale`;
       result.innerHTML = msg;
     } catch (error) {
-      consoe.error("Error:", error);
+      console.error("Error:", error);
       alert("Errore durante l'estrazione del testo dal file.");
     } finally {
       hideSpinner();
@@ -139,7 +139,7 @@ const RagUpload = {
         msgs.push(msg);
       }
     } catch (error) {
-      consoe.error("Error:", error);
+      console.error("Error:", error);
       alert("Errore durante l'estrazione del testo dal file.");
     } finally {
       hideSpinner();

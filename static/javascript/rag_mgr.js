@@ -7,20 +7,18 @@ const ID_DOC_NAMES = "id_doc_names";
 const ID_DOCS = "id_docs;";
 
 const PROMPT_DECR = 1024 * 10;
-
-// const MAX_PROMPT_LENGTH = 1024 * 95;
-const MAX_PROMPT_LENGTH = 132000 * 3;
-// const MAX_PROMPT_LENGTH = 32000 * 3;
+const MAX_PROMPT_LENGTH = 130 * 1024 * 3;
 
 //131000
 // const MODEL = "mistral-large-2411"
 // const MODEL = "open-mistral-nemo-2407";
-const MODEL = "ministral-8b-2410";
+// const MODEL = "ministral-8b-2410";
 // const MODEL = "ministral-3b-2410";
 
 //32000
 // const MODEL = "open-mistral-7b";
 // const MODEL = "open-mixtral-8x7b";
+const MODEL = "mistral-small-2501";
 
 //64000
 // const MODEL="open-mixtral-8x22b-2404"
@@ -28,7 +26,7 @@ const MODEL = "ministral-8b-2410";
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 
 const client = MistralApiClient(APIKEY, {
-  timeout: 60,
+  timeout: 90,
 });
 
 function cancelClientRequest() {
@@ -69,17 +67,6 @@ const isTooLarge = (err) => {
 //     console.error(`Error in getResponse: ${error}`);
 //     return [null, error];
 //   }
-// };
-
-// const getResponse = async (model, payload) => {
-//   const rs = await client.chat(model, payload);
-//   const error = rs[1];
-//   if (error) {
-//     return [null, error, null];
-//   }
-//   const response = rs[0];
-//   const content = response.choices[0].message.content;
-//   return [content, null, response];
 // };
 
 const getResponse = async (model, payload) => {
@@ -233,8 +220,8 @@ const Rag = {
           this.addPrompt(prompt);
           const payload = getPayloadDoc(prompt);
           // const der = await client.chat(MODEL, payload, 90);
-          const der = await getResponse(MODEL, payload, 90);
-          const err = der[1];
+          const cont_err_resp = await getResponse(MODEL, payload, 90);
+          const err = cont_err_resp[1];
           if (err) {
             console.error(`ERR1\n`, err);
             const code = err.code;
@@ -249,8 +236,8 @@ const Rag = {
               continue;
             } else throw err;
           }
-          answer = der[0];
-          const rsp = der[2];
+          answer = cont_err_resp[0];
+          const rsp = cont_err_resp[2];
           if (!answer) return "";
           //AAA log rokens
           let itks = calcTokens.get_sum_input_tokens();
@@ -366,7 +353,7 @@ const Rag = {
     let text = "";
     if (!this.ragContext) {
       // gestisce il pulsante verde che ha accettao il contetso vuoto
-      this.ragContext = "Sei un assitente AI dispoibile a soddisfare tutte le mi richieste";
+      this.ragContext = "Sei un assistente AI dispoibile a soddisfare tutte le mi richieste";
     }
     if (ThreadMgr.isFirst()) {
       ThreadMgr.init();

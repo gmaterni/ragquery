@@ -5,7 +5,7 @@
 const UaDb = {
   create(id, data) {
     if (localStorage.getItem(id)) {
-      consoe.error(`ID ${id} already exists.`);
+      console.error(`ID ${id} already exists.`);
       return;
     }
     localStorage.setItem(id, data);
@@ -27,7 +27,7 @@ const UaDb = {
   },
   delete(id) {
     if (!localStorage.getItem(id)) {
-      consoe.error(`ID ${id} not found.`);
+      console.error(`ID ${id} not found.`);
       return;
     }
     localStorage.removeItem(id);
@@ -78,7 +78,7 @@ const DataMgr = {
       const doc = cleanDoc(text);
       const name = this.linkToName(link);
       if (this.doc_names.includes(name)) {
-        alert(`Il docuento ${name} è già caricato`);
+        alert(`Il documento ${name} è già caricato`);
         return;
       }
       this.doc_names.push(name);
@@ -115,7 +115,7 @@ const DataMgr = {
     Rag.ragQuery = "";
     Rag.ragContext = "";
     Rag.ragAnswer = "";
-    Rag.answers= [];
+    Rag.answers = [];
     Rag.prompts = [];
     ThreadMgr.rows = [];
   },

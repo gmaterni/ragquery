@@ -323,7 +323,7 @@ function elencoDocs() {
   DataMgr.readDbDocNames();
   const arr = DataMgr.doc_names;
   const fh = (x, i) => `
-      <li><a href="#" onCLick="showT(${i});">${i + 1}.${x}</a></li>
+      <li><a href="#" onclick="showT(${i});">${i + 1}.${x}</a></li>
   `;
   const jfh = UaJtfh();
   let i = 0;
