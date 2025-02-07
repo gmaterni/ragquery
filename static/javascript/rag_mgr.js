@@ -4,7 +4,7 @@ const ID_RAG = "id_rag";
 const ID_THREAD = "id_thread";
 const ID_RESPONSES = "id_responses";
 const ID_DOC_NAMES = "id_doc_names";
-const ID_DOCS = "id_docs;";
+const ID_DOCS = "id_docs";
 
 const PROMPT_DECR = 1024 * 10;
 const MAX_PROMPT_LENGTH = 130 * 1024 * 3;
