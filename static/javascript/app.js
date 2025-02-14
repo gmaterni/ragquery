@@ -196,7 +196,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const VERS = "0.1.04 (03-01-2025)";
+const VERS = "0.1.05 (13-02-2025)";
 
 // var xlog = console.log;
 var xlog = function () {};
@@ -362,8 +362,8 @@ function calcQuery() {
 }
 
 //cancella dati
-function deleteDati(e) {
-  const ok = confirm("Confermi cancellazione dati?");
+async function deleteDati(e) {
+  const ok = await confirm("Confermi cancellazione dati?");
   if (ok) {
     DataMgr.deleteJsonDati();
     wnds.wdiv.close();
@@ -373,8 +373,8 @@ function deleteDati(e) {
 }
 
 //cancella localstrage
-function deleteSttorage(e) {
-  const ok = confirm("Confermi cancellazione documenti & dati?");
+async function deleteStorage(e) {
+  const ok = await confirm("Confermi cancellazione documenti & dati?");
   if (ok) {
     DataMgr.deleteJsonDati();
     localStorage.clear();
