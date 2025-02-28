@@ -350,7 +350,7 @@ const Rag = {
   },
   //richiesta iniziale della conversazione
   async requestContext(query) {
-    let text = "";
+    let answer = "";
     if (!this.ragContext) {
       // gestisce il pulsante verde che ha accettao il contetso vuoto
       this.ragContext = "Sei un assistente AI dispoibile a soddisfare tutte le mi richieste";
@@ -364,8 +364,9 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const der = await client.chat(MODEL, payload, 90);
-          const err = der[1];
+          // const der = await client.chat(MODEL, payload, 90);
+          const cont_err_resp = await getResponse(MODEL, payload, 90);
+          const err = cont_err_resp[1];
           if (err) {
             console.error(`ERR6\n`, err);
             const code = err.code;
@@ -378,17 +379,24 @@ const Rag = {
             } else if (code == 408) continue;
             else throw err;
           }
-          text = der[0];
-          const rsp = der[2];
-          if (!text) return "";
+          answer = cont_err_resp[0];
+          const rsp = cont_err_resp[2];
+          if (!answer) return "";
+          let itks = calcTokens.get_sum_input_tokens();
+          let gtks = calcTokens.get_sum_generate_tokens();
+          console.log(`Sum Tokens: ${itks} ${gtks}`);
+          infoResponse.set(rsp);
+          itks = infoResponse.get_total_tokens();
+          gtks = infoResponse.get_completion_tokens();
+          console.log(`Response Tokens: ${itks} ${gtks}`);
           calcTokens.add(rsp);
           break;
         }
-        text = cleanResponse(text);
-        ThreadMgr.add(query, text);
-        text = ThreadMgr.getThread();
+        answer = cleanResponse(answer);
+        ThreadMgr.add(query, answer);
+        answer = ThreadMgr.getThread();
         UaLog.log(`Inizio Conversazione (${prompt.length})`);
-        return text;
+        return answer;
       } catch (err) {
         console.error("ERR7\n", err);
         throw err;
@@ -401,8 +409,10 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const der = await client.chat(MODEL, payload, 90);
-          const err = der[1];
+          // const der = await client.chat(MODEL, payload, 90);
+          // const err = der[1];
+          const cont_err_resp = await getResponse(MODEL, payload, 90);
+          const err = cont_err_resp[1];
           if (err) {
             console.error(`ERR8\n`, err);
             const code = err.code;
@@ -417,17 +427,25 @@ const Rag = {
               continue;
             } else throw err;
           }
-          text = der[0];
-          const rsp = der[2];
-          if (!text) return "";
+          answer = cont_err_resp[0];
+          const rsp = cont_err_resp[2];
+          if (!answer) return "";
+          //AAA log rokens
+          let itks = calcTokens.get_sum_input_tokens();
+          let gtks = calcTokens.get_sum_generate_tokens();
+          console.log(`Sum Tokens: ${itks} ${gtks}`);
+          infoResponse.set(rsp);
+          itks = infoResponse.get_total_tokens();
+          gtks = infoResponse.get_completion_tokens();
+          console.log(`Response Tokens: ${itks} ${gtks}`);
           calcTokens.add(rsp);
           break;
         }
-        text = cleanResponse(text);
-        ThreadMgr.add(query, text);
-        text = ThreadMgr.getThread();
+        answer = cleanResponse(answer);
+        ThreadMgr.add(query, answer);
+        answer = ThreadMgr.getThread();
         UaLog.log(`Conversazione  (${prompt.length})`);
-        return text;
+        return answer;
       } catch (err) {
         console.error("ERR9\n", err);
         throw err;

@@ -37,7 +37,7 @@ var UaLog = {
   msg_id: "ualogmsg_",
   new: function () {
     if (this.wind == null) {
-      this.wind = UaWindowAdm.create("ualog_");
+      this.wind = UaWindowAdm.create("ualog_id");
       this.wind.drag();
     }
     const h = `
