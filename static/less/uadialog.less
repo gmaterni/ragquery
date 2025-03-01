@@ -87,13 +87,9 @@ Esmpio:
 <span class="menu-h-box tt-right" data-tt="Open">
   <span class="menu-h-inner"></span>
 </span>
-
-
-
-
 */
 /* ========= VARIABILI LESS ========= */
-@tt-bg: #b03407; // Colore di sfondo del tooltip
+@tt-bg: #cc3a05; // Colore di sfondo del tooltip
 @tt-text: #ffffff; // Colore testo del tooltip
 @tt-font: 20px "Arial", sans-serif; // Stile font
 @tt-radius: 4px; // Border-radius
@@ -136,10 +132,10 @@ Esmpio:
   }
 
   // Freccia
-  &::after {
-    content: "";
-    border: @border-width solid transparent;
-  }
+  // &::after {
+  //   content: "";
+  //   border: @border-width solid transparent;
+  // }
 
   // Hover states
   &:hover {
@@ -158,12 +154,12 @@ Esmpio:
     transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
   }
 
-  &::after {
-    border-top-color: @tt-bg; // Colore del bordo superiore per la freccia
-    bottom: ~"calc(100% + 0px)"; // Posizionato sopra l'elemento
-    left: 50%; // Centrato orizzontalmente
-    transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
-  }
+  // &::after {
+  //   border-top-color: @tt-bg; // Colore del bordo superiore per la freccia
+  //   bottom: ~"calc(100% + 0px)"; // Posizionato sopra l'elemento
+  //   left: 50%; // Centrato orizzontalmente
+  //   transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
+  // }
 }
 
 .tt-bottom {
@@ -215,7 +211,7 @@ Esmpio:
   &::before {
     left: ~"calc(100% + 12px)"; // Posizionato a destra dell'elemento di 12px
     top: 50%; // Centrato verticalmente
-    transform: translateY(10%); // Spostato in alto del 50% della sua altezza
+    transform: translateY(50%); // Spostato in alto del 50% della sua altezza
   }
   // &::after {
   //   border-right-color: @tt-bg; // Colore del bordo destro per la freccia

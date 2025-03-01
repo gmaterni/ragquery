@@ -26,12 +26,12 @@ const WndPre = (id) => {
         return `
 <div class="window-text">
 <div class="btn-wrapper">
-<button class="btn-copy" title="Copia">
+<button class="btn-copy tt-left" data-tt="Copia">
 <svg class="copy-icon" viewBox="0 0 20 24">
   <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
 </svg>
 </button>
-<button class="btn-close" title="chiudi" onclick="UaWindowAdm.closeThis(this)">X</button>
+<button class="btn-close tt-left" data-tt="chiudi" onclick="UaWindowAdm.closeThis(this)">X</button>
 </div>
 <pre class="pre-text">${txt}</pre>
 </div>
@@ -73,12 +73,12 @@ const WndDiv = (id) => {
         return `
 <div class="window-text">
 <div class="btn-wrapper">
-<button class="btn-copy" title="Copia">
+<button class="btn-copy tt-left" data-tt="Copia">
 <svg class="copy-icon" viewBox="0 0 20 24">
 <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
 </svg>
 </button>
-<button class="btn-close" title="chiudi" onclick="UaWindowAdm.closeThis(this)">X</button>
+<button class="btn-close tt-left" data-tt="Chiudi" onclick="UaWindowAdm.closeThis(this)">X</button>
 </div>
 <div class="div-text">${txt}</div>
 </div>
@@ -132,6 +132,11 @@ const Menu = {
     const btn = document.querySelector("#id-menu-btn");
     btn.addEventListener("change", () => {
       document.querySelector("body").classList.toggle("menu-open", btn.checked);
+      //gestione tootip
+      const body = document.querySelector("body");
+      const icon = document.querySelector("#id-menu-btn");
+      if (body.classList.contains("menu-open")) icon.setAttribute("data-tt", "Close");
+      else icon.setAttribute("data-tt", "Open");
     });
     // getsioe log
     const log = document.getElementById("id_log");
@@ -145,6 +150,7 @@ const Menu = {
       if (!log.classList.contains("active")) return;
       log.classList.remove("active");
     };
+
     UaLog.callHide = hide;
     UaLog.callShow = show;
 
@@ -286,7 +292,7 @@ const TextInput = {
       this.inp.value = "";
       UaLog.close();
     } catch (err) {
-      console.error("ERROR Send",err);
+      console.error("ERROR Send", err);
       const s = errorDumps(err);
       alert(s);
       // setOutText("");
