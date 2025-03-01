@@ -7,7 +7,7 @@ const ID_DOC_NAMES = "id_doc_names";
 const ID_DOCS = "id_docs";
 
 const PROMPT_DECR = 1024 * 10;
-const MAX_PROMPT_LENGTH = 130 * 1024 * 3;
+const MAX_PROMPT_LENGTH = 30 * 1024 * 3;
 
 //131000
 // const MODEL = "mistral-large-2411"
