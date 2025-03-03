@@ -38,15 +38,18 @@ var UaLog = {
   new: function () {
     if (this.wind == null) {
       this.wind = UaWindowAdm.create("ualog_id");
-      this.wind.drag();
+      //aggiunge la class inv
+      // const e = this.wind.getElement();
+      // e.classList.add("inv");
+      // this.wind.drag();
     }
     const h = `
-           <button type="button" class="clear inv" onclick="javascript:UaLog.cls();">Clear</button>
-           <button type="button" class="close inv" onclick="javascript:UaLog.close();">Close</button>
+           <button type="button" class="clear " onclick="javascript:UaLog.cls();">Clear</button>
+           <button type="button" class="close " onclick="javascript:UaLog.close();">Close</button>
            <pre id="ualogmsg_" ></pre>`;
     this.wind.setHtml(h);
     // this.wind.addClassStyle("ualog");
-
+    this.wind.addClassStyle("inv");
     if (!!this.x) this.wind.vw_vh().setXY(this.x, this.y, -1);
     else this.wind.setCenter(-1);
     if (!!this.z) this.wind.setZ(this.z);

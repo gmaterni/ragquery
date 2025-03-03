@@ -1,237 +1,123 @@
-/** @format */
+/**
+ * ========= VARIABILI =========
+ *
+ * @format
+ */
 
-@bg: #121212;
-@txt: #e0e0e0;
-@btnBg: #6200ea;
-@btnHoverBg: #3700b3;
-@dlgBg: #1d1c1c;
-@dlgBtnBg: #029b26; // Verde per conferma
-@dlgBtnHoverBg: #029b26; // Verde scuro per hover conferma
-@dlgCancelBg: #c73500; // Arancione per annulla
-@dlgCancelHoverBg: #c73500; // Arancione scuro per hover annulla
-@ovlBg: rgba(0, 0, 0, 0); // Grigio medio semi-trasparente
+@dialog-bg: #2d2d2d;
+@dialog-text: #f5f5f5;
+@overlay-bg: rgba(0, 0, 0, 0.7);
+@confirm-color: #4caf50;
+@cancel-color: #f44336;
+@border-radius: 12px;
+@transition-speed: 0.3s;
 
+/* ========= DIALOGHI ========= */
 .confirm-dialog,
 .alert-dialog {
-  display: none;
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
-  background: @dlgBg;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  z-index: 2000;
-  border: 2px solid @dlgBtnBg; // Aggiunto bordo dello stesso colore del bottone di conferma
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  visibility: hidden;
+  background: @dialog-bg;
+  padding: 2rem;
+  border-radius: @border-radius;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 10001;
+  min-width: 320px;
+  max-width: 90%;
+  transition: all @transition-speed cubic-bezier(0.4, 0, 0.2, 1);
 
   &.show {
-    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
   }
 
   h4 {
-    margin: 0 0 20px;
-    color: @txt;
+    margin: 0 0 2rem;
+    color: @dialog-text;
+    font-size: 1.25rem;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  .buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
   }
 
   button {
-    background-color: @dlgBtnBg;
-    color: @txt;
     border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     cursor: pointer;
-    margin-right: 10px;
+    transition: all 0.2s ease;
 
-    &:hover {
-      background-color: @dlgBtnHoverBg;
+    &:focus {
+      outline: 2px solid rgba(255, 255, 255, 0.5);
+      outline-offset: 2px;
+    }
+
+    &.ok {
+      background: @confirm-color;
+      color: white;
+
+      &:hover {
+        background: darken(@confirm-color, 8%);
+      }
     }
 
     &.cancel {
-      background-color: @dlgCancelBg;
-      color: @txt;
+      background: @cancel-color;
+      color: white;
 
       &:hover {
-        background-color: @dlgCancelHoverBg;
+        background: darken(@cancel-color, 8%);
       }
     }
   }
 }
 
+/* ========= DIFFERENZIAZIONE DIALOGHI ========= */
+.confirm-dialog {
+  border: 2px solid @confirm-color;
+}
+
+.alert-dialog {
+  border: 2px solid #2196f3;
+
+  .ok {
+    background: #2196f3;
+
+    &:hover {
+      background: darken(#2196f3, 8%);
+    }
+  }
+}
+
+/* ========= OVERLAY ========= */
 .overlay {
-  display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: @ovlBg;
-  z-index: 1999;
+  background: @overlay-bg;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 10000;
+  transition: opacity @transition-speed ease;
 
   &.show {
-    display: block;
+    opacity: 1;
+    visibility: visible;
   }
 }
-
-// TOOLTIP
-/*
-Regolare i valori di calc() per distanze diverse
-Aggiungere white-space: normal per tooltip multi-riga
-Modificare border-width per frecce più grandi/più piccole
-
-Nota importante: 
-Il sistema sfrutta l'attributo data-tooltip per il contenuto testuale,
-mantenendo HTML semantico e accessibile. 
-Per contenuti dinamici, basta modificare l'attributo via JavaScript.
-Esmpio:
-<span class="menu-h-box tt-right" data-tt="Open">
-  <span class="menu-h-inner"></span>
-</span>
-*/
-/* ========= VARIABILI LESS ========= */
-@tt-bg: #cc3a05; // Colore di sfondo del tooltip
-@tt-text: #ffffff; // Colore testo del tooltip
-@tt-font: 20px "Arial", sans-serif; // Stile font
-@tt-radius: 4px; // Border-radius
-@tt-shadow: 0 3px 6px #e2ca0e29; // Ombra
-@tt-transition: 0.3s opacity; // Transizione
-@border-width: 6px;
-
-/* ========= BASE TOOLTIP ========= */
-.tt-top,
-.tt-bottom,
-.tt-left,
-.tt-right {
-  position: relative;
-  // cursor: help;
-  transition: 0.2s transform;
-
-  // Pseudo-elementi comuni
-  &::before,
-  &::after {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 9999;
-    transition: @tt-transition;
-  }
-
-  // Testo del tooltip
-  &::before {
-    content: attr(data-tt);
-    background: @tt-bg;
-    color: @tt-text;
-    font: @tt-font;
-    font-weight: normal;
-    // padding: 8px 16px;
-    padding: 4px 10px;
-    border-radius: @tt-radius;
-    box-shadow: @tt-shadow;
-    // border: 2px solid yellow;
-    white-space: nowrap;
-  }
-
-  // Freccia
-  // &::after {
-  //   content: "";
-  //   border: @border-width solid transparent;
-  // }
-
-  // Hover states
-  &:hover {
-    &::before,
-    &::after {
-      opacity: 1;
-    }
-  }
-}
-
-/* ========= POSIZIONAMENTI ========= */
-.tt-top {
-  &::before {
-    bottom: ~"calc(100% + 12px)"; // Posizionato sopra l'elemento di 12px
-    left: 50%; // Centrato orizzontalmente
-    transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
-  }
-
-  // &::after {
-  //   border-top-color: @tt-bg; // Colore del bordo superiore per la freccia
-  //   bottom: ~"calc(100% + 0px)"; // Posizionato sopra l'elemento
-  //   left: 50%; // Centrato orizzontalmente
-  //   transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
-  // }
-}
-
-.tt-bottom {
-  &::before {
-    top: ~"calc(100% + 12px)"; // Posizionato sotto l'elemento di 12px
-    left: 50%; // Centrato orizzontalmente
-    transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
-  }
-
-  // &::after {
-  //   border-bottom-color: @tt-bg; // Colore del bordo inferiore per la freccia
-  //   top: ~"calc(100% + 0px)"; // Posizionato sotto l'elemento
-  //   left: 50%; // Centrato orizzontalmente
-  //   transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
-  // }
-}
-
-.tt-left {
-  &::before {
-    right: ~"calc(30% + 0px)";
-    top: ~"calc(100% + 22px)";
-    transform: translateY(-50%);
-  }
-
-  // &::after {
-  //   border-left-color: @tt-bg;
-  //   right: ~"calc(100% + 0px)";
-  //   top: 50%;
-  //   transform: translateY(-50%);
-  // }
-}
-
-// .tt-left {
-//   &::before {
-//     right: ~"calc(100% + 12px)"; // Posizionato a sinistra dell'elemento di 12px
-//     top: 50%; // Centrato verticalmente
-//     transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
-//   }
-
-//   &::after {
-//     border-left-color: @tt-bg; // Colore del bordo sinistro per la freccia
-//     right: ~"calc(100% + 0px)"; // Posizionato a sinistra dell'elemento
-//     top: 50%; // Centrato verticalmente
-//     transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
-//   }
-// }
-
-.tt-right {
-  &::before {
-    left: ~"calc(100% + 12px)"; // Posizionato a destra dell'elemento di 12px
-    top: 50%; // Centrato verticalmente
-    transform: translateY(50%); // Spostato in alto del 50% della sua altezza
-  }
-  // &::after {
-  //   border-right-color: @tt-bg; // Colore del bordo destro per la freccia
-  //   left: ~"calc(100% + 0px)"; // Posizionato a destra dell'elemento
-  //   top: 50%; // Centrato verticalmente
-  //   transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
-  // }
-}
-
-// .tt-right {
-//   &::before {
-//     left: ~"calc(100% + 12px)"; // Posizionato a destra dell'elemento di 12px
-//     top: 50%; // Centrato verticalmente
-//     transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
-//   }
-
-//   &::after {
-//     border-right-color: @tt-bg; // Colore del bordo destro per la freccia
-//     left: ~"calc(100% + 0px)"; // Posizionato a destra dell'elemento
-//     top: 50%; // Centrato verticalmente
-//     transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
-//   }
-// }
