@@ -1,5 +1,4 @@
 /** @format */
-
 function promptDoc(documento, domanda) {
   const prompt = `
 ### RUOLO ###
