@@ -1073,6 +1073,7 @@ Esmpio:
 .tt-top,
 .tt-bottom,
 .tt-left,
+.tt-leftx,
 .tt-right {
   position: relative;
   // cursor: help;
@@ -1163,6 +1164,15 @@ Esmpio:
   //   transform: translateY(-50%);
   // }
 }
+
+.tt-leftx {
+  &::before {
+    right: ~"calc(50% + 20px)";
+    top: ~"calc(100% + 22px)";
+    transform: translateY(-80%);
+  }
+}
+
 // .tt-left {
 //   &::before {
 //     right: ~"calc(100% + 12px)"; // Posizionato a sinistra dell'elemento di 12px
