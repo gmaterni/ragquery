@@ -201,9 +201,8 @@ const VERS = "0.1.09";
 // var xlog = console.log;
 var xlog = function () {};
 
-const cancelRequest = () => {
-  // AAA cancelRequest
-  const ok = confirm("Confermi Cancellazione Richeista ?");
+const stopRequest = async () => {
+  const ok = await confirm("Confermi Cancellazione Richeista ?");
   if (!ok) return;
   cancelClientRequest();
   hideSpinner();
@@ -212,13 +211,13 @@ const cancelRequest = () => {
 const showSpinner = () => {
   const spinner = document.getElementById("spinner");
   spinner.classList.add("show-spinner");
-  spinner.addEventListener("click", cancelRequest);
+  spinner.addEventListener("click", stopRequest);
 };
 
 const hideSpinner = () => {
   const spinner = document.getElementById("spinner");
   spinner.classList.remove("show-spinner");
-  spinner.removeEventListener("click", cancelRequest);
+  spinner.removeEventListener("click", stopRequest);
 };
 
 function openApp() {

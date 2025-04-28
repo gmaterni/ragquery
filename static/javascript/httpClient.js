@@ -1,9 +1,10 @@
 /** @format */
-
 const MistralApiClient = (apiKey, options = {}) => {
   const timeout = options.timeout || 60;
   const baseUrl = options.baseUrl || "https://api.mistral.ai/v1";
   let abortController = null;
+  // Flag per tener traccia se la cancellazione è stata esplicitamente richiesta dall'utente
+  let requestExplicitlyCancelled = false;
 
   const _buildUrl = (endpoint) => {
     return `${baseUrl}${endpoint}`;
@@ -16,27 +17,6 @@ const MistralApiClient = (apiKey, options = {}) => {
     };
   };
 
-  const _validateInput = (model, payload) => {
-    if (!model || typeof model !== "string") {
-      return _createError({
-        message: "Modello non valido",
-        type: "ValidationError",
-        code: 400,
-        details: "Il parametro model deve essere una stringa non vuota",
-      });
-    }
-
-    if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
-      return _createError({
-        message: "Payload non valido",
-        type: "ValidationError",
-        code: 400,
-        details: "Il payload deve essere un oggetto valido",
-      });
-    }
-    return null;
-  };
-
   const _handleHttpError = async (response) => {
     const errorMessages = {
       400: "Richiesta non valida",
@@ -47,14 +27,12 @@ const MistralApiClient = (apiKey, options = {}) => {
       500: "Errore interno del server",
       503: "Servizio non disponibile",
     };
-
     let details;
     try {
       details = await response.json();
     } catch {
       details = await response.text();
     }
-
     return _createError({
       message: errorMessages[response.status] || response.statusText,
       type: "HTTPError",
@@ -64,7 +42,14 @@ const MistralApiClient = (apiKey, options = {}) => {
   };
 
   const _handleNetworkError = (error, timeout) => {
-    if (error.name === "AbortError") {
+    // Se l'annullamento è stato esplicitamente richiesto dall'utente,
+    // non vogliamo trattarlo come un errore da segnalare
+    if (error.name === "AbortError" && requestExplicitlyCancelled) {
+      return null; // Restituiamo null invece di un oggetto errore
+    }
+
+    // Gestione normale degli errori di abort automatici (per timeout)
+    if (error.name === "AbortError" && !requestExplicitlyCancelled) {
       return _createError({
         message: "Richiesta interrotta per timeout",
         type: "TimeoutError",
@@ -86,12 +71,18 @@ const MistralApiClient = (apiKey, options = {}) => {
   };
 
   const chat = async (model, payload, requestTimeout = timeout) => {
-    const validationError = _validateInput(model, payload);
-    if (validationError) return [null, validationError];
     payload["model"] = model;
+
+    // Reset del flag di cancellazione esplicita all'inizio di ogni nuova richiesta
+    requestExplicitlyCancelled = false;
+
+    // Assicuriamoci di cancellare qualsiasi richiesta precedente prima di crearne una nuova
+    if (abortController) {
+      abortController.abort();
+    }
+
     abortController = new AbortController();
     const timeoutId = setTimeout(() => abortController.abort(), requestTimeout * 1000);
-
     try {
       const response = await fetch(_buildUrl("/chat/completions"), {
         method: "POST",
@@ -99,9 +90,6 @@ const MistralApiClient = (apiKey, options = {}) => {
         body: JSON.stringify(payload),
         signal: abortController.signal,
       });
-
-      clearTimeout(timeoutId);
-
       if (!response.ok) {
         return [null, await _handleHttpError(response)];
       }
@@ -119,18 +107,34 @@ const MistralApiClient = (apiKey, options = {}) => {
       }
       return [data, null];
     } catch (error) {
-      clearTimeout(timeoutId);
-      return [null, _handleNetworkError(error, requestTimeout)];
+      // Se la richiesta è stata esplicitamente cancellata,
+      // restituiamo null invece della coppia [null, error]
+      if (requestExplicitlyCancelled) {
+        return null;
+      }
+
+      // Altrimenti gestiamo l'errore normalmente
+      const networkError = _handleNetworkError(error, requestTimeout);
+      if (networkError === null) {
+        return null; // Se _handleNetworkError ha già determinato che è una cancellazione esplicita
+      }
+      return [null, networkError];
     } finally {
+      clearTimeout(timeoutId);
       abortController = null;
+      // Reset del flag dopo aver completato la richiesta
+      requestExplicitlyCancelled = false;
     }
   };
 
   const cancelRequest = () => {
     if (abortController) {
+      // Imposta il flag per indicare che la cancellazione è stata richiesta esplicitamente
+      requestExplicitlyCancelled = true;
       abortController.abort();
       abortController = null;
     }
+    return null;
   };
 
   return {

@@ -81,6 +81,10 @@ const isTooLarge = (err) => {
 const getResponse = async (model, payload) => {
   try {
     const rs = await client.chat(model, payload);
+    if (!rs) {
+      alert("Rquest Interrotta");
+      return [null, null, null];
+    }
     const error = rs[1];
     if (error) {
       throw error;
@@ -228,8 +232,10 @@ const Rag = {
           prompt = promptDoc(lft, query, docName);
           this.addPrompt(prompt);
           const payload = getPayloadDoc(prompt);
-          // const der = await client.chat(MODEL, payload, 90);
           const cont_err_resp = await getResponse(MODEL, payload, 90);
+          if (!cont_err_resp) {
+            return;
+          }
           const err = cont_err_resp[1];
           if (err) {
             console.error(`ERR1\n`, err);
@@ -248,7 +254,6 @@ const Rag = {
           answer = cont_err_resp[0];
           const rsp = cont_err_resp[2];
           if (!answer) return "";
-          //AAA log rokens
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);
@@ -276,6 +281,9 @@ const Rag = {
           prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
           const payload = getPayloadBuildContext(prompt);
           const der = await getResponse(MODEL, payload, 90);
+          if (!cont_err_resp) {
+            return;
+          }
           const err = der[1];
           if (err) {
             console.error(`ERR2\n`, err);
