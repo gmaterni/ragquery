@@ -203,8 +203,8 @@ var xlog = function () {};
 
 const cancelRequest = () => {
   // AAA cancelRequest
-  // const ok = confirm("Confermi Cancellazione Richeista ?");
-  // if (!ok) return;
+  const ok = confirm("Confermi Cancellazione Richeista ?");
+  if (!ok) return;
   cancelClientRequest();
   hideSpinner();
 };

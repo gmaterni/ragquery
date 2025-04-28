@@ -1,17 +1,20 @@
 /** @format */
 
-/** @format */
 const MistralApiClient = (apiKey, options = {}) => {
   const timeout = options.timeout || 60;
   const baseUrl = options.baseUrl || "https://api.mistral.ai/v1";
   let abortController = null;
 
-  const _buildUrl = (endpoint) => `${baseUrl}${endpoint}`;
+  const _buildUrl = (endpoint) => {
+    return `${baseUrl}${endpoint}`;
+  };
 
-  const _getHeaders = () => ({
-    Authorization: `Bearer ${apiKey}`,
-    "Content-Type": "application/json",
-  });
+  const _getHeaders = () => {
+    return {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    };
+  };
 
   const _validateInput = (model, payload) => {
     if (!model || typeof model !== "string") {
@@ -85,8 +88,7 @@ const MistralApiClient = (apiKey, options = {}) => {
   const chat = async (model, payload, requestTimeout = timeout) => {
     const validationError = _validateInput(model, payload);
     if (validationError) return [null, validationError];
-
-    payload.model = model;
+    payload["model"] = model;
     abortController = new AbortController();
     const timeoutId = setTimeout(() => abortController.abort(), requestTimeout * 1000);
 
@@ -98,10 +100,11 @@ const MistralApiClient = (apiKey, options = {}) => {
         signal: abortController.signal,
       });
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
         return [null, await _handleHttpError(response)];
       }
-
       const data = await response.json();
       if (!data?.choices?.[0]?.message?.content) {
         return [
@@ -114,12 +117,11 @@ const MistralApiClient = (apiKey, options = {}) => {
           }),
         ];
       }
-
       return [data, null];
     } catch (error) {
+      clearTimeout(timeoutId);
       return [null, _handleNetworkError(error, requestTimeout)];
     } finally {
-      clearTimeout(timeoutId);
       abortController = null;
     }
   };

@@ -7,7 +7,20 @@ const ID_DOC_NAMES = "id_doc_names";
 const ID_DOCS = "id_docs";
 
 const PROMPT_DECR = 1024 * 10;
-const MAX_PROMPT_LENGTH = 30 * 1024 * 3;
+
+const maxLenRequest = (nk = 32) => {
+  //  1024   * 32 = 32758
+  //  32768  * 6 = 196698
+  //  196608 x 0,15 = 29591
+  //  196608 + 29591 = 226199
+  nc = 1024 * nk * 6;
+  sp = nc * 0.15;
+  mlr = Math.trunc(nc + sp);
+  return mlr;
+};
+const MAX_PROMPT_LENGTH = maxLenRequest(32);
+
+// const MAX_PROMPT_LENGTH = 30 * 1024 * 3;
 
 //131000
 // const MODEL = "mistral-large-2411"
@@ -19,10 +32,6 @@ const MAX_PROMPT_LENGTH = 30 * 1024 * 3;
 // const MODEL = "open-mistral-7b";
 // const MODEL = "open-mixtral-8x7b";
 const MODEL = "mistral-small-2503";
-
-//64000
-// const MODEL="open-mixtral-8x22b-2404"
-
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 
 const client = MistralApiClient(APIKEY, {
