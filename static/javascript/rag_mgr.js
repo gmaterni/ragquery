@@ -82,8 +82,8 @@ const getResponse = async (model, payload) => {
   try {
     const rs = await client.chat(model, payload);
     if (!rs) {
-      alert("Rquest Interrotta");
-      return [null, null, null];
+      alert("Request Interrotta");
+      return null;
     }
     const error = rs[1];
     if (error) {
@@ -234,7 +234,7 @@ const Rag = {
           const payload = getPayloadDoc(prompt);
           const cont_err_resp = await getResponse(MODEL, payload, 90);
           if (!cont_err_resp) {
-            return;
+            return "";
           }
           const err = cont_err_resp[1];
           if (err) {
@@ -281,8 +281,8 @@ const Rag = {
           prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
           const payload = getPayloadBuildContext(prompt);
           const der = await getResponse(MODEL, payload, 90);
-          if (!cont_err_resp) {
-            return;
+          if (!der) {
+            return "";
           }
           const err = der[1];
           if (err) {
@@ -325,6 +325,9 @@ const Rag = {
           let prompt = promptWithContext(context, query);
           const payload = getPayloadWithContext(prompt);
           const der = await getResponse(MODEL, payload, 90);
+          if (!der) {
+            return "";
+          }
           const err = der[1];
           if (err) {
             console.error(`ERR4\n`, err);
@@ -383,6 +386,9 @@ const Rag = {
           const payload = getPayloadThread(prompt);
           // const der = await client.chat(MODEL, payload, 90);
           const cont_err_resp = await getResponse(MODEL, payload, 90);
+          if (!cont_err_resp) {
+            return "";
+          }
           const err = cont_err_resp[1];
           if (err) {
             console.error(`ERR6\n`, err);
@@ -429,6 +435,9 @@ const Rag = {
           // const der = await client.chat(MODEL, payload, 90);
           // const err = der[1];
           const cont_err_resp = await getResponse(MODEL, payload, 90);
+          if (!cont_err_resp) {
+            return "";
+          }
           const err = cont_err_resp[1];
           if (err) {
             console.error(`ERR8\n`, err);
