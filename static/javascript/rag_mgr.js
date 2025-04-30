@@ -13,12 +13,12 @@ const maxLenRequest = (nk = 32) => {
   //  32768  * 6 = 196698
   //  196608 x 0,15 = 29591
   //  196608 + 29591 = 226199
-  nc = 1024 * nk * 6;
-  sp = nc * 0.15;
+  nc = 1024 * nk * 3;
+  sp = nc * 0.1;
   mlr = Math.trunc(nc + sp);
   return mlr;
 };
-const MAX_PROMPT_LENGTH = maxLenRequest(32);
+const MAX_PROMPT_LENGTH = maxLenRequest(100);
 
 // const MAX_PROMPT_LENGTH = 30 * 1024 * 3;
 
