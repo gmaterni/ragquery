@@ -64,20 +64,6 @@ const isTooLarge = (err) => {
   return tks;
 };
 
-// utilizzato per httpClientMst
-// const getResponse = async (model, payload) => {
-//   try {
-//     payload["model"] = model;
-//     const response = await client.chat(payload);
-//     console.log("Response:\n", response);
-//     const content = response.choices[0].message.content;
-//     return [content, null, response];
-//   } catch (error) {
-//     console.error(`Error in getResponse: ${error}`);
-//     return [null, error];
-//   }
-// };
-
 const getResponse = async (model, payload) => {
   try {
     const rs = await client.chat(model, payload);
@@ -384,7 +370,6 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          // const der = await client.chat(MODEL, payload, 90);
           const cont_err_resp = await getResponse(MODEL, payload, 90);
           if (!cont_err_resp) {
             return "";
@@ -480,8 +465,8 @@ const Rag = {
   },
 };
 
-const LLM = "## Assistant:";
-const USER = "## User:";
+const LLM = "# Assistant:";
+const USER = "# User:";
 
 const ThreadMgr = {
   rows: [],
