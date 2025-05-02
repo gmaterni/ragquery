@@ -3,7 +3,6 @@ const MistralApiClient = (apiKey, options = {}) => {
   const timeout = options.timeout || 60;
   const baseUrl = options.baseUrl || "https://api.mistral.ai/v1";
   let abortController = null;
-  // Flag per tener traccia se la cancellazione è stata esplicitamente richiesta dall'utente
   let requestExplicitlyCancelled = false;
 
   const _buildUrl = (endpoint) => {
@@ -42,13 +41,9 @@ const MistralApiClient = (apiKey, options = {}) => {
   };
 
   const _handleNetworkError = (error, timeout) => {
-    // Se l'annullamento è stato esplicitamente richiesto dall'utente,
-    // non vogliamo trattarlo come un errore da segnalare
     if (error.name === "AbortError" && requestExplicitlyCancelled) {
       return null; // Restituiamo null invece di un oggetto errore
     }
-
-    // Gestione normale degli errori di abort automatici (per timeout)
     if (error.name === "AbortError" && !requestExplicitlyCancelled) {
       return _createError({
         message: "Richiesta interrotta per timeout",
@@ -57,7 +52,6 @@ const MistralApiClient = (apiKey, options = {}) => {
         details: `La richiesta ha superato il limite di ${timeout} secondi`,
       });
     }
-
     return _createError({
       message: "Errore di rete",
       type: "NetworkError",
@@ -65,22 +59,15 @@ const MistralApiClient = (apiKey, options = {}) => {
       details: "Impossibile raggiungere il server. Controlla la connessione.",
     });
   };
-
   const _createError = ({ message, type, code, details }) => {
     return { message, type, code, details };
   };
-
   const chat = async (model, payload, requestTimeout = timeout) => {
     payload["model"] = model;
-
-    // Reset del flag di cancellazione esplicita all'inizio di ogni nuova richiesta
     requestExplicitlyCancelled = false;
-
-    // Assicuriamoci di cancellare qualsiasi richiesta precedente prima di crearne una nuova
     if (abortController) {
       abortController.abort();
     }
-
     abortController = new AbortController();
     const timeoutId = setTimeout(() => abortController.abort(), requestTimeout * 1000);
     try {
@@ -107,29 +94,23 @@ const MistralApiClient = (apiKey, options = {}) => {
       }
       return [data, null];
     } catch (error) {
-      // Se la richiesta è stata esplicitamente cancellata,
-      // restituiamo null invece della coppia [null, error]
       if (requestExplicitlyCancelled) {
         return null;
       }
-
-      // Altrimenti gestiamo l'errore normalmente
       const networkError = _handleNetworkError(error, requestTimeout);
       if (networkError === null) {
-        return null; // Se _handleNetworkError ha già determinato che è una cancellazione esplicita
+        return null;
       }
       return [null, networkError];
     } finally {
       clearTimeout(timeoutId);
       abortController = null;
-      // Reset del flag dopo aver completato la richiesta
       requestExplicitlyCancelled = false;
     }
   };
 
   const cancelRequest = () => {
     if (abortController) {
-      // Imposta il flag per indicare che la cancellazione è stata richiesta esplicitamente
       requestExplicitlyCancelled = true;
       abortController.abort();
       abortController = null;
@@ -144,43 +125,6 @@ const MistralApiClient = (apiKey, options = {}) => {
 };
 
 //////////////
-
-/*
-object = {
-  id: "3e9443ea2683476ab5843d5fdcf4b757",
-  object: "chat.completion",
-  created: 1735763652,
-  model: "open-mistral-nemo-2407",
-  choices: [
-    {
-      index: 0,
-      message: {
-        role: "assistant",
-        tool_calls: null,
-        content: "",
-      },
-      finish_reason: "length",
-    },
-  ],
-  usage: {
-    prompt_tokens: 116980,
-    total_tokens: 117492,
-    completion_tokens: 512,
-  },
-};
-const error = {
-  message: "Richiesta non valida",
-  type: "HTTPError",
-  code: 400,
-  details: {
-    object: "error",
-    message: "Prompt contains 226728 tokens and 0 draft tokens, too large for model with 131072 maximum context length",
-    type: "invalid_request_error",
-    param: null,
-    code: null,
-  },
-};
-*/
 
 const infoError = {
   set(error) {

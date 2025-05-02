@@ -178,35 +178,67 @@ ${domanda}
 `;
 }
 
-function promptBuildContext(testo, domanda) {
+// function xpromptBuildContext(testo, domanda) {
+//   return `
+// # SISTEMA
+// Estrattore e compattatore semantico per contesto LLM.
+
+// # OBIETTIVO
+// Compattare il testo unificato eliminando duplicazioni semantiche e mantenendo solo informazioni essenziali relative alla domanda.
+
+// # ISTRUZIONI
+// 1. Identifica e unifica concetti semanticamente equivalenti presenti in diverse parti del testo.
+// 2. Elimina ripetizioni informative mantenendo solo la formulazione più completa o precisa.
+// 3. Seleziona SOLO informazioni rilevanti per rispondere alla domanda.
+// 4. Mantieni relazioni logiche essenziali (causali, temporali, concettuali).
+// 5. Preserva terminologia tecnica necessaria.
+// 6. Produci proposizioni atomiche con struttura minimale.
+// 7. Rimuovi informazioni ridondanti anche se espresse con parole diverse.
+// 8. Massimizza la densità informativa per uso efficiente come contesto.
+
+// # FORMATO
+// - Non numerare le proposizioni.
+// - Non usare introduzioni o conclusioni.
+// - Non includere spiegazioni meta-testuali.
+// - Non inserire frasi di collegamento tra le proposizioni.
+
+// # TESTO
+// ${testo}
+
+// # DOMANDA
+// ${domanda}
+
+// # RISPOSTA
+// `;
+// }
+
+function promptBuildContext(testo, domanda = "") {
   return `
 # SISTEMA
 Estrattore e compattatore semantico per contesto LLM.
 
 # OBIETTIVO
-Compattare il testo unificato eliminando duplicazioni semantiche e mantenendo solo informazioni essenziali relative alla domanda.
+Raggruppa e compatta le informazioni estratte dai frammenti di un documento, associando concetti semanticamente simili e sviluppando inferenze tra le informazioni.
 
 # ISTRUZIONI
-1. Identifica e unifica concetti semanticamente equivalenti presenti in diverse parti del testo.
-2. Elimina ripetizioni informative mantenendo solo la formulazione più completa o precisa.
-3. Seleziona SOLO informazioni rilevanti per rispondere alla domanda.
-4. Mantieni relazioni logiche essenziali (causali, temporali, concettuali).
-5. Preserva terminologia tecnica necessaria.
-6. Produci proposizioni atomiche con struttura minimale.
-7. Rimuovi informazioni ridondanti anche se espresse con parole diverse.
-8. Massimizza la densità informativa per uso efficiente come contesto.
+1. Identificazione dei Concetti: Identifica e unifica i concetti che hanno lo stesso significato semantico, anche se espressi in modi diversi.
+2. Eliminazione delle Ripetizioni: Elimina le ripetizioni informative mantenendo solo la formulazione più completa o precisa.
+3. Preservazione delle Relazioni Logiche: Mantieni le relazioni logiche essenziali (causali, temporali, concettuali) tra le informazioni.
+4. Terminologia Tecnica: Preserva la terminologia tecnica necessaria per mantenere la precisione delle informazioni.
+5. Sintassi Semplificata: Usa una sintassi minimale (soggetto-verbo-complemento) per chiarezza e concisione.
+6. Eliminazione degli Elementi Discorsivi: Rimuovi elementi discorsivi, connettivi e contestualizzazioni non essenziali.
+7. Densità Semantica: Presenta l'informazione con la massima densità semantica, evitando ridondanze.
+8. Rielaborazione degli Insegnamenti: Rielabora le informazioni per garantire che siano coese e che sviluppino inferenze tra parti diverse del documento.
 
-# FORMATO
-- Non numerare le proposizioni.
-- Non usare introduzioni o conclusioni.
-- Non includere spiegazioni meta-testuali.
-- Non inserire frasi di collegamento tra le proposizioni.
+# FORMATO_OUTPUT
+- Struttura flat senza gerarchie.
+- NON numerare le proposizioni.
+- NON usare introduzioni o conclusioni.
+- NON includere spiegazioni meta-testuali.
+- NON inserire frasi di collegamento tra le proposizioni.
 
 # TESTO
 ${testo}
-
-# DOMANDA
-${domanda}
 
 # RISPOSTA
 `;
