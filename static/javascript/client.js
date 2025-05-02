@@ -42,7 +42,7 @@ const MistralApiClient = (apiKey, options = {}) => {
 
   const _handleNetworkError = (error, timeout) => {
     if (error.name === "AbortError" && requestExplicitlyCancelled) {
-      return null; // Restituiamo null invece di un oggetto errore
+      return null;
     }
     if (error.name === "AbortError" && !requestExplicitlyCancelled) {
       return _createError({
