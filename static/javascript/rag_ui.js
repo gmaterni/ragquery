@@ -365,7 +365,8 @@ TextOutput = {
     }, 5000);
   },
   clear() {
-    const out = document.querySelector("#id-text-out .pre-text");
+    const out = document.querySelector("#id-text-out .div-text");
+    // AAA const out = document.querySelector("#id-text-out .pre-text");
     out.textContent = "";
   },
 };
