@@ -17,6 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+const errorDumps = (err) => {
+  const s = JSON.stringify(err, null, 2);
+  if (s == "{}") return `${err}`;
+  return s;
+};
+
 const WndPre = (id) => {
   return {
     w: UaWindowAdm.create(id),

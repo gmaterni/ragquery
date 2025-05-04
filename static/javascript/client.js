@@ -1,4 +1,5 @@
 /** @format */
+
 const MistralApiClient = (apiKey, options = {}) => {
   // Imposta il timeout predefinito e l'URL base dall'oggetto delle opzioni
   const timeout = options.timeout || 60;
@@ -367,14 +368,3 @@ const calcTokens = {
     return this.sum_generate_tokens;
   },
 };
-
-const errorDumps = (err) => {
-  const s = JSON.stringify(err, null, 2);
-  if (s == "{}") return `${err}`;
-  return s;
-};
-
-// const errorMsg = (err) => {
-//   const s = err.details.message;
-//   return s;
-// };

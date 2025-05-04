@@ -34,17 +34,32 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 const MODEL = "mistral-small-2503";
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 
-const client = new ClientLLM(APIKEY, {
-  timeout: 90,
-});
+const client = ClientLLM(APIKEY);
+
+const calcTokens = {
+  sum_input_tokens: 0,
+  sum_generate_tokens: 0,
+  init() {
+    this.sum_input_tokens = 0;
+    this.sum_generate_tokens = 0;
+  },
+  add(response) {
+    if (!response) return;
+    this.sum_input_tokens += response.usage.total_tokens;
+    this.sum_generate_tokens += response.usage.completion_tokens;
+  },
+  get_sum_input_tokens() {
+    return this.sum_input_tokens;
+  },
+  get_sum_generate_tokens() {
+    return this.sum_generate_tokens;
+  },
+};
 
 function cancelClientRequest() {
   client.cancelRequest();
 }
 
-// function wait(seconds) {
-//   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-// }
 
 const getPromptTokens = (err) => {
   const msg = err.details.message;

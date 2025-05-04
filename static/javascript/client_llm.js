@@ -66,46 +66,45 @@ const responseDettails = {
   },
 };
 
-class RequestResult {
-  constructor(response = null, data = null, error = null) {
-    this.response = response;
-    this.data = data;
-    this.error = error;
-  }
-}
+const createRequestResult = (response = null, data = null, error = null) => {
+  return {
+    response,
+    data,
+    error,
+  };
+};
 
-class ClientLLM {
-  constructor(apiKey, options = {}) {
-    this.timeout = options.timeout || 60;
-    this.baseUrl = options.baseUrl || "https://api.mistral.ai/v1";
-    this.apiKey = apiKey;
-    this.abortController = null;
-    this.isCancelled = false;
-    this.requestResult = new RequestResult();
-  }
+// Factory function per il client LLM
+const ClientLLM = (apiKey, options = {}) => {
+  // Variabili private all'interno della closure
+  const timeout = options.timeout || 60;
+  const baseUrl = options.baseUrl || "https://api.mistral.ai/v1";
+  let abortController = null;
+  let isCancelled = false;
 
-  _buildUrl(endpoint) {
-    return `${this.baseUrl}${endpoint}`;
-  }
+  // Funzioni di supporto private
+  const buildUrl = (endpoint) => {
+    return `${baseUrl}${endpoint}`;
+  };
 
-  _getHeaders() {
+  const getHeaders = () => {
     return {
-      Authorization: `Bearer ${this.apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     };
-  }
+  };
 
-  _validateInput(model, payload) {
+  const validateInput = (model, payload) => {
     if (!model || typeof model !== "string") {
-      return this._createError("Modello non valido", "ValidationError", 400, "Il parametro model deve essere una stringa non vuota");
+      return createError("Modello non valido", "ValidationError", 400, "Il parametro model deve essere una stringa non vuota");
     }
     if (!payload || typeof payload !== "object") {
-      return this._createError("Payload non valido", "ValidationError", 400, "Il payload deve essere un oggetto valido");
+      return createError("Payload non valido", "ValidationError", 400, "Il payload deve essere un oggetto valido");
     }
     return null;
-  }
+  };
 
-  _handleHttpError(response) {
+  const handleHttpError = (response) => {
     const errorMessages = {
       400: "Richiesta non valida",
       401: "Non autorizzato - Controlla la API key",
@@ -116,141 +115,99 @@ class ClientLLM {
       503: "Servizio non disponibile",
     };
     const details = response.headers.get("Content-Type") === "application/json" ? response.json() : response.text();
-    return this._createError(errorMessages[response.status] || response.status.toString(), "HTTPError", response.status, details);
-  }
+    return createError(errorMessages[response.status] || response.status.toString(), "HTTPError", response.status, details);
+  };
 
-  _handleNetworkError(error, timeout) {
+  const handleNetworkError = (error, timeout) => {
     if (error.name === "AbortError") {
-      return this._createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
+      return createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
     }
     if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
-      return this._createError("Errore di rete", "NetworkError", 0, "Impossibile raggiungere il server. Controlla la connessione.");
+      return createError("Errore di rete", "NetworkError", 0, "Impossibile raggiungere il server. Controlla la connessione.");
     }
-    return this._createError("Errore imprevisto", error.name || "UnknownError", 500, error.message);
-  }
+    return createError("Errore imprevisto", error.name || "UnknownError", 500, error.message);
+  };
 
-  _createError(message, type, code, details) {
+  const createError = (message, type, code, details) => {
     return {
       message,
       type,
       code,
       details,
     };
-  }
+  };
 
-  async sendRequest(model, payload, requestTimeout = null) {
+  // Funzione principale per inviare la richiesta
+  const sendRequest = async (model, payload, requestTimeout = null) => {
     if (requestTimeout === null) {
-      requestTimeout = this.timeout;
+      requestTimeout = timeout;
     }
 
-    this.isCancelled = false;
+    isCancelled = false;
 
-    const validationError = this._validateInput(model, payload);
+    const validationError = validateInput(model, payload);
     if (validationError) {
-      return new RequestResult(null, null, validationError);
+      return createRequestResult(null, null, validationError);
     }
 
     payload.model = model;
-    this.abortController = new AbortController();
+    abortController = new AbortController();
 
     try {
-      if (this.isCancelled) {
-        const cancelledError = this._createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
-        return new RequestResult(null, null, cancelledError);
+      if (isCancelled) {
+        const cancelledError = createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
+        return createRequestResult(null, null, cancelledError);
       }
 
-      const response = await fetch(this._buildUrl("/chat/completions"), {
+      const response = await fetch(buildUrl("/chat/completions"), {
         method: "POST",
-        headers: this._getHeaders(),
+        headers: getHeaders(),
         body: JSON.stringify(payload),
-        signal: this.abortController.signal,
+        signal: abortController.signal,
       });
 
-      if (this.isCancelled) {
-        const cancelledError = this._createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
-        return new RequestResult(null, null, cancelledError);
+      if (isCancelled) {
+        const cancelledError = createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
+        return createRequestResult(null, null, cancelledError);
       }
 
       if (!response.ok) {
-        const err = this._handleHttpError(response);
-        return new RequestResult(null, null, err);
+        const err = handleHttpError(response);
+        return createRequestResult(null, null, err);
       }
 
       const respJson = await response.json();
       if (!respJson.choices || !respJson.choices[0].message || !respJson.choices[0].message.content) {
-        const err = this._createError("Risposta non valida", "ParseError", 500, "La risposta non contiene il contenuto atteso");
-        return new RequestResult(null, null, err);
+        const err = createError("Risposta non valida", "ParseError", 500, "La risposta non contiene il contenuto atteso");
+        return createRequestResult(null, null, err);
       }
 
       const data = respJson.choices[0].message.content;
-      return new RequestResult(respJson, data);
+      return createRequestResult(respJson, data);
     } catch (error) {
-      if (this.isCancelled) {
-        const cancelledError = this._createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
-        return new RequestResult(null, null, cancelledError);
+      if (isCancelled) {
+        const cancelledError = createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
+        return createRequestResult(null, null, cancelledError);
       } else {
-        const err = this._handleNetworkError(error, requestTimeout);
-        return new RequestResult(null, null, err);
+        const err = handleNetworkError(error, requestTimeout);
+        return createRequestResult(null, null, err);
       }
     }
-  }
+  };
 
-  cancelRequest() {
-    this.isCancelled = true;
-    if (this.abortController) {
-      this.abortController.abort();
-      this.abortController = null;
+  // Funzione per annullare la richiesta in corso
+  const cancelRequest = () => {
+    isCancelled = true;
+    if (abortController) {
+      abortController.abort();
+      abortController = null;
     }
     return true;
-  }
-}
-
-// Esempio di utilizzo che include il caso di interruzione della richiesta
-/*
-(async () => {
-  const options = {
-    timeout: 90, // Imposta il timeout a 90 secondi
-    baseUrl: "https://api.mistral.ai/v1", // URL base dell'API
-  };
-  const client = new ClientLLM("YOUR_API_KEY", options);
-  const model = "example-model";
-  const payload = {
-    messages: [{ role: "user", content: "Hello!" }],
   };
 
-  const result = await client.sendRequest(model, payload);
-  if (result.error) {
-    console.error(`Errore: ${result.error.message}`);
-    console.error(`Dettagli: ${result.error.details}`);
-    console.error(`Codice: ${result.error.code}`);
-  } else {
-    console.log(`Risposta: ${result.data}`);
-  }
-})();
-*/
-
-const calcTokens = {
-  sum_input_tokens: 0,
-  sum_generate_tokens: 0,
-  init() {
-    this.sum_input_tokens = 0;
-    this.sum_generate_tokens = 0;
-  },
-  add(response) {
-    if (!response) return;
-    this.sum_input_tokens += response.usage.total_tokens;
-    this.sum_generate_tokens += response.usage.completion_tokens;
-  },
-  get_sum_input_tokens() {
-    return this.sum_input_tokens;
-  },
-  get_sum_generate_tokens() {
-    return this.sum_generate_tokens;
-  },
-};
-
-const errorDumps = (err) => {
-  const s = JSON.stringify(err, null, 2);
-  if (s == "{}") return `${err}`;
-  return s;
+  // Interfaccia pubblica
+  return {
+    sendRequest,
+    cancelRequest,
+  };
 };
