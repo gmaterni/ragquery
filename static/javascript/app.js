@@ -238,11 +238,6 @@ function openApp() {
 function showHistory() {
   const txt = ThreadMgr.getThread();
   setOutText(txt);
-  // const p = document.querySelector("#id-text-out .pre-text");
-  // p.textContent = txt;
-  // setTimeout(() => {
-  //   p.scrollTop = p.scrollHeight;
-  // }, 0);
 }
 
 function release() {

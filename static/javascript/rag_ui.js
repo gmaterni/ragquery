@@ -188,24 +188,13 @@ const Menu = {
 };
 
 const setOutText = (txt) => {
-  const p = document.querySelector("#id-text-out .pre-text");
-  p.textContent = txt;
+  txt = cleanOut(txt);
+  // AAA const p = document.querySelector("#id-text-out .pre-text");
+  const p = document.querySelector("#id-text-out .div-text");
+  // p.textContent = txt;
+  p.innerHTML = txt;
   p.scrollTop = p.scrollHeight;
 };
-
-// const setOutText2 = async (txt) => {
-// const t = p.textContent;
-// if (t.trim().length < 2) {
-//   p.textContent = txt;
-//   p.scrollTop = p.scrollHeight;
-//   return;
-// }
-// for (let i = 0; i < txt.length; i++) {
-//   p.textContent += txt[i];
-//   p.scrollTop = p.scrollHeight;
-//   await new Promise((resolve) => setTimeout(resolve, 2));
-// }
-// };
 
 const TextInput = {
   wnd: null,
@@ -294,7 +283,6 @@ const TextInput = {
     const msg = this.inp.value.trim();
     try {
       let text = await Rag.requestDocsRAG(msg);
-      text = cleanOut(text);
       setOutText(text);
       this.inp.value = "";
       UaLog.close();
@@ -302,7 +290,6 @@ const TextInput = {
       console.error("ERROR Send", err);
       const s = errorDumps(err);
       alert(s);
-      // setOutText("");
     }
     hideSpinner();
   },
@@ -325,14 +312,12 @@ const TextInput = {
         hideSpinner();
         return;
       }
-      text = cleanOut(text);
       setOutText(text);
       this.inp.value = "";
     } catch (err) {
       console.error("Error send2", err);
       const s = errorDumps(err);
       alert(s);
-      // setOutText(s);
     }
     hideSpinner();
   },
@@ -355,17 +340,21 @@ TextOutput = {
     wndBtn.addEventListener("click", () => this.openWnd());
   },
   openWnd() {
-    const p = document.querySelector("#id-text-out .pre-text");
-    const s = p.textContent;
+    // AAA const p = document.querySelector("#id-text-out .pre-text");
+    const p = document.querySelector("#id-text-out .div-text");
+    // const s = p.textContent;
+    const s = textFormatter(p.textContent);
     wnds.wout.show(s);
   },
   async copy() {
-    const pre = document.querySelector("#id-text-out .pre-text");
-    const t = pre.textContent;
+    // const pre = document.querySelector("#id-text-out .pre-text");
+    const pre = document.querySelector("#id-text-out .div-text");
+    let t = pre.textContent;
     if (t.trim().length < 2) return;
     pre.classList.add("copied");
     this.copyBtn.classList.add("copied");
     try {
+      t = textFormatter(t); // AAA
       await navigator.clipboard.writeText(t);
     } catch (err) {
       console.error("Errore  ", err);

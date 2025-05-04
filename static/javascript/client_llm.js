@@ -5,25 +5,25 @@ const errorDetails = {
     this.error = error;
   },
   get_message() {
-    return this.error && this.error.message ? this.error.message : null;
+    return this.error.message;
   },
   get_type() {
-    return this.error && this.error.type ? this.error.type : null;
+    return this.error.type;
   },
   get_code() {
-    return this.error && this.error.code ? this.error.code : null;
+    return this.error.code;
   },
   get_details_message() {
-    return this.error && this.error.details && this.error.details.message ? this.error.details.message : null;
+    return this.error.details.message;
   },
   get_details_type() {
-    return this.error && this.error.details && this.error.details.type ? this.error.details.type : null;
+    return this.error.details.type;
   },
   get_details_param() {
-    return this.error && this.error.details && this.error.details.param ? this.error.details.param : null;
+    return this.error.details.param;
   },
   get_details_code() {
-    return this.error && this.error.details && this.error.details.code ? this.error.details.code : null;
+    return this.error.details.code;
   },
 };
 
@@ -32,37 +32,37 @@ const responseDetails = {
     this.response = response;
   },
   get_id() {
-    return this.response && this.response.id ? this.response.id : null;
+    return this.response.id;
   },
   get_created() {
-    return this.response && this.response.created ? this.response.created : null;
+    return this.response.created;
   },
   get_model() {
-    return this.response && this.response.model ? this.response.model : null;
+    return this.response.model;
   },
   get_index() {
-    return this.response && this.response.choices && this.response.choices[0] ? this.response.choices[0].index : null;
+    return this.response.choices[0].index;
   },
   get_role() {
-    return this.response && this.response.choices && this.response.choices[0] && this.response.choices[0].message ? this.response.choices[0].message.role : null;
+    return this.response.choices[0].message.role;
   },
   get_tool_calls() {
-    return this.response && this.response.choices && this.response.choices[0] && this.response.choices[0].message ? this.response.choices[0].message.tool_calls : null;
+    return this.response.choices[0].message.tool_calls;
   },
   get_content() {
-    return this.response && this.response.choices && this.response.choices[0] && this.response.choices[0].message ? this.response.choices[0].message.content : null;
+    return this.response.choices[0].message.content;
   },
   get_finish_reason() {
-    return this.response && this.response.choices && this.response.choices[0] ? this.response.choices[0].finish_reason : null;
+    return this.response.choices[0].finish_reason;
   },
   get_prompt_tokens() {
-    return this.response && this.response.usage ? this.response.usage.prompt_tokens : null;
+    return this.response.usage.prompt_tokens;
   },
   get_total_tokens() {
-    return this.response && this.response.usage ? this.response.usage.total_tokens : null;
+    return this.response.usage.total_tokens;
   },
   get_completion_tokens() {
-    return this.response && this.response.usage ? this.response.usage.completion_tokens : null;
+    return this.response.usage.completion_tokens;
   },
 };
 
@@ -88,8 +88,8 @@ const RequestResult = (response = null, data = null, error = null) => {
  * @returns {Object} - Interfaccia pubblica del client
  */
 const ClientLLM = (apiKey, options = {}) => {
-  // Variabili private all'interno della closure
-  const timeoutMs = options.timeout ? options.timeout * 1000 : 60000; // Converti secondi in millisecondi
+  // Converti secondi in millisecondi
+  const timeoutMs = options.timeout ? options.timeout * 1000 : 60000;
   const baseUrl = options.baseUrl || "https://api.mistral.ai/v1";
   let abortController = null;
   let isCancelled = false;
@@ -238,7 +238,9 @@ const ClientLLM = (apiKey, options = {}) => {
     }
 
     // Prepara la richiesta
-    payload = { ...payload, model };
+    // AAA payload = { ...payload, model };
+    payload["model"] = model;
+
     abortController = new AbortController();
 
     // Imposta il timeout

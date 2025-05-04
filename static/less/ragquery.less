@@ -290,6 +290,11 @@ body {
 @btn-send2-bg: darken(@color2, 20%);
 @btn-send2-hover-bg: lighten(@btn-send2-bg, 15%);
 
+.copied {
+  background-color: @text-copied-bg !important;
+  color: @text-copied !important;
+}
+
 div.container {
   background: @contaniner-bg;
   box-sizing: border-box;
@@ -382,9 +387,29 @@ div.container {
           box-sizing: border-box;
           overflow-y: scroll;
         }
-        &.copied {
-          background-color: @text-copied-bg;
-          color: @text-copied;
+        .user {
+          border: 2px solid @color2 !important;
+          border-radius: 10px;
+          padding: 2px 2px 3px 10px;
+          margin: 2px 5px 5px 150px;
+          b {
+            font-weight: bold;
+            text-decoration: underline;
+            color: @color1;
+            padding-bottom: 5px;
+          }
+        }
+        .assistant {
+          border: 2px solid @color1 !important;
+          border-radius: 10px;
+          padding: 2px 2px 3px 10px;
+          margin: 2px 90px 5px 6px;
+          b {
+            font-weight: bold;
+            text-decoration: underline;
+            color: @color2;
+            padding-bottom: 5px;
+          }
         }
       }
     }
