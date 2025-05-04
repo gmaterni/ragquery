@@ -34,17 +34,31 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 const MODEL = "mistral-small-2503";
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 
-const client = MistralApiClient(APIKEY, {
-  timeout: 90,
-});
+const client = ClientLLM(APIKEY);
+
+const calcTokens = {
+  sum_input_tokens: 0,
+  sum_generate_tokens: 0,
+  init() {
+    this.sum_input_tokens = 0;
+    this.sum_generate_tokens = 0;
+  },
+  add(response) {
+    if (!response) return;
+    this.sum_input_tokens += response.usage.total_tokens;
+    this.sum_generate_tokens += response.usage.completion_tokens;
+  },
+  get_sum_input_tokens() {
+    return this.sum_input_tokens;
+  },
+  get_sum_generate_tokens() {
+    return this.sum_generate_tokens;
+  },
+};
 
 function cancelClientRequest() {
   client.cancelRequest();
 }
-
-// function wait(seconds) {
-//   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-// }
 
 const getPromptTokens = (err) => {
   const msg = err.details.message;
@@ -65,23 +79,12 @@ const isTooLarge = (err) => {
 };
 
 const getResponse = async (model, payload) => {
-  try {
-    const rs = await client.chat(model, payload);
-    if (!rs) {
-      alert("Request Interrotta");
-      return null;
-    }
-    const error = rs[1];
-    if (error) {
-      throw error;
-    }
-    const response = rs[0];
-    const content = response.choices[0].message.content;
-    return [content, null, response];
-  } catch (error) {
-    console.error(`Error in getResponse: ${error}`);
-    return [null, error, null];
+  const rr = await client.sendRequest(model, payload);
+  if (rr.error && rr.error.code === 499) {
+    alert("Request Interrotta");
+    return null;
   }
+  return rr;
 };
 
 const truncateInput = (txt, decr) => {
@@ -193,7 +196,6 @@ const Rag = {
     let ndoc = 0;
     try {
       let j = 1;
-
       for (let i = 0; i < DataMgr.docs.length; i++) {
         let doc = DataMgr.docs[i];
         if (doc.trim() == "") continue;
@@ -209,7 +211,6 @@ const Rag = {
         let rgt = "";
         let answer = "";
         let docAnswersLst = [];
-
         while (true) {
           const partSize = getPartSize(doc, promptDoc("", query, ""), decr);
           if (partSize < 10) break;
@@ -218,11 +219,11 @@ const Rag = {
           prompt = promptDoc(lft, query, docName);
           this.addPrompt(prompt);
           const payload = getPayloadDoc(prompt);
-          const cont_err_resp = await getResponse(MODEL, payload, 90);
-          if (!cont_err_resp) {
+          const rr = await getResponse(MODEL, payload, 90);
+          if (!rr) {
             return "";
           }
-          const err = cont_err_resp[1];
+          const err = rr.error;
           if (err) {
             console.error(`ERR1\n`, err);
             const code = err.code;
@@ -237,17 +238,16 @@ const Rag = {
               continue;
             } else throw err;
           }
-          answer = cont_err_resp[0];
-          const rsp = cont_err_resp[2];
+          answer = rr.data;
+          const rsp = rr.response;
           if (!answer) return "";
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);
-          infoResponse.set(rsp);
-          itks = infoResponse.get_total_tokens();
-          gtks = infoResponse.get_completion_tokens();
+          responseDetails.set(rsp);
+          itks = responseDetails.get_total_tokens();
+          gtks = responseDetails.get_completion_tokens();
           console.log(`Response Tokens: ${itks} ${gtks}`);
-          //
           calcTokens.add(rsp);
           npart++;
           j++;
@@ -257,20 +257,18 @@ const Rag = {
           const s = `DOCUMENTO : ${docName}_${npart}\n${answer}`;
           this.answers.push(s);
         } // end while
-
         // doc answer list => cContext
         const docAnswersLen = docAnswersLst.length;
         let docAnswresTxt = docAnswersLst.join("\n\n");
         let docContext = "";
-
         while (true) {
           prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
           const payload = getPayloadBuildContext(prompt);
-          const der = await getResponse(MODEL, payload, 90);
-          if (!der) {
+          const rr = await getResponse(MODEL, payload, 90);
+          if (!rr) {
             return "";
           }
-          const err = der[1];
+          const err = rr.error;
           if (err) {
             console.error(`ERR2\n`, err);
             const code = err.code;
@@ -285,13 +283,12 @@ const Rag = {
               continue;
             } else throw err;
           }
-          docContext = der[0];
-          const rsp = der[2];
+          docContext = rr.data;
+          const rsp = rr.response;
           if (!docContext) return "";
           calcTokens.add(rsp);
           break;
         } //end while
-
         UaLog.log(`context  ${docAnswersLen} => ${docContext.length}`);
         docContext = `\n### DOCUMENTO: ${docName}\n ${docContext}`;
         this.docContextLst.push(docContext);
@@ -300,6 +297,7 @@ const Rag = {
       console.error("ERR3\n", err);
       throw err;
     }
+
     this.ragContext = this.docContextLst.join("\n\n");
     this.saveToDb();
     // queryWithContext finale che utilizza context e genera la prima risposta
@@ -310,11 +308,11 @@ const Rag = {
         while (true) {
           let prompt = promptWithContext(context, query);
           const payload = getPayloadWithContext(prompt);
-          const der = await getResponse(MODEL, payload, 90);
-          if (!der) {
+          const rr = await getResponse(MODEL, payload, 90);
+          if (!rr) {
             return "";
           }
-          const err = der[1];
+          const err = rr.error;
           if (err) {
             console.error(`ERR4\n`, err);
             const code = err.code;
@@ -329,8 +327,8 @@ const Rag = {
               continue;
             } else throw err;
           }
-          answer = der[0];
-          const rsp = der[2];
+          answer = rr.data;
+          const rsp = rr.response;
           if (!answer) return "";
           calcTokens.add(rsp);
           break;
@@ -370,11 +368,11 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const cont_err_resp = await getResponse(MODEL, payload, 90);
-          if (!cont_err_resp) {
+          const rr = await getResponse(MODEL, payload, 90);
+          if (!rr) {
             return "";
           }
-          const err = cont_err_resp[1];
+          const err = rr.error;
           if (err) {
             console.error(`ERR6\n`, err);
             const code = err.code;
@@ -387,15 +385,15 @@ const Rag = {
             } else if (code == 408) continue;
             else throw err;
           }
-          answer = cont_err_resp[0];
-          const rsp = cont_err_resp[2];
+          answer = rr.data;
+          const rsp = rr.response;
           if (!answer) return "";
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);
-          infoResponse.set(rsp);
-          itks = infoResponse.get_total_tokens();
-          gtks = infoResponse.get_completion_tokens();
+          responseDetails.set(rsp);
+          itks = responseDetails.get_total_tokens();
+          gtks = responseDetails.get_completion_tokens();
           console.log(`Response Tokens: ${itks} ${gtks}`);
           calcTokens.add(rsp);
           break;
@@ -417,13 +415,11 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          // const der = await client.chat(MODEL, payload, 90);
-          // const err = der[1];
-          const cont_err_resp = await getResponse(MODEL, payload, 90);
-          if (!cont_err_resp) {
+          const rr = await getResponse(MODEL, payload, 90);
+          if (!rr) {
             return "";
           }
-          const err = cont_err_resp[1];
+          const err = rr.error;
           if (err) {
             console.error(`ERR8\n`, err);
             const code = err.code;
@@ -438,16 +434,16 @@ const Rag = {
               continue;
             } else throw err;
           }
-          answer = cont_err_resp[0];
-          const rsp = cont_err_resp[2];
+          answer = rr.data;
+          const rsp = rr.response;
           if (!answer) return "";
           //AAA log rokens
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);
-          infoResponse.set(rsp);
-          itks = infoResponse.get_total_tokens();
-          gtks = infoResponse.get_completion_tokens();
+          responseDetails.set(rsp);
+          itks = responseDetails.get_total_tokens();
+          gtks = responseDetails.get_completion_tokens();
           console.log(`Response Tokens: ${itks} ${gtks}`);
           calcTokens.add(rsp);
           break;

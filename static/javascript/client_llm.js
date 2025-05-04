@@ -1,72 +1,79 @@
 /** @format */
 
-const errorDettails = {
+const errorDetails = {
   set(error) {
     this.error = error;
   },
   get_message() {
-    return this.error.message;
+    return this.error && this.error.message ? this.error.message : null;
   },
   get_type() {
-    return this.error.type;
+    return this.error && this.error.type ? this.error.type : null;
   },
   get_code() {
-    return this.error.code;
+    return this.error && this.error.code ? this.error.code : null;
   },
   get_details_message() {
-    return this.error.details.message;
+    return this.error && this.error.details && this.error.details.message ? this.error.details.message : null;
   },
   get_details_type() {
-    return this.error.details.type;
+    return this.error && this.error.details && this.error.details.type ? this.error.details.type : null;
   },
   get_details_param() {
-    return this.error.details.param;
+    return this.error && this.error.details && this.error.details.param ? this.error.details.param : null;
   },
   get_details_code() {
-    return this.error.details.code;
+    return this.error && this.error.details && this.error.details.code ? this.error.details.code : null;
   },
 };
 
-const responseDettails = {
+const responseDetails = {
   set(response) {
     this.response = response;
   },
   get_id() {
-    return this.response.id;
+    return this.response && this.response.id ? this.response.id : null;
   },
   get_created() {
-    return this.response.created;
+    return this.response && this.response.created ? this.response.created : null;
   },
   get_model() {
-    return this.response.model;
+    return this.response && this.response.model ? this.response.model : null;
   },
   get_index() {
-    return this.response.choices[0].index;
+    return this.response && this.response.choices && this.response.choices[0] ? this.response.choices[0].index : null;
   },
   get_role() {
-    return this.response.choices[0].message.role;
+    return this.response && this.response.choices && this.response.choices[0] && this.response.choices[0].message ? this.response.choices[0].message.role : null;
   },
   get_tool_calls() {
-    return this.response.choices[0].message.tool_calls;
+    return this.response && this.response.choices && this.response.choices[0] && this.response.choices[0].message ? this.response.choices[0].message.tool_calls : null;
   },
   get_content() {
-    return this.response.choices[0].message.content;
+    return this.response && this.response.choices && this.response.choices[0] && this.response.choices[0].message ? this.response.choices[0].message.content : null;
   },
   get_finish_reason() {
-    return this.response.choices[0].finish_reason;
+    return this.response && this.response.choices && this.response.choices[0] ? this.response.choices[0].finish_reason : null;
   },
   get_prompt_tokens() {
-    return this.response.usage.prompt_tokens;
+    return this.response && this.response.usage ? this.response.usage.prompt_tokens : null;
   },
   get_total_tokens() {
-    return this.response.usage.total_tokens;
+    return this.response && this.response.usage ? this.response.usage.total_tokens : null;
   },
   get_completion_tokens() {
-    return this.response.usage.completion_tokens;
+    return this.response && this.response.usage ? this.response.usage.completion_tokens : null;
   },
 };
 
-const createRequestResult = (response = null, data = null, error = null) => {
+/**
+ * Crea un oggetto di risultato standardizzato
+ * @param {Object} response - La risposta completa dall'API
+ * @param {String|Object} data - I dati estratti dalla risposta
+ * @param {Object} error - Dettagli dell'errore, se presente
+ * @returns {Object} - Oggetto di risultato standardizzato
+ */
+const RequestResult = (response = null, data = null, error = null) => {
   return {
     response,
     data,
@@ -74,19 +81,32 @@ const createRequestResult = (response = null, data = null, error = null) => {
   };
 };
 
-// Factory function per il client LLM
+/**
+ * Factory function per creare un client LLM
+ * @param {String} apiKey - La chiave API per l'autenticazione
+ * @param {Object} options - Opzioni di configurazione
+ * @returns {Object} - Interfaccia pubblica del client
+ */
 const ClientLLM = (apiKey, options = {}) => {
   // Variabili private all'interno della closure
-  const timeout = options.timeout || 60;
+  const timeoutMs = options.timeout ? options.timeout * 1000 : 60000; // Converti secondi in millisecondi
   const baseUrl = options.baseUrl || "https://api.mistral.ai/v1";
   let abortController = null;
   let isCancelled = false;
 
-  // Funzioni di supporto private
+  /**
+   * Costruisce l'URL completo per l'endpoint specificato
+   * @param {String} endpoint - L'endpoint API
+   * @returns {String} - URL completo
+   */
   const buildUrl = (endpoint) => {
     return `${baseUrl}${endpoint}`;
   };
 
+  /**
+   * Genera gli header HTTP per le richieste
+   * @returns {Object} - Headers HTTP
+   */
   const getHeaders = () => {
     return {
       Authorization: `Bearer ${apiKey}`,
@@ -94,17 +114,34 @@ const ClientLLM = (apiKey, options = {}) => {
     };
   };
 
+  /**
+   * Valida i parametri di input
+   * @param {String} model - Il modello LLM da utilizzare
+   * @param {Object} payload - Il payload della richiesta
+   * @returns {Object|null} - Oggetto errore o null se valido
+   */
   const validateInput = (model, payload) => {
     if (!model || typeof model !== "string") {
-      return createError("Modello non valido", "ValidationError", 400, "Il parametro model deve essere una stringa non vuota");
+      return createError("Modello non valido", "ValidationError", 400, { message: "Il parametro model deve essere una stringa non vuota" });
     }
     if (!payload || typeof payload !== "object") {
-      return createError("Payload non valido", "ValidationError", 400, "Il payload deve essere un oggetto valido");
+      return createError("Payload non valido", "ValidationError", 400, { message: "Il payload deve essere un oggetto valido" });
     }
+
+    // Verifica che il payload contenga i campi necessari
+    if (!payload.messages || !Array.isArray(payload.messages) || payload.messages.length === 0) {
+      return createError("Payload incompleto", "ValidationError", 400, { message: "Il payload deve contenere un array 'messages' non vuoto" });
+    }
+
     return null;
   };
 
-  const handleHttpError = (response) => {
+  /**
+   * Gestisce gli errori HTTP
+   * @param {Response} response - L'oggetto risposta HTTP
+   * @returns {Promise<Object>} - Promise che risolve con un oggetto errore
+   */
+  const handleHttpError = async (response) => {
     const errorMessages = {
       400: "Richiesta non valida",
       401: "Non autorizzato - Controlla la API key",
@@ -114,51 +151,106 @@ const ClientLLM = (apiKey, options = {}) => {
       500: "Errore interno del server",
       503: "Servizio non disponibile",
     };
-    const details = response.headers.get("Content-Type") === "application/json" ? response.json() : response.text();
-    return createError(errorMessages[response.status] || response.status.toString(), "HTTPError", response.status, details);
+
+    let detailsContent;
+    let errorType = "HTTPError";
+    let message = errorMessages[response.status] || `Errore HTTP ${response.status}`;
+
+    try {
+      if (response.headers.get("Content-Type")?.includes("application/json")) {
+        detailsContent = await response.json();
+
+        // Verifica errori specifici per input troppo lungo
+        if (response.status === 400 && detailsContent) {
+          // Verifica se c'è un messaggio di errore relativo alla lunghezza dell'input
+          const errorMsg = typeof detailsContent.error === "string" ? detailsContent.error : detailsContent.message || detailsContent.error?.message;
+
+          if (
+            errorMsg &&
+            (errorMsg.includes("token limit") || errorMsg.includes("token exceeded") || errorMsg.includes("input too long") || errorMsg.includes("context length") || errorMsg.includes("max tokens"))
+          ) {
+            message = "Input troppo lungo - Superato il limite di token";
+            errorType = "TokenLimitError";
+          }
+        }
+      } else {
+        detailsContent = await response.text();
+        // Verifica anche nel testo semplice
+        if (response.status === 400 && (detailsContent.includes("token limit") || detailsContent.includes("input too long") || detailsContent.includes("context length"))) {
+          message = "Input troppo lungo - Superato il limite di token";
+          errorType = "TokenLimitError";
+        }
+      }
+    } catch (e) {
+      detailsContent = { message: "Impossibile estrarre i dettagli dell'errore" };
+    }
+
+    return createError(message, errorType, response.status, typeof detailsContent === "string" ? { message: detailsContent } : detailsContent);
   };
 
-  const handleNetworkError = (error, timeout) => {
+  /**
+   * Gestisce gli errori di rete
+   * @param {Error} error - L'errore catturato
+   * @returns {Object} - Oggetto errore standardizzato
+   */
+  const handleNetworkError = (error) => {
     if (error.name === "AbortError") {
-      return createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
+      return createError("Richiesta annullata", "CancellationError", 499, { message: "La richiesta è stata interrotta volontariamente dall'utente" });
     }
     if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
-      return createError("Errore di rete", "NetworkError", 0, "Impossibile raggiungere il server. Controlla la connessione.");
+      return createError("Errore di rete", "NetworkError", 0, { message: "Impossibile raggiungere il server. Controlla la connessione." });
     }
-    return createError("Errore imprevisto", error.name || "UnknownError", 500, error.message);
+    return createError("Errore imprevisto", error.name || "UnknownError", 500, { message: error.message || "Si è verificato un errore sconosciuto" });
   };
 
+  /**
+   * Crea un oggetto errore standardizzato
+   * @param {String} message - Messaggio principale dell'errore
+   * @param {String} type - Tipo di errore
+   * @param {Number} code - Codice di errore
+   * @param {Object} details - Dettagli aggiuntivi dell'errore
+   * @returns {Object} - Oggetto errore standardizzato
+   */
   const createError = (message, type, code, details) => {
     return {
       message,
       type,
       code,
-      details,
+      details: details || {},
     };
   };
 
-  // Funzione principale per inviare la richiesta
+  /**
+   * Invia una richiesta al modello LLM
+   * @param {String} model - Il modello LLM da utilizzare
+   * @param {Object} payload - Il payload della richiesta
+   * @param {Number} requestTimeout - Timeout in secondi (sovrascrive il default)
+   * @returns {Promise<Object>} - Promise che risolve con un RequestResult
+   */
   const sendRequest = async (model, payload, requestTimeout = null) => {
-    if (requestTimeout === null) {
-      requestTimeout = timeout;
-    }
-
+    // Resetta lo stato della richiesta
     isCancelled = false;
 
+    // Valida input
     const validationError = validateInput(model, payload);
     if (validationError) {
-      return createRequestResult(null, null, validationError);
+      return RequestResult(null, null, validationError);
     }
 
-    payload.model = model;
+    // Prepara la richiesta
+    payload = { ...payload, model };
     abortController = new AbortController();
 
-    try {
-      if (isCancelled) {
-        const cancelledError = createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
-        return createRequestResult(null, null, cancelledError);
+    // Imposta il timeout
+    const actualTimeoutMs = requestTimeout !== null ? requestTimeout * 1000 : timeoutMs;
+    const timeoutId = setTimeout(() => {
+      if (abortController) {
+        isCancelled = true;
+        abortController.abort();
       }
+    }, actualTimeoutMs);
 
+    try {
       const response = await fetch(buildUrl("/chat/completions"), {
         method: "POST",
         headers: getHeaders(),
@@ -166,43 +258,54 @@ const ClientLLM = (apiKey, options = {}) => {
         signal: abortController.signal,
       });
 
+      // Puliamo il timeout poiché la richiesta è completata
+      clearTimeout(timeoutId);
+
+      // Se la richiesta è stata annullata dopo che la risposta è arrivata
       if (isCancelled) {
-        const cancelledError = createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
-        return createRequestResult(null, null, cancelledError);
+        const cancelledError = createError("Richiesta annullata", "CancellationError", 499, { message: "La richiesta è stata interrotta volontariamente dall'utente" });
+        return RequestResult(null, null, cancelledError);
       }
 
+      // Gestisci errori HTTP
       if (!response.ok) {
-        const err = handleHttpError(response);
-        return createRequestResult(null, null, err);
+        const err = await handleHttpError(response);
+        return RequestResult(null, null, err);
       }
 
+      // Elabora la risposta
       const respJson = await response.json();
-      if (!respJson.choices || !respJson.choices[0].message || !respJson.choices[0].message.content) {
-        const err = createError("Risposta non valida", "ParseError", 500, "La risposta non contiene il contenuto atteso");
-        return createRequestResult(null, null, err);
+
+      // Verifica che la risposta contenga i dati attesi
+      if (!respJson.choices || !respJson.choices[0] || !respJson.choices[0].message || respJson.choices[0].message.content === undefined) {
+        const err = createError("Risposta non valida", "ParseError", 500, { message: "La risposta non contiene il contenuto atteso" });
+        return RequestResult(null, null, err);
       }
 
       const data = respJson.choices[0].message.content;
-      return createRequestResult(respJson, data);
+      return RequestResult(respJson, data);
     } catch (error) {
-      if (isCancelled) {
-        const cancelledError = createError("Richiesta annullata", "CancellationError", 499, "La richiesta è stata interrotta volontariamente dall'utente");
-        return createRequestResult(null, null, cancelledError);
-      } else {
-        const err = handleNetworkError(error, requestTimeout);
-        return createRequestResult(null, null, err);
-      }
+      // Puliamo il timeout in caso di errore
+      clearTimeout(timeoutId);
+
+      // Gestisci errori di rete
+      const err = handleNetworkError(error);
+      return RequestResult(null, null, err);
     }
   };
 
-  // Funzione per annullare la richiesta in corso
+  /**
+   * Annulla una richiesta in corso
+   * @returns {Boolean} - True se l'annullamento è stato avviato
+   */
   const cancelRequest = () => {
     isCancelled = true;
     if (abortController) {
       abortController.abort();
       abortController = null;
+      return true;
     }
-    return true;
+    return false;
   };
 
   // Interfaccia pubblica
