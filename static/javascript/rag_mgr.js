@@ -36,6 +36,56 @@ const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 
 const client = ClientLLM(APIKEY);
 
+const getResponse = async (model, payload) => {
+  // AAA payload = { ...payload, model };
+  payload["model"] = model;
+  const rr = await client.sendRequest(payload);
+  if (rr.error && rr.error.code === 499) {
+    alert("Request Interrotta");
+    return null;
+  }
+  return rr;
+};
+
+const responseDetails = {
+  set(response) {
+    this.response = response;
+  },
+  get_id() {
+    return this.response.id;
+  },
+  get_created() {
+    return this.response.created;
+  },
+  get_model() {
+    return this.response.model;
+  },
+  get_index() {
+    return this.response.choices[0].index;
+  },
+  get_role() {
+    return this.response.choices[0].message.role;
+  },
+  get_tool_calls() {
+    return this.response.choices[0].message.tool_calls;
+  },
+  get_content() {
+    return this.response.choices[0].message.content;
+  },
+  get_finish_reason() {
+    return this.response.choices[0].finish_reason;
+  },
+  get_prompt_tokens() {
+    return this.response.usage.prompt_tokens;
+  },
+  get_total_tokens() {
+    return this.response.usage.total_tokens;
+  },
+  get_completion_tokens() {
+    return this.response.usage.completion_tokens;
+  },
+};
+
 const calcTokens = {
   sum_input_tokens: 0,
   sum_generate_tokens: 0,
@@ -76,15 +126,6 @@ const isTooLarge = (err) => {
   const msg = err.details.message;
   const tks = msg.includes("too large");
   return tks;
-};
-
-const getResponse = async (model, payload) => {
-  const rr = await client.sendRequest(model, payload);
-  if (rr.error && rr.error.code === 499) {
-    alert("Request Interrotta");
-    return null;
-  }
-  return rr;
 };
 
 const truncateInput = (txt, decr) => {

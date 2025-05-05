@@ -163,6 +163,7 @@ function cleanOut(inputText) {
   if (currentSpeaker) {
     resultHtml += `</div>`;
   }
+  // console.log("html:\n", resultHtml);
   return resultHtml;
 }
 
