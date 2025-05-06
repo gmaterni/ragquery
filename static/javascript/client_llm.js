@@ -124,7 +124,8 @@ const ClientLLM = (apiKey, options = {}) => {
     }, actualTimeoutMs);
 
     try {
-      const response = await fetch(buildUrl("/chat/completions"), {
+      const url = buildUrl("/chat/completions");
+      const response = await fetch(url, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(payload),
