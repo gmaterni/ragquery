@@ -37,9 +37,13 @@ const getResponse = async (model, payload) => {
   url = "https://api.mistral.ai/v1/chat/completions";
   payload["model"] = model;
   const rr = await client.sendRequest(url, payload, 60);
-  if (rr.error && rr.error.code === 499) {
-    alert("Request Interrotta");
-    return null;
+  if (rr.error) {
+    if (rr.error.code === 499) {
+      alert("Request Interrotta");
+      return null;
+    } else {
+      return rr;
+    }
   }
   if (!rr.response.choices || !rr.response.choices[0] || !rr.response.choices[0].message || rr.response.choices[0].message.content === undefined) {
     const err = client.createError("Risposta non valida", "ParseError", 500, { message: "La risposta non contiene il contenuto atteso" });
