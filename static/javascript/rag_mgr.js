@@ -31,16 +31,21 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 // const MODEL = "open-mixtral-8x7b";
 const MODEL = "mistral-small-2503";
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
-
 const client = ClientLLM(APIKEY);
 
 const getResponse = async (model, payload) => {
+  url = "https://api.mistral.ai/v1/chat/completions";
   payload["model"] = model;
-  const rr = await client.sendRequest(payload);
+  const rr = await client.sendRequest(url, payload, 60);
   if (rr.error && rr.error.code === 499) {
     alert("Request Interrotta");
     return null;
   }
+  if (!rr.response.choices || !rr.response.choices[0] || !rr.response.choices[0].message || rr.response.choices[0].message.content === undefined) {
+    const err = client.createError("Risposta non valida", "ParseError", 500, { message: "La risposta non contiene il contenuto atteso" });
+    return RequestResult(null, null, err);
+  }
+  rr.data = rr.response.choices[0].message.content;
   return rr;
 };
 

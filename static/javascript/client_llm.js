@@ -35,15 +35,9 @@ const RequestResult = (response = null, data = null, error = null) => {
   };
 };
 
-const ClientLLM = (apiKey, options = {}) => {
-  const timeoutMs = options.timeout ? options.timeout * 1000 : 60000;
-  const baseUrl = options.baseUrl || "https://api.mistral.ai/v1";
+const ClientLLM = (apiKey) => {
   let abortController = null;
   let isCancelled = false;
-
-  const buildUrl = (endpoint) => {
-    return `${baseUrl}${endpoint}`;
-  };
 
   const getHeaders = () => {
     return {
@@ -112,19 +106,17 @@ const ClientLLM = (apiKey, options = {}) => {
     };
   };
 
-  const sendRequest = async (payload, requestTimeout = null) => {
+  const sendRequest = async (url, payload, requestTimeout = 60) => {
     isCancelled = false;
     abortController = new AbortController();
-    const actualTimeoutMs = requestTimeout !== null ? requestTimeout * 1000 : timeoutMs;
+    const actualTimeoutMs = requestTimeout * 1000;
     const timeoutId = setTimeout(() => {
       if (abortController) {
         isCancelled = true;
         abortController.abort();
       }
     }, actualTimeoutMs);
-
     try {
-      const url = buildUrl("/chat/completions");
       const response = await fetch(url, {
         method: "POST",
         headers: getHeaders(),
@@ -143,18 +135,8 @@ const ClientLLM = (apiKey, options = {}) => {
         const err = await handleHttpError(response);
         return RequestResult(null, null, err);
       }
-      // Elabora la risposta
       const respJson = await response.json();
-
-      // Verifica che la risposta contenga i dati attesi
-      // AAA specifica di mistral
-      if (!respJson.choices || !respJson.choices[0] || !respJson.choices[0].message || respJson.choices[0].message.content === undefined) {
-        const err = createError("Risposta non valida", "ParseError", 500, { message: "La risposta non contiene il contenuto atteso" });
-        return RequestResult(null, null, err);
-      }
-      const data = respJson.choices[0].message.content;
-
-      return RequestResult(respJson, data);
+      return RequestResult(respJson);
     } catch (error) {
       clearTimeout(timeoutId);
       const err = handleNetworkError(error);
@@ -175,6 +157,7 @@ const ClientLLM = (apiKey, options = {}) => {
   // Interfaccia pubblica
   return {
     sendRequest,
+    createError,
     cancelRequest,
   };
 };
