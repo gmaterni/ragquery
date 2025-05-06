@@ -475,7 +475,6 @@ const Rag = {
           answer = rr.data;
           const rsp = rr.response;
           if (!answer) return "";
-          //AAA log rokens
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);

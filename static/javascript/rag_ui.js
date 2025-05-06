@@ -189,9 +189,7 @@ const Menu = {
 
 const setOutText = (txt) => {
   txt = cleanOut(txt);
-  // AAA const p = document.querySelector("#id-text-out .pre-text");
   const p = document.querySelector("#id-text-out .div-text");
-  // p.textContent = txt;
   p.innerHTML = txt;
   p.scrollTop = p.scrollHeight;
 };
@@ -340,9 +338,7 @@ TextOutput = {
     wndBtn.addEventListener("click", () => this.openWnd());
   },
   openWnd() {
-    // AAA const p = document.querySelector("#id-text-out .pre-text");
     const p = document.querySelector("#id-text-out .div-text");
-    // const s = p.textContent;
     const s = textFormatter(p.textContent);
     wnds.wout.show(s);
   },
@@ -354,7 +350,7 @@ TextOutput = {
     pre.classList.add("copied");
     this.copyBtn.classList.add("copied");
     try {
-      t = textFormatter(t); // AAA
+      t = textFormatter(t);
       await navigator.clipboard.writeText(t);
     } catch (err) {
       console.error("Errore  ", err);
@@ -366,7 +362,6 @@ TextOutput = {
   },
   clear() {
     const out = document.querySelector("#id-text-out .div-text");
-    // AAA const out = document.querySelector("#id-text-out .pre-text");
     out.textContent = "";
   },
 };
