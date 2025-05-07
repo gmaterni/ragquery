@@ -127,7 +127,7 @@ function cleanResponse(s) {
   }
 }
 
-function cleanOut(inputText) {
+function answerFormtter(inputText) {
   if (inputText.trim() == "") return "";
 
   // Controlla se entrambi i tag # User e # Assistant sono presenti nel testo di input

@@ -188,7 +188,7 @@ const Menu = {
 };
 
 const setOutText = (txt) => {
-  txt = cleanOut(txt);
+  txt = answerFormtter(txt);
   const p = document.querySelector("#id-text-out .div-text");
   p.innerHTML = txt;
   p.scrollTop = p.scrollHeight;
@@ -301,7 +301,7 @@ const TextInput = {
     }
     showSpinner();
     if (ThreadMgr.isFirst()) {
-      setOutText("");
+      // setOutText("");
     }
     const query = this.inp.value.trim();
     try {
