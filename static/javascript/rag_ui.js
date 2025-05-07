@@ -301,7 +301,7 @@ const TextInput = {
     }
     showSpinner();
     if (ThreadMgr.isFirst()) {
-      // setOutText("");
+      // AAA setOutText("");
     }
     const query = this.inp.value.trim();
     try {
