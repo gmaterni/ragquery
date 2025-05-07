@@ -128,42 +128,47 @@ function cleanResponse(s) {
 }
 
 function cleanOut(inputText) {
+  if (inputText.trim() == "") return "";
+
+  // Controlla se entrambi i tag # User e # Assistant sono presenti nel testo di input
+  const hasUserTag = inputText.includes("# User:");
+  const hasAssistantTag = inputText.includes("# Assistant:");
+
+  if (!hasUserTag || !hasAssistantTag) {
+    // Se almeno uno dei due tag non è presente, inserisci tutto in un unico div con classe assistant
+    return `<div class="assistant"><b>Assistant:</b><br>${inputText.split("\n").join("<br>")}</div>`;
+  }
+
+  // Altrimenti, procedi come prima
   const lines = inputText.split("\n");
   let currentSpeaker = null;
   let resultHtml = "";
+
   lines.forEach((line) => {
-    // Trim the line to remove any leading/trailing whitespace
     line = line.trim();
-    // Check if the line starts with '# User:' or '# Assistant:'
     if (line.startsWith("# User:")) {
-      // If there was a previous speaker, close their div
       if (currentSpeaker) {
         resultHtml += `</div>`;
       }
-      // Set the current speaker to 'user' and open a new div
       currentSpeaker = "user";
       resultHtml += `<div class="${currentSpeaker}"><b>User:</b>`;
     } else if (line.startsWith("# Assistant:")) {
-      // If there was a previous speaker, close their div
       if (currentSpeaker) {
         resultHtml += `</div>`;
       }
-      // Set the current speaker to 'assistant' and open a new div
       currentSpeaker = "assistant";
       resultHtml += `<div class="${currentSpeaker}"><b>Assistant:</b>`;
     } else if (line.length > 0) {
-      // If the line is not a speaker line and not empty, add it to the current div
       if (currentSpeaker) {
         resultHtml += `<br>${line}`;
       }
     }
   });
 
-  // Close the last div if there was any speaker
   if (currentSpeaker) {
     resultHtml += `</div>`;
   }
-  // console.log("html:\n", resultHtml);
+
   return resultHtml;
 }
 

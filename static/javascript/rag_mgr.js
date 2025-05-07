@@ -13,9 +13,9 @@ const maxLenRequest = (nk = 32) => {
   //  32768  * 6 = 196698
   //  196608 x 0,15 = 29591
   //  196608 + 29591 = 226199
-  nc = 1024 * nk * 3;
-  sp = nc * 0.1;
-  mlr = Math.trunc(nc + sp);
+  const nc = 1024 * nk * 3;
+  const sp = nc * 0.1;
+  const mlr = Math.trunc(nc + sp);
   return mlr;
 };
 const MAX_PROMPT_LENGTH = maxLenRequest(100);
@@ -32,11 +32,11 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 const MODEL = "mistral-small-2503";
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 const client = ClientLLM(APIKEY);
+const URL = "https://api.mistral.ai/v1/chat/completions";
 
-const getResponse = async (model, payload) => {
-  url = "https://api.mistral.ai/v1/chat/completions";
+const getResponse = async (model, payload, timeout = 60) => {
   payload["model"] = model;
-  const rr = await client.sendRequest(url, payload, 60);
+  const rr = await client.sendRequest(URL, payload, timeout);
   if (rr.error) {
     if (rr.error.code === 499) {
       alert("Request Interrotta");
@@ -47,7 +47,7 @@ const getResponse = async (model, payload) => {
   }
   if (!rr.response.choices || !rr.response.choices[0] || !rr.response.choices[0].message || rr.response.choices[0].message.content === undefined) {
     const err = client.createError("Risposta non valida", "ParseError", 500, { message: "La risposta non contiene il contenuto atteso" });
-    return RequestResult(null, null, err);
+    return RequestResult(false, null, null, err);
   }
   rr.data = rr.response.choices[0].message.content;
   return rr;
@@ -271,7 +271,7 @@ const Rag = {
             return "";
           }
           const err = rr.error;
-          if (err) {
+          if (!rr.ok) {
             console.error(`ERR1\n`, err);
             const code = err.code;
             if (code == 400) {
@@ -286,16 +286,18 @@ const Rag = {
             } else throw err;
           }
           answer = rr.data;
-          const rsp = rr.response;
           if (!answer) return "";
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);
+
+          const rsp = rr.response;
           responseDetails.set(rsp);
           itks = responseDetails.get_total_tokens();
           gtks = responseDetails.get_completion_tokens();
           console.log(`Response Tokens: ${itks} ${gtks}`);
           calcTokens.add(rsp);
+
           npart++;
           j++;
           doc = rgt;
@@ -316,7 +318,7 @@ const Rag = {
             return "";
           }
           const err = rr.error;
-          if (err) {
+          if (!rr.ok) {
             console.error(`ERR2\n`, err);
             const code = err.code;
             if (code == 400) {
@@ -331,8 +333,8 @@ const Rag = {
             } else throw err;
           }
           docContext = rr.data;
-          const rsp = rr.response;
           if (!docContext) return "";
+          const rsp = rr.response;
           calcTokens.add(rsp);
           break;
         } //end while
@@ -344,7 +346,6 @@ const Rag = {
       console.error("ERR3\n", err);
       throw err;
     }
-
     this.ragContext = this.docContextLst.join("\n\n");
     this.saveToDb();
     // queryWithContext finale che utilizza context e genera la prima risposta
@@ -360,7 +361,7 @@ const Rag = {
             return "";
           }
           const err = rr.error;
-          if (err) {
+          if (!rr.ok) {
             console.error(`ERR4\n`, err);
             const code = err.code;
             if (code == 400) {
@@ -375,8 +376,8 @@ const Rag = {
             } else throw err;
           }
           answer = rr.data;
-          const rsp = rr.response;
           if (!answer) return "";
+          const rsp = rr.response;
           calcTokens.add(rsp);
           break;
         }
@@ -391,7 +392,6 @@ const Rag = {
         const itks = calcTokens.get_sum_input_tokens();
         const gtks = calcTokens.get_sum_generate_tokens();
         UaLog.log(`Tokens: ${itks} ${gtks}`);
-
         return answer;
       } catch (err) {
         console.error("ERR5\n", err);
@@ -420,7 +420,7 @@ const Rag = {
             return "";
           }
           const err = rr.error;
-          if (err) {
+          if (!rr.ok) {
             console.error(`ERR6\n`, err);
             const code = err.code;
             if (code == 400) {
@@ -433,8 +433,8 @@ const Rag = {
             else throw err;
           }
           answer = rr.data;
-          const rsp = rr.response;
           if (!answer) return "";
+          const rsp = rr.response;
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);
@@ -467,7 +467,7 @@ const Rag = {
             return "";
           }
           const err = rr.error;
-          if (err) {
+          if (!rr.ok) {
             console.error(`ERR8\n`, err);
             const code = err.code;
             if (code == 400) {
@@ -482,8 +482,8 @@ const Rag = {
             } else throw err;
           }
           answer = rr.data;
-          const rsp = rr.response;
           if (!answer) return "";
+          const rsp = rr.response;
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);

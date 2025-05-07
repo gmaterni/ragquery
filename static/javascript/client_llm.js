@@ -1,50 +1,29 @@
 /** @format */
 
-const errorDetails = {
-  set(error) {
-    this.error = error;
-  },
-  get_message() {
-    return this.error.message;
-  },
-  get_type() {
-    return this.error.type;
-  },
-  get_code() {
-    return this.error.code;
-  },
-  get_details_message() {
-    return this.error.details.message;
-  },
-  get_details_type() {
-    return this.error.details.type;
-  },
-  get_details_param() {
-    return this.error.details.param;
-  },
-  get_details_code() {
-    return this.error.details.code;
-  },
-};
-
-const RequestResult = (response = null, data = null, error = null) => {
-  return {
-    response,
-    data,
-    error,
-  };
-};
-
 const ClientLLM = (apiKey) => {
   let abortController = null;
   let isCancelled = false;
 
-  const getHeaders = () => {
+  const createResult = (ok, response = null, data = null, error = null) => {
     return {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
+      ok,
+      response,
+      data,
+      error,
     };
   };
+
+  const createError = (message, type, code, details) => ({
+    message: message || null,
+    type: type || null,
+    code: code || null,
+    details: {
+      message: details?.message || null,
+      type: details?.type || null,
+      param: details?.param || null,
+      code: details?.code || null,
+    },
+  });
 
   const handleHttpError = async (response) => {
     const errorMessages = {
@@ -89,7 +68,11 @@ const ClientLLM = (apiKey) => {
 
   const handleNetworkError = (error) => {
     if (error.name === "AbortError") {
-      return createError("Richiesta annullata", "CancellationError", 499, { message: "La richiesta è stata interrotta volontariamente dall'utente" });
+      if (isCancelled) {
+        return createError("Richiesta annullata dall'utente", "CancellationError", 499, { message: "La richiesta è stata interrotta volontariamente dall'utente" });
+      } else {
+        return createError("Richiesta interrotta per timeout", "TimeoutError", 408, { message: "La richiesta è stata interrotta a causa di un timeout", isTimeout: true });
+      }
     }
     if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
       return createError("Errore di rete", "NetworkError", 0, { message: "Impossibile raggiungere il server. Controlla la connessione." });
@@ -97,50 +80,44 @@ const ClientLLM = (apiKey) => {
     return createError("Errore imprevisto", error.name || "UnknownError", 500, { message: error.message || "Si è verificato un errore sconosciuto" });
   };
 
-  const createError = (message, type, code, details) => {
-    return {
-      message,
-      type,
-      code,
-      details: details || {},
-    };
-  };
-
   const sendRequest = async (url, payload, requestTimeout = 60) => {
     isCancelled = false;
     abortController = new AbortController();
     const actualTimeoutMs = requestTimeout * 1000;
+
     const timeoutId = setTimeout(() => {
       if (abortController) {
-        isCancelled = true;
         abortController.abort();
       }
     }, actualTimeoutMs);
+
     try {
       const response = await fetch(url, {
         method: "POST",
-        headers: getHeaders(),
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
         signal: abortController.signal,
       });
-      // Puliamo il timeout poiché la richiesta è completata
-      clearTimeout(timeoutId);
-      // Se la richiesta è stata annullata dopo che la risposta è arrivata
+
       if (isCancelled) {
         const cancelledError = createError("Richiesta annullata", "CancellationError", 499, { message: "La richiesta è stata interrotta volontariamente dall'utente" });
-        return RequestResult(null, null, cancelledError);
+        return createResult(false, null, null, cancelledError);
       }
-      // Gestisci errori HTTP
       if (!response.ok) {
         const err = await handleHttpError(response);
-        return RequestResult(null, null, err);
+        return createResult(false, null, null, err);
       }
       const respJson = await response.json();
-      return RequestResult(respJson);
+      return createResult(true, respJson);
     } catch (error) {
-      clearTimeout(timeoutId);
       const err = handleNetworkError(error);
-      return RequestResult(null, null, err);
+      return createResult(false, null, null, err);
+    } finally {
+      clearTimeout(timeoutId);
+      abortController = null;
     }
   };
 
@@ -154,7 +131,6 @@ const ClientLLM = (apiKey) => {
     return false;
   };
 
-  // Interfaccia pubblica
   return {
     sendRequest,
     createError,
