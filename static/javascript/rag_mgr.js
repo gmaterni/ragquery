@@ -32,11 +32,11 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 const MODEL = "mistral-small-2503";
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 const client = ClientLLM(APIKEY);
-const URL = "https://api.mistral.ai/v1/chat/completions";
 
 const getResponse = async (model, payload, timeout = 60) => {
+  const url = "https://api.mistral.ai/v1/chat/completions";
   payload["model"] = model;
-  const rr = await client.sendRequest(URL, payload, timeout);
+  const rr = await client.sendRequest(url, payload, timeout);
   if (rr.error) {
     if (rr.error.code === 499) {
       alert("Request Interrotta");
