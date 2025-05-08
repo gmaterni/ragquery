@@ -33,9 +33,9 @@ const MODEL = "mistral-small-2503";
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 const client = ClientLLM(APIKEY);
 
-const getResponse = async (model, payload, timeout = 60) => {
+const getResponse = async (payload, timeout = 60) => {
   const url = "https://api.mistral.ai/v1/chat/completions";
-  payload["model"] = model;
+  payload["model"] = MODEL;
   const rr = await client.sendRequest(url, payload, timeout);
   if (rr.error) {
     if (rr.error.code === 499) {
@@ -266,7 +266,7 @@ const Rag = {
           prompt = promptDoc(lft, query, docName);
           this.addPrompt(prompt);
           const payload = getPayloadDoc(prompt);
-          const rr = await getResponse(MODEL, payload, 90);
+          const rr = await getResponse(payload, 90);
           if (!rr) {
             return "";
           }
@@ -313,7 +313,7 @@ const Rag = {
         while (true) {
           prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
           const payload = getPayloadBuildContext(prompt);
-          const rr = await getResponse(MODEL, payload, 90);
+          const rr = await getResponse(payload, 90);
           if (!rr) {
             return "";
           }
@@ -356,7 +356,7 @@ const Rag = {
         while (true) {
           let prompt = promptWithContext(context, query);
           const payload = getPayloadWithContext(prompt);
-          const rr = await getResponse(MODEL, payload, 90);
+          const rr = await getResponse(payload, 90);
           if (!rr) {
             return "";
           }
@@ -415,7 +415,7 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const rr = await getResponse(MODEL, payload, 90);
+          const rr = await getResponse(payload, 90);
           if (!rr) {
             return "";
           }
@@ -462,7 +462,7 @@ const Rag = {
         while (true) {
           prompt = promptThread(context, thread, query);
           const payload = getPayloadThread(prompt);
-          const rr = await getResponse(MODEL, payload, 90);
+          const rr = await getResponse(payload, 90);
           if (!rr) {
             return "";
           }
