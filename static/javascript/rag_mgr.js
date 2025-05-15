@@ -20,16 +20,17 @@ const maxLenRequest = (nk = 32) => {
 };
 const MAX_PROMPT_LENGTH = maxLenRequest(100);
 
-// const MAX_PROMPT_LENGTH = 30 * 1024 * 3;
 //131000
 // const MODEL = "mistral-large-2411"
 // const MODEL = "open-mistral-nemo-2407";
 // const MODEL = "ministral-8b-2410";
 // const MODEL = "ministral-3b-2410";
+// const MODEL = "mistral-medium-2505";
 //32000
 // const MODEL = "open-mistral-7b";
 // const MODEL = "open-mixtral-8x7b";
 const MODEL = "mistral-small-2503";
+
 const APIKEY = "YhGMPy8ntz9wjJzacynYqOZc29RRGBFO";
 const client = ClientLLM(APIKEY);
 
