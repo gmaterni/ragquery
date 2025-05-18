@@ -137,16 +137,10 @@ body {
 }
 
 //UA Bottoni tema
-// .display-theme {
-//   button {
-//     display: inline-block !important;
-//   }
-// }
-
 .btn-theme {
   position: fixed;
   top: 0;
-  right: 4vw;
+  right: 10vw;
   height: 4vh;
   background: inherit;
   font-weight: bold;
@@ -259,7 +253,7 @@ body {
 @base-bg: #000000;
 @text-color: #fff;
 @color1: #ff4500;
-@color2: #17d2ad;
+@color2: #00bd97;
 @color3: #e3d50e;
 
 @contaniner-bg: lighten(@base-bg, 10%);
@@ -622,7 +616,7 @@ div.item2 {
 @menu-border: lighten(@menu-bg, 20%);
 @menu-fg: @text-color;
 @menu-icon-fg: #aea7a7;
-@menu-icon-hover: lighten(@color2, 10%);
+@menu-icon-hover: lighten(@color1, 00%);
 
 .menu-open {
   .container {
@@ -653,10 +647,54 @@ div.menu-h {
     color: lighten(@text-color, 0%);
     font-size: @fsize-msg;
     font-weight: normal;
-    margin-left: 60vw;
+    margin-left: 0.6vw;
     margin-top: 0.8vh;
+    position: fixed;
+    top: 0.2vh;
+    right: 0.4vw;
+    height: 4vh;
+  }
+  /////////
+
+  .menu-btn {
+    appearance: none;
   }
 
+  .menu-btn:checked + .menu-icon .nav-icon::before {
+    content: "X";
+  }
+
+  .menu-icon {
+    box-sizing: border-box;
+    background-color: inherit;
+    display: block;
+    position: absolute;
+    margin-left: 2vw;
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 100%;
+    cursor: pointer;
+    padding: 2px 2px;
+    z-index: 1;
+  }
+
+  .menu-icon:hover .nav-icon::before {
+    color: @menu-icon-hover;
+    // background-color: @menu-icon-hover;
+  }
+
+  .nav-icon::before {
+    content: "☰";
+    position: absolute;
+    left: 0;
+    color: @menu-icon-fg;
+    font-size: 25px;
+    transition-duration: 0.25s;
+  }
+
+  ////////////
+  /*
   .menu-btn {
     appearance: none;
   }
@@ -731,6 +769,8 @@ div.menu-h {
       top: 8px;
     }
   }
+    */
+  /////////////
 
   .head-wrapper {
     position: absolute;
