@@ -58,33 +58,33 @@ const responseDetails = {
   set(response) {
     this.response = response;
   },
-  get_id() {
-    return this.response.id;
-  },
-  get_created() {
-    return this.response.created;
-  },
-  get_model() {
-    return this.response.model;
-  },
-  get_index() {
-    return this.response.choices[0].index;
-  },
-  get_role() {
-    return this.response.choices[0].message.role;
-  },
-  get_tool_calls() {
-    return this.response.choices[0].message.tool_calls;
-  },
-  get_content() {
-    return this.response.choices[0].message.content;
-  },
-  get_finish_reason() {
-    return this.response.choices[0].finish_reason;
-  },
-  get_prompt_tokens() {
-    return this.response.usage.prompt_tokens;
-  },
+  // get_id() {
+  //   return this.response.id;
+  // },
+  // get_created() {
+  //   return this.response.created;
+  // },
+  // get_model() {
+  //   return this.response.model;
+  // },
+  // get_index() {
+  //   return this.response.choices[0].index;
+  // },
+  // get_role() {
+  //   return this.response.choices[0].message.role;
+  // },
+  // get_tool_calls() {
+  //   return this.response.choices[0].message.tool_calls;
+  // },
+  // get_content() {
+  //   return this.response.choices[0].message.content;
+  // },
+  // get_finish_reason() {
+  //   return this.response.choices[0].finish_reason;
+  // },
+  // get_prompt_tokens() {
+  //   return this.response.usage.prompt_tokens;
+  // },
   get_total_tokens() {
     return this.response.usage.total_tokens;
   },
@@ -435,15 +435,17 @@ const Rag = {
           }
           answer = rr.data;
           if (!answer) return "";
-          const rsp = rr.response;
           let itks = calcTokens.get_sum_input_tokens();
           let gtks = calcTokens.get_sum_generate_tokens();
           console.log(`Sum Tokens: ${itks} ${gtks}`);
+
+          const rsp = rr.response;
           responseDetails.set(rsp);
           itks = responseDetails.get_total_tokens();
           gtks = responseDetails.get_completion_tokens();
           console.log(`Response Tokens: ${itks} ${gtks}`);
           calcTokens.add(rsp);
+
           break;
         }
         answer = cleanResponse(answer);
