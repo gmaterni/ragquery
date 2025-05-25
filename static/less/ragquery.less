@@ -1,0 +1,1283 @@
+/** @format */
+
+html,
+body,
+div,
+span,
+table,
+td,
+label,
+p,
+a,
+input,
+ul,
+li,
+button {
+  padding: 0;
+  margin: 0;
+  font-family: @fsans;
+}
+
+.bb0 {
+  background: #daee59 !important;
+}
+.bb1 {
+  background: #5487fc !important;
+}
+
+html {
+  background: @contaniner-bg;
+  // scrollbar-width: 8px;
+  // scrollbar-color: #00d3a2 #676767; /* Colore della barra di scorrimento e dello sfondo */
+}
+
+body {
+  background: @contaniner-bg;
+  box-sizing: border-box;
+  min-height: 100vh;
+  height: 100vh;
+  position: relative;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: @fsans;
+  font-weight: normal;
+}
+// spinner
+.spinner {
+  z-index: 1000;
+  position: absolute;
+  top: 70vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+
+  .pulse-icon {
+    width: 20px;
+    height: 20px;
+    background-color: #ff8c00; // Arancione
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .stop-message {
+    margin-left: 15px;
+    background-color: inherit;
+    color: #8f8a8a;
+    padding: 8px 15px;
+    border-radius: 10px;
+    font-size: 22px;
+    font-weight: bold;
+    opacity: 1;
+    transition: opacity 0.3s;
+  }
+
+  &:hover .stop-message {
+    color: @text-color;
+    background: @btn-hover;
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.6);
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.7); // Arancione con opacità
+  }
+
+  70% {
+    transform: scale(1.4);
+    box-shadow: 0 0 0 20px rgba(255, 140, 0, 0); // Arancione completamente trasparente
+  }
+
+  100% {
+    transform: scale(0.6);
+    box-shadow: 0 0 0 0 rgba(255, 140, 0, 0); // Arancione completamente trasparente
+  }
+}
+
+.show-spinner {
+  display: flex;
+}
+///////////////
+
+.theme-dark {
+  .btn-light {
+    display: inline-block !important;
+  }
+}
+
+.theme-light {
+  .btn-dark {
+    display: inline-block !important;
+  }
+}
+
+.invert {
+  filter: invert(100%);
+}
+
+.invert .tt-top::before,
+.invert .tt-left::before,
+.invert .tt-right::before,
+.invert .tt-bottom::before {
+  filter: invert(100%);
+  // filter: invert(100%) hue-rotate(180deg);
+}
+
+.inver svg,
+.invert img,
+.invert video,
+.invert iframe,
+.invert .inv {
+  filter: invert(100%);
+  // filter: invert(100%) hue-rotate(180deg);
+}
+
+//UA Bottoni tema
+.btn-theme {
+  position: fixed;
+  top: 0;
+  right: 10vw;
+  height: 4vh;
+  background: inherit;
+  font-weight: bold;
+  margin-left: 5vw;
+  margin-top: 0.5vh;
+  z-index: 2000;
+  button {
+    color: #ffffff;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 5px;
+    display: none;
+    svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+    }
+  }
+}
+
+/////////////////
+.upload {
+  @primary-color: darken(@color2, 25%);
+  @background-color: #121212;
+  @surface-color: #1e1e1e;
+  @btn-text-color: #000000;
+  @border-radius: 4px;
+
+  background-color: @surface-color;
+  padding: 2em;
+  padding-top: 0;
+  margin: 0;
+  border-radius: @border-radius;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  text-align: center;
+
+  h4 {
+    color: @text-color;
+    margin-bottom: 1em;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .file {
+      background-color: @background-color;
+      border: 1px solid lighten(@surface-color, 20%);
+      color: @text-color;
+      padding: 0.5em;
+      margin-bottom: 1em;
+      border-radius: @border-radius;
+      width: 100%;
+      box-sizing: border-box;
+
+      &::file-selector-button {
+        background-color: @primary-color;
+        color: @text-color;
+        // color: #000000;
+        border: none;
+        padding: 0.5em 1em;
+        border-radius: @border-radius;
+        cursor: pointer;
+
+        &:hover {
+          background-color: darken(@primary-color, 10%);
+        }
+      }
+    }
+
+    button {
+      background-color: @primary-color;
+      color: @text-color;
+      border: none;
+      padding: 0.5em 1em;
+      border-radius: @border-radius;
+      cursor: pointer;
+      width: 100%;
+      box-sizing: border-box;
+
+      &:hover {
+        background-color: darken(@primary-color, 10%);
+      }
+    }
+  }
+
+  .result {
+    width: 100%;
+    background: @output-bg;
+    color: @text-color;
+    font-size: @fsize-result;
+    font-weight: normal;
+    text-align: left;
+  }
+}
+
+@fserif: Georigia, "Ties New Roman", serif;
+@fsans: arial, verdana, Helvetica, sans-serif;
+
+// @fsize-menu: calc(10px + 1vw);
+@fsize-out: 20px;
+@fsize-inp: 20px;
+@fsize-help: 18px;
+@fsize-btn-close: 22px;
+@fsize-result: 15px;
+@fsize-msg: 15px;
+
+@base-bg: #000000;
+@text-color: #fff;
+@color1: #ff4500;
+@color2: #00bd97;
+@color3: #e3d50e;
+
+@contaniner-bg: lighten(@base-bg, 10%);
+@border-shadow: lighten(@contaniner-bg, 20%);
+
+@btn-bg: lighten(@contaniner-bg, 10%);
+@btn-hover: lighten(@btn-bg, 15%);
+@btn-color: darken(@text-color, 10%);
+@btn-hover-fg: lighten(@color2, 10%);
+
+@border-hover: @color2;
+@border-input: @color1;
+// window
+@wnd-bg: lighten(@base-bg, 10%);
+@wnd-border-shadow: darken(@color3, 10%);
+@wnd-pre-color: lighten(@color3, 30%);
+//output
+@output-bg: darken(@contaniner-bg, 15%);
+@btn-copied: darken(@color2, 20%);
+@text-copied-bg: lighten(@output-bg, 5%);
+@text-copied: lighten(@color2, 20%);
+@input-bg: darken(@contaniner-bg, 15%);
+
+@btn-send-bg: darken(@color1, 20%);
+@btn-send-fg: @text-color;
+@btn-send-hover-bg: lighten(@btn-send-bg, 20%);
+
+@btn-send2-bg: darken(@color2, 20%);
+@btn-send2-hover-bg: lighten(@btn-send2-bg, 15%);
+
+.copied {
+  background-color: @text-copied-bg !important;
+  color: @text-copied !important;
+}
+
+div.container {
+  background: @contaniner-bg;
+  box-sizing: border-box;
+  position: relative;
+  top: 5vh;
+  left: 0;
+  height: 95vh;
+  margin: 0;
+  padding: 0;
+  transition: margin-left 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  overflow-y: auto;
+  overflow-x: auto;
+
+  div.item {
+    box-sizing: border-box;
+    min-height: 50px;
+    margin: 0;
+    padding: 0;
+  }
+
+  div.item1 {
+    flex: 5;
+    padding-top: 0.5vh;
+    padding-right: 0.5vw;
+    padding-left: 0.5vw;
+    padding-bottom: 10vh;
+
+    .output-wrapper {
+      background-color: @contaniner-bg;
+      border-radius: 20px;
+      position: relative;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      .text-out {
+        flex: 1;
+        box-sizing: border-box;
+        background: @output-bg;
+        color: @text-color;
+        border: none;
+        padding: 2px;
+        margin: 0;
+        min-width: 50vw;
+        height: 100%;
+        border-radius: 10px;
+        overflow-y: auto;
+        outline: none;
+        box-shadow: 0 0 0 2px @border-shadow;
+        &:hover {
+          box-shadow: 0 0 0 2px @border-hover;
+        }
+
+        .pre-text {
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          font-family: @fsans;
+          font-size: @fsize-out;
+          line-height: 1.5;
+          padding: 2px;
+          margin: 0;
+          height: 100%;
+          box-sizing: border-box;
+          // FIXME scroll
+          overflow-y: auto;
+          scroll-behavior: smooth;
+          &.copied {
+            background-color: @text-copied-bg;
+            color: @text-copied;
+          }
+        }
+        .div-text {
+          white-space: pre-wrap;
+          word-wrap: break-word;
+          font-family: @fsans;
+          font-size: @fsize-out;
+          line-height: 1.5;
+          padding: 2px;
+          margin: 0;
+          height: 100%;
+          box-sizing: border-box;
+          overflow-y: scroll;
+        }
+        .user {
+          border: 2px solid @color2 !important;
+          border-radius: 10px;
+          padding: 2px 2px 3px 10px;
+          margin: 2px 5px 5px 150px;
+          b {
+            font-weight: bold;
+            text-decoration: underline;
+            color: @color1;
+            padding-bottom: 5px;
+          }
+        }
+        .assistant {
+          border: 2px solid @color1 !important;
+          border-radius: 10px;
+          padding: 2px 2px 3px 10px;
+          margin: 2px 90px 5px 6px;
+          b {
+            font-weight: bold;
+            text-decoration: underline;
+            color: @color2;
+            padding-bottom: 5px;
+          }
+        }
+      }
+    }
+
+    .output-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      margin-left: 0.5vw;
+      margin-right: 0.5vw;
+
+      .copy-output,
+      .wnd-output,
+      .clear-output {
+        box-sizing: border-box;
+        background-color: @btn-bg;
+        color: @text-color;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        transition: background-color 0.3s;
+
+        &:hover {
+          background-color: @btn-hover;
+        }
+      }
+
+      .copy-output {
+        transition: background-color 0.3s, transform 0.3s;
+
+        &.copied {
+          background: @btn-hover-fg;
+          transform: scale(1.2);
+        }
+        .copy-icon {
+          fill: @text-color;
+          width: 24px;
+          height: 24px;
+
+          &:hover {
+            fill: @btn-hover-fg;
+          }
+        }
+      }
+      .clear-output,
+      .wnd-output {
+        transition: background-color 0.3s, transform 0.3s;
+        .icon {
+          fill: @text-color;
+          width: 24px;
+          height: 24px;
+
+          &:hover {
+            fill: @btn-hover-fg;
+          }
+        }
+      }
+    }
+  }
+}
+
+////////////////////
+*:hover {
+  outline: none;
+  caret-color: transparent;
+}
+
+textarea:focus {
+  caret-color: auto;
+}
+
+///////////////////
+
+div.item2 {
+  flex: 2;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 0.5vw;
+  padding-left: 0.5vw;
+
+  .input-wrapper {
+    background-color: @contaniner-bg;
+    border-radius: 20px;
+    position: relative;
+    bottom: 2vh;
+    right: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+
+    &:focus-within .clear-button {
+      display: block;
+    }
+
+    .text-input {
+      flex: 1;
+      font-size: @fsize-inp;
+      font-family: @fsans;
+      resize: none;
+      box-sizing: border-box;
+      background: @input-bg;
+      color: @text-color;
+      border: none;
+      padding: 2px;
+      padding-right: 40px;
+      height: 100%;
+      margin-left: 5px;
+      border-radius: 10px;
+      overflow-y: auto;
+      outline: none;
+      box-shadow: 0 0 0 2px @border-shadow;
+      &:hover {
+        box-shadow: 0 0 0 2px @border-hover;
+      }
+
+      &:focus {
+        box-shadow: 0 0 0 2px @border-input;
+      }
+    }
+
+    .clear-button {
+      position: absolute;
+      right: 60px;
+      top: 19vh;
+      padding: 5px;
+      border-radius: 50%;
+      background: @btn-bg;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: darken(@text-color, 20%);
+      display: none;
+      &:hover {
+        font-weight: bold;
+        background: @btn-hover;
+        color: @text-color;
+      }
+    }
+
+    .input-actions {
+      display: flex;
+      flex-direction: column;
+      margin-left: 0.5vw;
+      margin-right: 0.5vw;
+
+      .send-input,
+      .send2-input,
+      .clear-input {
+        box-sizing: border-box;
+        background-color: @btn-bg;
+        color: @text-color;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin-bottom: 5px;
+        transition: background-color 0.3s;
+
+        &:hover {
+          background-color: @btn-hover;
+        }
+      }
+
+      .send-input {
+        background: @btn-send-bg;
+
+        &:hover {
+          background: @btn-send-hover-bg;
+        }
+      }
+
+      .send2-input {
+        background: @btn-send2-bg;
+
+        &:hover {
+          background: @btn-send2-hover-bg;
+        }
+      }
+
+      .clear-input {
+        background: @btn-bg;
+        color: @btn-color;
+        &:hover {
+          background: @btn-hover;
+          color: @btn-hover-fg;
+        }
+      }
+    }
+  }
+}
+
+// menu_h
+@fsize-upload: 20px;
+@fsize-log: 14px;
+@fsize-menu: 14px;
+
+@menu-width: 16vw;
+@menu-bg: darken(@contaniner-bg, 35%);
+@menu-border: lighten(@menu-bg, 20%);
+@menu-fg: @text-color;
+@menu-icon-fg: #aea7a7;
+@menu-icon-hover: lighten(@color1, 00%);
+
+.menu-open {
+  .container {
+    margin-left: @menu-width;
+  }
+
+  .menu-box {
+    left: 0 !important;
+  }
+}
+
+// UA meu-h
+div.menu-h {
+  background-color: lighten(@menu-bg, 10%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 4.5vh;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  box-shadow: 0 0 0 2px @border-shadow;
+  z-index: 100;
+
+  .release {
+    background: inherit;
+    color: lighten(@text-color, 0%);
+    font-size: @fsize-msg;
+    font-weight: normal;
+    margin-left: 0.6vw;
+    margin-top: 0.8vh;
+    position: fixed;
+    top: 0.2vh;
+    right: 0.4vw;
+    height: 4vh;
+  }
+  /////////
+
+  .menu-btn {
+    appearance: none;
+  }
+
+  .menu-btn:checked + .menu-icon .nav-icon::before {
+    content: "X";
+  }
+
+  .menu-icon {
+    box-sizing: border-box;
+    background-color: inherit;
+    display: block;
+    position: absolute;
+    margin-left: 2vw;
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 100%;
+    cursor: pointer;
+    padding: 2px 2px;
+    z-index: 1;
+  }
+
+  .menu-icon:hover .nav-icon::before {
+    color: @menu-icon-hover;
+    // background-color: @menu-icon-hover;
+  }
+
+  .nav-icon::before {
+    content: "☰";
+    position: absolute;
+    left: 0;
+    color: @menu-icon-fg;
+    font-size: 25px;
+    transition-duration: 0.25s;
+  }
+
+  ////////////
+  /*
+  .menu-btn {
+    appearance: none;
+  }
+
+  .menu-btn:checked {
+    & + .menu-icon {
+      border: 1px solid @menu-border;
+
+      .nav-icon {
+        transform: rotate(45deg);
+
+        &::before {
+          top: 0;
+        }
+
+        &::after {
+          top: 0;
+          transform: rotate(90deg);
+        }
+      }
+    }
+  }
+
+  .menu-icon {
+    box-sizing: border-box;
+    background-color: inherit;
+    display: block;
+    position: absolute;
+    margin-left: 2vw;
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 100%;
+    cursor: pointer;
+    padding: 2px 2px;
+    z-index: 1;
+
+    &:hover {
+      .nav-icon,
+      .nav-icon::before,
+      .nav-icon::after {
+        background-color: @menu-icon-hover;
+      }
+    }
+
+    .nav-icon {
+      background-color: @menu-icon-fg;
+      display: block;
+      position: absolute;
+      top: 14px;
+      left: 0;
+      width: 25px;
+      height: 2px;
+      transition-duration: 0.25s;
+    }
+
+    .nav-icon::before,
+    .nav-icon::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      background-color: inherit;
+      width: inherit;
+      height: inherit;
+    }
+
+    .nav-icon::before {
+      top: -8px;
+    }
+
+    .nav-icon::after {
+      top: 8px;
+    }
+  }
+    */
+  /////////////
+
+  .head-wrapper {
+    position: absolute;
+    top: 0;
+    left: 5vw;
+    height: 4vh;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+
+    .log,
+    .help,
+    .upload,
+    .upload-dir {
+      margin-top: 2px;
+      margin-left: 30px;
+      margin-right: 0;
+      padding: 5px 5px 0 5px;
+      border: none;
+      cursor: pointer;
+      border-radius: 20%;
+      font-size: @fsize-upload;
+      color: @text-color;
+      background: @btn-bg;
+      max-height: 4vh;
+
+      &:hover {
+        background: @btn-hover;
+      }
+    }
+  }
+
+  .upload,
+  .upload-dir {
+    transition: background-color 0.3s, transform 0.3s;
+    .icon {
+      fill: @text-color;
+      width: 24px;
+      height: 24px;
+
+      &:hover {
+        fill: @btn-hover-fg;
+      }
+    }
+  }
+
+  .log {
+    font-size: @fsize-log !important;
+    font-weight: normal !important;
+    background: darken(@color1, 20%) !important;
+    &:hover {
+      background: darken(@color1, 10%) !important;
+    }
+    &.active {
+      background: darken(@color2, 20%) !important;
+
+      &:hover {
+        background: darken(@color2, 10%) !important;
+      }
+    }
+  }
+
+  div.menu-box {
+    position: fixed;
+    top: 5vh;
+    left: -2000px;
+    height: 95vh;
+    width: @menu-width;
+    transition: left 0.3s ease-out;
+    padding: 0;
+    padding-top: 1vh;
+    padding-left: 0.5vw;
+    z-index: 101;
+    background: lighten(@menu-bg, 5%);
+    box-sizing: border-box;
+    outline: none;
+    box-shadow: 0 0 0 2px @border-shadow;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    overflow-y: auto;
+    overflow-x: auto;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid @menu-border;
+
+      li {
+        border-left: 1px solid @menu-border;
+        border-right: 1px solid @menu-border;
+        border-bottom: 1px solid @menu-border;
+
+        a {
+          color: @menu-fg;
+          font-size: @fsize-menu;
+          font-family: @fsans;
+          font-weight: normal;
+          display: block;
+          margin: 0;
+          padding: 2px 2px 2px 0;
+          text-align: left;
+          text-decoration: none;
+        }
+
+        &:hover {
+          text-decoration: underline;
+          background-color: lighten(@menu-bg, 20%);
+          color: @menu-icon-hover;
+        }
+      }
+      a.delete {
+        text-align: center;
+        font-weight: bold;
+        font-style: italic;
+        color: #000000;
+        background: darken(@color3, 10%);
+      }
+      a.help {
+        text-align: center;
+        font-weight: bold;
+        font-style: italic;
+        color: #000000;
+        background: darken(@color1, 10%);
+      }
+
+      li.show {
+        background: @base-bg;
+        color: @text-color;
+        width: 100%;
+        text-align: center;
+        box-sizing: border-box;
+
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+  }
+}
+
+// Window
+.window-text {
+  position: relative;
+  top: 0;
+  left: 0;
+  background: @wnd-bg;
+  color: @text-color;
+  border: none;
+  padding: 0 2px 2px 2px;
+  width: 78vw;
+  height: 80vh;
+  border-radius: 10px;
+  box-sizing: border-box;
+  outline: none;
+  box-shadow: 0 0 0 2px @wnd-border-shadow;
+  overflow-y: auto;
+  overflow-x: auto;
+
+  pre.pre-text {
+    color: @wnd-pre-color;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: @fserif;
+    font-size: @fsize-help;
+    line-height: 1.6;
+    padding: 2px 2px 2px 2px;
+    margin: 0;
+    text-align: left;
+  }
+
+  div.div-text {
+    color: @wnd-pre-color;
+    word-wrap: break-word;
+    font-family: @fserif;
+    font-size: @fsize-help;
+    padding: 0 2px 0 2px;
+    margin: 0;
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid @menu-border;
+      li {
+        border-left: 1px solid @menu-border;
+        border-right: 1px solid @menu-border;
+        border-bottom: 1px solid @menu-border;
+        a {
+          color: @menu-fg;
+          font-size: @fsize-menu;
+          font-family: @fsans;
+          font-weight: normal;
+          display: block;
+          margin: 0;
+          padding: 5px 2px 2px 0;
+          text-align: left;
+          text-decoration: none;
+        }
+        &:hover {
+          text-decoration: underline;
+          background-color: lighten(@menu-bg, 20%);
+          color: @menu-icon-hover;
+        }
+      }
+    }
+  }
+  // help
+  div.text {
+    font-size: @fsize-help;
+    font-weight: normal;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin: 0;
+    pre {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-family: @fsans;
+      font-size: @fsize-help;
+      line-height: 1.3;
+      padding: 0 5px 0 5px;
+      margin: 0;
+      text-align: left;
+    }
+    .center {
+      text-align: center;
+      font-size: @fsize-help;
+      font-weight: bold;
+      text-decoration: underline;
+      font-style: italic;
+      color: @color3;
+    }
+    .label {
+      margin: 5px 0 5px 10px;
+      font-size: @fsize-help;
+      font-weight: bold;
+      font-style: italic;
+      color: @color3;
+    }
+    div {
+      font-family: @fsans;
+      font-size: @fsize-help;
+      font-weight: bold;
+      padding-top: 0;
+      padding-bottom: 0;
+      a {
+        background: @base-bg;
+        color: @text-color;
+        font-weight: normal;
+        &:hover {
+          background: lighten(@base-bg, 20%);
+          color: @text-color;
+        }
+      }
+    }
+    p {
+      font-size: @fsize-help;
+      font-weight: normal;
+      font-family: @fsans;
+      text-align: justify;
+      padding-bottom: 9px;
+      padding-right: 0;
+      padding-left: 10px;
+    }
+  }
+}
+
+.btn-wrapper {
+  width: 100%;
+  height: 2vw;
+  position: sticky;
+  top: 0;
+  padding: 0;
+  background: lighten(@wnd-bg, 5%);
+
+  .btn-copy {
+    position: absolute;
+    top: 1px;
+    right: 5vw;
+    box-sizing: border-box;
+    background: inherit;
+    color: @text-color;
+    border: none;
+    cursor: pointer;
+    width: 30px;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: @btn-hover;
+    }
+
+    // &.copied {
+    //   background-color: @btn-copied;
+    //   transform: scale(1.2);
+    // }
+    .copy-icon {
+      fill: @btn-color;
+      width: 20px;
+      height: 20px;
+
+      &:hover {
+        fill: @btn-hover-fg;
+        background: lighten(@wnd-bg, 15%);
+      }
+    }
+  }
+
+  .btn-close {
+    position: absolute;
+    top: 0;
+    right: 2vw;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+    color: @btn-color;
+    font-size: @fsize-btn-close;
+    font-weight: bold;
+    cursor: pointer;
+    outline: none;
+
+    &:hover {
+      color: @btn-hover-fg;
+      background: lighten(@wnd-bg, 15%);
+    }
+  }
+}
+
+// TOOLTIP
+/*
+Regolare i valori di calc() per distanze diverse
+Aggiungere white-space: normal per tooltip multi-riga
+Modificare border-width per frecce più grandi/più piccole
+
+Nota importante: 
+Il sistema sfrutta l'attributo data-tooltip per il contenuto testuale,
+mantenendo HTML semantico e accessibile. 
+Per contenuti dinamici, basta modificare l'attributo via JavaScript.
+Esmpio:
+<span class="menu-h-box tt-right" data-tt="Open">
+  <span class="menu-h-inner"></span>
+</span>
+*/
+/* ========= VARIABILI LESS ========= */
+@tt-bg: #cc3a05; // Colore di sfondo del tooltip
+@tt-text: #ffffff; // Colore testo del tooltip
+@tt-font: 20px "Arial", sans-serif; // Stile font
+@tt-radius: 4px; // Border-radius
+@tt-shadow: 0 3px 6px #e2ca0e29; // Ombra
+@tt-transition: 0.3s opacity; // Transizione
+@border-width: 6px;
+
+/* ========= BASE TOOLTIP ========= */
+.tt-top,
+.tt-bottom,
+.tt-left,
+.tt-leftx,
+.tt-right {
+  position: relative;
+  // cursor: help;
+  transition: 0.2s transform;
+
+  // Pseudo-elementi comuni
+  &::before,
+  &::after {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: @tt-transition;
+  }
+
+  // Testo del tooltip
+  &::before {
+    content: attr(data-tt);
+    background: @tt-bg;
+    color: @tt-text;
+    font: @tt-font;
+    font-weight: normal;
+    // padding: 8px 16px;
+    padding: 4px 10px;
+    border-radius: @tt-radius;
+    box-shadow: @tt-shadow;
+    // border: 2px solid yellow;
+    white-space: nowrap;
+  }
+
+  // Freccia
+  // &::after {
+  //   content: "";
+  //   border: @border-width solid transparent;
+  // }
+
+  // Hover states
+  &:hover {
+    &::before,
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+/* ========= POSIZIONAMENTI ========= */
+.tt-top {
+  &::before {
+    bottom: ~"calc(100% + 12px)"; // Posizionato sopra l'elemento di 12px
+    left: 50%; // Centrato orizzontalmente
+    transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
+  }
+
+  // &::after {
+  //   border-top-color: @tt-bg; // Colore del bordo superiore per la freccia
+  //   bottom: ~"calc(100% + 0px)"; // Posizionato sopra l'elemento
+  //   left: 50%; // Centrato orizzontalmente
+  //   transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
+  // }
+}
+
+.tt-bottom {
+  &::before {
+    top: ~"calc(100% + 12px)"; // Posizionato sotto l'elemento di 12px
+    left: 50%; // Centrato orizzontalmente
+    transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
+  }
+
+  // &::after {
+  //   border-bottom-color: @tt-bg; // Colore del bordo inferiore per la freccia
+  //   top: ~"calc(100% + 0px)"; // Posizionato sotto l'elemento
+  //   left: 50%; // Centrato orizzontalmente
+  //   transform: translateX(-50%); // Spostato indietro del 50% della sua larghezza
+  // }
+}
+
+.tt-left {
+  &::before {
+    right: ~"calc(50% + 0px)";
+    top: ~"calc(100% + 22px)";
+    transform: translateY(-50%);
+  }
+
+  // &::after {
+  //   border-left-color: @tt-bg;
+  //   right: ~"calc(100% + 0px)";
+  //   top: 50%;
+  //   transform: translateY(-50%);
+  // }
+}
+
+.tt-leftx {
+  &::before {
+    right: ~"calc(50% + 20px)";
+    top: ~"calc(100% + 22px)";
+    transform: translateY(-80%);
+  }
+}
+
+// .tt-left {
+//   &::before {
+//     right: ~"calc(100% + 12px)"; // Posizionato a sinistra dell'elemento di 12px
+//     top: 50%; // Centrato verticalmente
+//     transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
+//   }
+
+//   &::after {
+//     border-left-color: @tt-bg; // Colore del bordo sinistro per la freccia
+//     right: ~"calc(100% + 0px)"; // Posizionato a sinistra dell'elemento
+//     top: 50%; // Centrato verticalmente
+//     transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
+//   }
+// }
+
+.tt-right {
+  &::before {
+    left: ~"calc(100% + 12px)"; // Posizionato a destra dell'elemento di 12px
+    top: 50%; // Centrato verticalmente
+    transform: translateY(50%); // Spostato in alto del 50% della sua altezza
+  }
+  // &::after {
+  //   border-right-color: @tt-bg; // Colore del bordo destro per la freccia
+  //   left: ~"calc(100% + 0px)"; // Posizionato a destra dell'elemento
+  //   top: 50%; // Centrato verticalmente
+  //   transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
+  // }
+}
+
+// .tt-right {
+//   &::before {
+//     left: ~"calc(100% + 12px)"; // Posizionato a destra dell'elemento di 12px
+//     top: 50%; // Centrato verticalmente
+//     transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
+//   }
+
+//   &::after {
+//     border-right-color: @tt-bg; // Colore del bordo destro per la freccia
+//     left: ~"calc(100% + 0px)"; // Posizionato a destra dell'elemento
+//     top: 50%; // Centrato verticalmente
+//     transform: translateY(-50%); // Spostato in alto del 50% della sua altezza
+//   }
+// }
