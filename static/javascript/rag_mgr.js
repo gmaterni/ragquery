@@ -25,7 +25,9 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 // const MODEL = "mistral-medium-2505";
 // const MODEL = "open-mistral-7b";
 // const MODEL = "open-mixtral-8x7b";
-const MODEL = "mistral-small-2503";
+// const MODEL = "mistral-small-2503";
+const MODEL = "mistral-medium-2505";
+//
 //
 // const APIKEY = "QsTPmjThpVYNi2mPtujTDYYjXffjtN5N"; //GIU
 const API = "FAUsMsVFSw5gW5OEkvUZEZ1jcIWFlPj4"; //IPT
