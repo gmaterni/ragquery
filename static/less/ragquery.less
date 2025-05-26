@@ -116,24 +116,22 @@ body {
 }
 
 .invert {
-  filter: invert(100%);
+  // filter: invert(100%);
+  filter: invert(100%) hue-rotate(180deg);
 }
 
 .invert .tt-top::before,
 .invert .tt-left::before,
 .invert .tt-right::before,
-.invert .tt-bottom::before {
-  filter: invert(100%);
-  // filter: invert(100%) hue-rotate(180deg);
-}
-
+.invert .tt-bottom::before,
 .inver svg,
 .invert img,
 .invert video,
 .invert iframe,
 .invert .inv {
-  filter: invert(100%);
-  // filter: invert(100%) hue-rotate(180deg);
+  // filter: none;
+  // filter: invert(100%);
+  filter: invert(100%) hue-rotate(180deg);
 }
 
 //UA Bottoni tema
@@ -255,6 +253,7 @@ body {
 @color1: #ff4500;
 @color2: #00bd97;
 @color3: #e3d50e;
+@color_red: #cc3a05; // Colore di sfondo del tooltip
 
 @contaniner-bg: lighten(@base-bg, 10%);
 @border-shadow: lighten(@contaniner-bg, 20%);
@@ -895,14 +894,14 @@ div.menu-h {
         text-align: center;
         font-weight: bold;
         font-style: italic;
-        color: #000000;
-        background: darken(@color3, 10%);
+        color: #ffffff;
+        background: darken(@color1, 10%);
       }
       a.help {
         text-align: center;
         font-weight: bold;
         font-style: italic;
-        color: #000000;
+        color: #ffffff;
         background: darken(@color1, 10%);
       }
 
