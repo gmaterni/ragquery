@@ -245,17 +245,14 @@ function release() {
 }
 
 // README
-const op0 = async function (e) {
-  // AAA const text = await requestGet("./help1.html");
-  const text = help1_html;
-  wnds.wdiv.show(text);
+const op0 = function (e) {
+  wnds.wdiv.show(help1_html);
 };
 
 //query iniziale
 function showQuery(e) {
   const txt = `\n${Rag.ragQuery}`;
   wnds.wpre.show(txt);
-  // Menu.close();
 }
 
 //Risposta Rsg
@@ -288,8 +285,7 @@ function elencoRisposte(e) {
 
 //contesto
 function showContesto(e) {
-  const txt = `${Rag.ragContext}`;
-  wnds.wpre.show(txt);
+  wnds.wpre.show(Rag.ragContext);
 }
 
 //elemco dati
@@ -394,10 +390,8 @@ function loadTestoEsempio(name) {
   wnds.wdiv.close();
 }
 
-async function help2(e) {
-  //AAA const text = await requestGet("./help2.html");
-  const text = help2_html;
-  wnds.wdiv.show(text);
+function help2(e) {
+  wnds.wdiv.show(help2_html);
 }
 
 const themeKey = "theme";

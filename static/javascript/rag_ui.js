@@ -169,10 +169,8 @@ const Menu = {
     document.querySelector("body").classList.remove("menu-open", btn.checked);
     document.querySelector(".menu-btn").checked = false;
   },
-  async help() {
-    //AAA const text = await requestGet("./help0.html");
-    const text = help0_html;
-    wnds.wdiv.show(text);
+  help() {
+    wnds.wdiv.show(help0_html);
   },
   upload() {
     RagUpload.open();
@@ -302,7 +300,6 @@ const TextInput = {
     }
     showSpinner();
     if (ThreadMgr.isFirst()) {
-      // AAA setOutText("");
     }
     const query = this.inp.value.trim();
     try {

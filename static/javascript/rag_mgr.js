@@ -244,6 +244,7 @@ const Rag = {
     DataMgr.deleteJsonDati();
     DataMgr.readDbDocNames();
     DataMgr.readDbDocs();
+    this.docContextLst = [];
     this.ragQuery = query;
     this.saveToDb();
     let ndoc = 0;
@@ -315,6 +316,7 @@ const Rag = {
         // doc answer list => cContext
         const docAnswersLen = docAnswersLst.length;
         let docAnswresTxt = docAnswersLst.join("\n\n");
+
         let docContext = "";
         while (true) {
           prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
@@ -352,7 +354,9 @@ const Rag = {
       console.error("ERR3\n", err);
       throw err;
     }
+    // console.log("tagContext_0\n", this.ragContext);
     this.ragContext = this.docContextLst.join("\n\n");
+    // console.log("tagContext_1\n", this.ragContext);
     this.saveToDb();
     // queryWithContext finale che utilizza context e genera la prima risposta
     {
