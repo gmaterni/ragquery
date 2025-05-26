@@ -41,7 +41,7 @@ var UaLog = {
       //aggiunge la class inv
       // const e = this.wind.getElement();
       // e.classList.add("inv");
-      // this.wind.drag();
+      this.wind.drag();
     }
     const h = `
            <button type="button" class="clear " onclick="javascript:UaLog.cls();">Clear</button>
