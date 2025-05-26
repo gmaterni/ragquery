@@ -28,19 +28,15 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 // const MODEL = "mistral-small-2503";
 const MODEL = "mistral-medium-2505";
 //
-//
 // const APIKEY = "QsTPmjThpVYNi2mPtujTDYYjXffjtN5N"; //GIU
 const API = "FAUsMsVFSw5gW5OEkvUZEZ1jcIWFlPj4"; //IPT
+console.log("MODEL:\n", MODEL);
 
 const client = ClientLLM(API);
 
 const getResponse = async (payload, timeout = 60) => {
   payload["model"] = MODEL;
-  //MISTRAL
   const url = "https://api.mistral.ai/v1/chat/completions";
-  //HF
-  // const url = `https://router.huggingface.co/hf-inference/models/${MODEL}/v1/chat/completions`;
-  // const url = "https://router.huggingface.co/together/v1/chat/completions";
 
   const rr = await client.sendRequest(url, payload, timeout);
   if (rr.error) {
