@@ -47,7 +47,7 @@ body {
 .spinner {
   z-index: 1000;
   position: absolute;
-  top: 70vh;
+  top: 70.8vh;
   left: 50vw;
   transform: translate(-50%, -50%);
   cursor: pointer;
@@ -493,7 +493,7 @@ div.item2 {
     background-color: @contaniner-bg;
     border-radius: 20px;
     position: relative;
-    bottom: 2vh;
+    bottom: 1vh;
     right: 0;
     left: 0;
     width: 100%;
@@ -501,10 +501,6 @@ div.item2 {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-
-    &:focus-within .clear-button {
-      display: block;
-    }
 
     .text-input {
       flex: 1;
@@ -532,34 +528,15 @@ div.item2 {
       }
     }
 
-    .clear-button {
-      position: absolute;
-      right: 60px;
-      top: 19vh;
-      padding: 5px;
-      border-radius: 50%;
-      background: @btn-bg;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-      color: darken(@text-color, 20%);
-      display: none;
-      &:hover {
-        font-weight: bold;
-        background: @btn-hover;
-        color: @text-color;
-      }
-    }
-
     .input-actions {
       display: flex;
       flex-direction: column;
       margin-left: 0.5vw;
       margin-right: 0.5vw;
-
       .send-input,
       .send2-input,
-      .clear-input {
+      .clear-input,
+      .clear-button {
         box-sizing: border-box;
         background-color: @btn-bg;
         color: @text-color;

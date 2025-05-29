@@ -528,6 +528,10 @@ const ThreadMgr = {
       this.add("", "");
     }
   },
+  delete() {
+    this.rows = [];
+    this.add("", "");
+  },
   add(query, resp) {
     const row = [query, resp];
     this.rows.push(row);
