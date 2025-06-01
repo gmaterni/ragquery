@@ -515,7 +515,7 @@ const Rag = {
   },
 };
 
-const LLM = "# Assistant:";
+const ASSISTANT = "# Assistant:";
 const USER = "# User:";
 
 const ThreadMgr = {
@@ -543,7 +543,7 @@ const ThreadMgr = {
       const u = ua[0];
       const a = ua[1];
       if (!u) continue;
-      rows.push(`${USER}\n${u}\n${LLM}\n${a}\n`);
+      rows.push(`${USER}\n${u}\n${ASSISTANT}\n${a}\n`);
     }
     return rows.join("\n\n");
   },

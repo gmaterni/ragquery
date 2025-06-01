@@ -66,3 +66,29 @@ function getPayloadThread(prompt) {
     random_seed: 42,
   };
 }
+
+function text2messages(text, user = "User:", assistant = "Assistant:") {
+  const messages = [];
+  const userEscaped = user.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const assistantEscaped = assistant.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`(${userEscaped}|${assistantEscaped})`, "g");
+  const parts = text.split(pattern);
+  let currentRole = null;
+  for (const part of parts) {
+    const trimmedPart = part.trim();
+    if (!trimmedPart) {
+      continue;
+    }
+    if (trimmedPart === user) {
+      currentRole = "user";
+    } else if (trimmedPart === assistant) {
+      currentRole = "assistant";
+    } else if (currentRole) {
+      messages.push({
+        role: currentRole,
+        content: trimmedPart,
+      });
+    }
+  }
+  return messages;
+}
