@@ -420,6 +420,10 @@ const Rag = {
 
         while (true) {
           prompt = promptThread(context, thread, query);
+
+          // let s = text2messages(prompt, USER, ASSISTANT);
+          // console.log("FIRST\n", s);
+
           const payload = getPayloadThread(prompt);
           const rr = await getResponse(payload, 90);
           if (!rr) {
@@ -469,6 +473,10 @@ const Rag = {
         let prompt = "";
         while (true) {
           prompt = promptThread(context, thread, query);
+
+          // let s = text2messages(prompt, USER, ASSISTANT);
+          // console.log("NEXT\n", s);
+
           const payload = getPayloadThread(prompt);
           const rr = await getResponse(payload, 90);
           if (!rr) {

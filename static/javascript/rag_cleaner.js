@@ -117,7 +117,7 @@ function cleanResponse(s) {
     // Rimuovi tutti gli altri backslash
     s = s.replace(/\\/g, "");
     // Sostituisce le sequenze di più di due newline con due newline
-    s = s.replace(/\n{3,}/g, "\n\n");
+    s = s.replace(/\n{2,}/g, "\n");
     // unifica spazi multipli
     s = s.replace(/ +/g, " ");
     return s.trim();
