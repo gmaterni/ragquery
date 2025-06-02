@@ -322,7 +322,6 @@ const TextInput = {
     if (!ok) return;
     this.inp.value = "";
     setOutText("");
-    //AAA ThreadMgr.init();
     ThreadMgr.delete();
   },
 };

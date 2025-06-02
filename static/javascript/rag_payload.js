@@ -67,28 +67,27 @@ function getPayloadThread(prompt) {
   };
 }
 
-function text2messages(text, user = "User:", assistant = "Assistant:") {
-  const messages = [];
-  const userEscaped = user.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const assistantEscaped = assistant.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(`(${userEscaped}|${assistantEscaped})`, "g");
-  const parts = text.split(pattern);
-  let currentRole = null;
-  for (const part of parts) {
-    const trimmedPart = part.trim();
-    if (!trimmedPart) {
-      continue;
+function getPayloadThreadRows(rows, query) {
+  const rows2msgs = (rows, query) => {
+    let result = [];
+    for (let i = 0; i < rows.length; i++) {
+      let q = rows[i][0];
+      let a = rows[i][1];
+      if (!q) continue;
+      result.push({ role: "user", content: q });
+      result.push({ role: "assistant", content: a });
     }
-    if (trimmedPart === user) {
-      currentRole = "user";
-    } else if (trimmedPart === assistant) {
-      currentRole = "assistant";
-    } else if (currentRole) {
-      messages.push({
-        role: currentRole,
-        content: trimmedPart,
-      });
-    }
-  }
-  return messages;
+    result.push({ role: "user", content: query });
+    return result;
+  };
+  const msgs = rows2msgs(rows, query);
+  return {
+    model: "",
+    messages: msgs,
+    temperature: 0.7,
+    max_tokens: 2000,
+    stream: false,
+    safe_prompt: false,
+    random_seed: 42,
+  };
 }

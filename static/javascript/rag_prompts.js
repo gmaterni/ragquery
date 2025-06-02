@@ -272,7 +272,42 @@ Fornisci la risposta in un formato semplice e lineare suddiviso in paragrafi.
 `;
 }
 
-function promptThread(contesto, conversazione, richiesta) {
+// function promptThread(contesto, conversazione, richiesta) {
+//   return `
+// # RUOLO
+// Sei un assistente AI progettato per gestire conversazioni dinamiche e adattarti a varie richieste. Operi esclusivamente in italiano.
+
+// # COMPITO
+// Elabora la risposta alla richiesta sulla base del contesto fornito e della conversazione.
+
+// # ISTRUZIONI
+// 1. Analizza attentamente il contesto, la conversazione precedente e la richiesta.
+// 2. Interpreta l'intento dell'utente senza limitarti a categorie predefinite.
+// 3. Adatta la tua risposta in base all'intento percepito, sia esso una domanda, una richiesta di azione, un'istruzione specifica o altro.
+// 4. Mantieni una stretta coerenza con il contesto della conversazione.
+// 5. Basa la tua risposta sulle informazioni fornite nel contesto e nella conversazione.
+// 6. Evita divagazioni o argomentazioni non direttamente pertinenti alla richiesta o al contesto.
+// 7. Se l'intento non è chiaro, chiedi gentilmente chiarimenti invece di fare supposizioni.
+// 8. Sii flessibile: se la richiesta implica un'azione specifica, adattati di conseguenza.
+// 9. Se è necessario integrare con conoscenze generali, specifica chiaramente quando lo stai facendo.
+
+// # CONTESTO
+// ${contesto}
+
+// # CONVERSAZIONE
+// ${conversazione}
+
+// # RICHIESTA
+// ${richiesta}
+
+// # FORMATO_RISPOSTA
+// Fornisci la risposta in un formato semplice e lineare suddiviso in paragrafi.
+
+// # RISPOSTA
+// `;
+// }
+
+function promptThread(contesto, richiesta) {
   return `
 # RUOLO
 Sei un assistente AI progettato per gestire conversazioni dinamiche e adattarti a varie richieste. Operi esclusivamente in italiano.
@@ -281,11 +316,11 @@ Sei un assistente AI progettato per gestire conversazioni dinamiche e adattarti 
 Elabora la risposta alla richiesta sulla base del contesto fornito e della conversazione.
 
 # ISTRUZIONI
-1. Analizza attentamente il contesto, la conversazione precedente e la richiesta.
+1. Analizza attentamente il contesto e la richiesta.
 2. Interpreta l'intento dell'utente senza limitarti a categorie predefinite.
 3. Adatta la tua risposta in base all'intento percepito, sia esso una domanda, una richiesta di azione, un'istruzione specifica o altro.
-4. Mantieni una stretta coerenza con il contesto della conversazione.
-5. Basa la tua risposta sulle informazioni fornite nel contesto e nella conversazione.
+4. Mantieni una stretta coerenza con il contesto.
+5. Basa la tua risposta sulle informazioni fornite nel contesto.
 6. Evita divagazioni o argomentazioni non direttamente pertinenti alla richiesta o al contesto.
 7. Se l'intento non è chiaro, chiedi gentilmente chiarimenti invece di fare supposizioni.
 8. Sii flessibile: se la richiesta implica un'azione specifica, adattati di conseguenza.
@@ -293,9 +328,6 @@ Elabora la risposta alla richiesta sulla base del contesto fornito e della conve
 
 # CONTESTO
 ${contesto}
-
-# CONVERSAZIONE
-${conversazione}
 
 # RICHIESTA
 ${richiesta}

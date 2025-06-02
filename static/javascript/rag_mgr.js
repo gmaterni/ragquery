@@ -114,6 +114,16 @@ const calcTokens = {
   },
 };
 
+const showTokens = (rsp) => {
+  let itks = calcTokens.get_sum_input_tokens();
+  let gtks = calcTokens.get_sum_generate_tokens();
+  console.log(`Sum Tokens: ${itks} ${gtks}`);
+  responseDetails.set(rsp);
+  itks = responseDetails.get_total_tokens();
+  gtks = responseDetails.get_completion_tokens();
+  console.log(`Response Tokens: ${itks} ${gtks}`);
+};
+
 function cancelClientRequest() {
   client.cancelRequest();
 }
@@ -191,7 +201,9 @@ const Rag = {
   ragContext: "",
   //query usata per creare la lista delle rispste
   ragQuery: "",
-  // risposta finale alla qury contetso
+  //prompt con il contest
+  ragPrompt: "",
+  // risposta finale alla prompt contetso
   ragAnswer: "",
   answers: [],
   docContextLst: [],
@@ -199,6 +211,7 @@ const Rag = {
   doc: "",
   doc_part: "",
   init() {
+    ThreadMgr.init();
     this.readRespsFromDb();
     this.readFromDb();
     calcTokens.init();
@@ -211,6 +224,7 @@ const Rag = {
     const js = {
       context: this.ragContext,
       ragquery: this.ragQuery,
+      ragprompt: this.ragPrompt,
       raganswer: this.ragAnswer,
     };
     UaDb.saveJson(ID_RAG, js);
@@ -220,6 +234,7 @@ const Rag = {
     const js = UaDb.readJson(ID_RAG);
     this.ragContext = js.context || "";
     this.ragQuery = js.ragquery || "";
+    this.ragPrompt = js.ragprompt || "";
     this.ragAnswer = js.raganswer || "";
     ThreadMgr.rows = UaDb.readArray(ID_THREAD);
   },
@@ -230,7 +245,7 @@ const Rag = {
     this.answers = UaDb.readArray(ID_RESPONSES);
   },
 
-  // AAA visualizzazione prompts
+  //  visualizzazione prompts
   addPrompt(p) {
     // this.prompts.push(p);
   },
@@ -270,9 +285,7 @@ const Rag = {
           this.addPrompt(prompt);
           const payload = getPayloadDoc(prompt);
           const rr = await getResponse(payload, 90);
-          if (!rr) {
-            return "";
-          }
+          if (!rr) return "";
           const err = rr.error;
           if (!rr.ok) {
             console.error(`ERR1\n`, err);
@@ -290,17 +303,9 @@ const Rag = {
           }
           answer = rr.data;
           if (!answer) return "";
-          let itks = calcTokens.get_sum_input_tokens();
-          let gtks = calcTokens.get_sum_generate_tokens();
-          console.log(`Sum Tokens: ${itks} ${gtks}`);
-
           const rsp = rr.response;
-          responseDetails.set(rsp);
-          itks = responseDetails.get_total_tokens();
-          gtks = responseDetails.get_completion_tokens();
-          console.log(`Response Tokens: ${itks} ${gtks}`);
+          showTokens(rsp);
           calcTokens.add(rsp);
-
           npart++;
           j++;
           doc = rgt;
@@ -309,18 +314,16 @@ const Rag = {
           const s = `DOCUMENTO : ${docName}_${npart}\n${answer}`;
           this.answers.push(s);
         } // end while
+
         // doc answer list => cContext
         const docAnswersLen = docAnswersLst.length;
         let docAnswresTxt = docAnswersLst.join("\n\n");
-
         let docContext = "";
         while (true) {
           prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
           const payload = getPayloadBuildContext(prompt);
           const rr = await getResponse(payload, 90);
-          if (!rr) {
-            return "";
-          }
+          if (!rr) return "";
           const err = rr.error;
           if (!rr.ok) {
             console.error(`ERR2\n`, err);
@@ -358,14 +361,14 @@ const Rag = {
     {
       let answer = "";
       let context = this.ragContext;
+      let prompt = "";
       try {
         while (true) {
-          let prompt = promptWithContext(context, query);
+          prompt = promptWithContext(context, query);
+          this.ragprompt = prompt;
           const payload = getPayloadWithContext(prompt);
           const rr = await getResponse(payload, 90);
-          if (!rr) {
-            return "";
-          }
+          if (!rr) return "";
           const err = rr.error;
           if (!rr.ok) {
             console.error(`ERR4\n`, err);
@@ -390,10 +393,8 @@ const Rag = {
         answer = cleanResponse(answer);
         this.ragAnswer = answer;
         this.saveRespToDb();
-        ThreadMgr.init();
         this.saveToDb();
         UaLog.log(`Risposta: (${this.ragAnswer.length})`);
-
         //log del totale tokens
         const itks = calcTokens.get_sum_input_tokens();
         const gtks = calcTokens.get_sum_generate_tokens();
@@ -405,61 +406,54 @@ const Rag = {
       }
     } // end query
   },
+
   //richiesta iniziale della conversazione
-  async requestContext(query) {
+  async requestContext(queryThread) {
     let answer = "";
-    if (!this.ragContext) {
-      // gestisce il pulsante verde che ha accettao il contetso vuoto
-      this.ragContext = "Sei un assistente AI dispoibile a soddisfare tutte le mi richieste";
-    }
     if (ThreadMgr.isFirst()) {
-      ThreadMgr.init();
+      // console.log("************** FIRST");
       try {
-        let context = this.ragContext;
-        let thread = ThreadMgr.getThread();
-
+        let queryContext = queryThread;
+        if (!this.ragContext) {
+          const context = "Sei un assistente AI dispoibile a soddisfare tutte le mi richieste";
+          queryContext = promptThread(context, queryThread);
+        }
+        const threadRows = ThreadMgr.getThreadRows();
+        const payload = getPayloadThreadRows(threadRows, queryContext);
         while (true) {
-          prompt = promptThread(context, thread, query);
-
-          // let s = text2messages(prompt, USER, ASSISTANT);
-          // console.log("FIRST\n", s);
-
-          const payload = getPayloadThread(prompt);
           const rr = await getResponse(payload, 90);
-          if (!rr) {
-            return "";
-          }
+          if (!rr) return "";
           const err = rr.error;
           if (!rr.ok) {
             console.error(`ERR6\n`, err);
             const code = err.code;
             if (code == 400) {
               if (isTooLarge(err)) {
-                UaLog.log(`Error tokens with Context ${prompt.length}`);
-                context = truncateInput(context, PROMPT_DECR);
-                continue;
-              } else throw err;
+                alert("Conversazione troppo lunga");
+              }
+              throw err;
             } else if (code == 408) continue;
             else throw err;
           }
           answer = rr.data;
           if (!answer) return "";
-          let itks = calcTokens.get_sum_input_tokens();
-          let gtks = calcTokens.get_sum_generate_tokens();
-          console.log(`Sum Tokens: ${itks} ${gtks}`);
-
           const rsp = rr.response;
-          responseDetails.set(rsp);
-          itks = responseDetails.get_total_tokens();
-          gtks = responseDetails.get_completion_tokens();
-          console.log(`Response Tokens: ${itks} ${gtks}`);
+          showTokens(rsp);
           calcTokens.add(rsp);
-
           break;
         }
         answer = cleanResponse(answer);
-        ThreadMgr.add(query, answer);
-        answer = ThreadMgr.getThread();
+
+        if (!this.ragContext) {
+          ThreadMgr.add(queryContext, answer);
+          ThreadMgr.add(queryThread, answer);
+        } else {
+          ThreadMgr.add(this.ragPrompt, this.ragAnswer);
+          ThreadMgr.add(this.ragQuery, this.ragAnswer);
+          ThreadMgr.add(queryThread, answer);
+        }
+
+        answer = ThreadMgr.getThreadQueryAnswer();
         UaLog.log(`Inizio Conversazione (${prompt.length})`);
         return answer;
       } catch (err) {
@@ -467,31 +461,22 @@ const Rag = {
         throw err;
       }
     } else {
+      // console.log("************** NEXT");
       try {
-        let context = this.ragContext;
-        let thread = ThreadMgr.getThread();
-        let prompt = "";
+        const threadRows = ThreadMgr.getThreadRows();
+        const payload = getPayloadThreadRows(threadRows, queryThread);
         while (true) {
-          prompt = promptThread(context, thread, query);
-
-          // let s = text2messages(prompt, USER, ASSISTANT);
-          // console.log("NEXT\n", s);
-
-          const payload = getPayloadThread(prompt);
           const rr = await getResponse(payload, 90);
-          if (!rr) {
-            return "";
-          }
+          if (!rr) return "";
           const err = rr.error;
           if (!rr.ok) {
             console.error(`ERR8\n`, err);
             const code = err.code;
             if (code == 400) {
               if (isTooLarge(err)) {
-                UaLog.log(`Error tokens with Context ${prompt.length}`);
-                context = truncateInput(context, PROMPT_DECR);
-                continue;
-              } else throw err;
+                alert("Conversazione troppo lunga");
+              }
+              throw err;
             } else if (code == 408) {
               UaLog.log(`Error timeout Context`);
               continue;
@@ -500,19 +485,13 @@ const Rag = {
           answer = rr.data;
           if (!answer) return "";
           const rsp = rr.response;
-          let itks = calcTokens.get_sum_input_tokens();
-          let gtks = calcTokens.get_sum_generate_tokens();
-          console.log(`Sum Tokens: ${itks} ${gtks}`);
-          responseDetails.set(rsp);
-          itks = responseDetails.get_total_tokens();
-          gtks = responseDetails.get_completion_tokens();
-          console.log(`Response Tokens: ${itks} ${gtks}`);
+          showTokens(rsp);
           calcTokens.add(rsp);
           break;
         }
         answer = cleanResponse(answer);
-        ThreadMgr.add(query, answer);
-        answer = ThreadMgr.getThread();
+        ThreadMgr.add(queryThread, answer);
+        answer = ThreadMgr.getThreadQueryAnswer();
         UaLog.log(`Conversazione  (${prompt.length})`);
         return answer;
       } catch (err) {
@@ -528,34 +507,46 @@ const USER = "# User:";
 
 const ThreadMgr = {
   rows: [],
+  first: true,
   init() {
     this.rows = [];
-    if (!!Rag.ragAnswer) {
-      this.add(Rag.ragQuery, Rag.ragAnswer);
-    } else {
-      this.add("", "");
-    }
+    this.first = true;
   },
   delete() {
     this.rows = [];
-    this.add("", "");
+    this.first = true;
   },
   add(query, resp) {
     const row = [query, resp];
     this.rows.push(row);
-    UaDb.saveArray(ID_THREAD, ThreadMgr.rows);
+    //AAA UaDb.saveArray(ID_THREAD, ThreadMgr.rows);
   },
-  getThread() {
-    const rows = [];
-    for (const ua of this.rows) {
+  getThreadQueryAnswer() {
+    const lst = [];
+    for (let i = 1; i < this.rows.length; i++) {
+      const ua = this.rows[i];
       const u = ua[0];
       const a = ua[1];
-      if (!u) continue;
-      rows.push(`${USER}\n${u}\n${ASSISTANT}\n${a}\n`);
+      lst.push(`${USER}\n${u}\n${ASSISTANT}\n${a}\n`);
     }
-    return rows.join("\n\n");
+    return lst.join("\n");
+  },
+  getThread() {
+    const lst = [];
+    for (let i = 1; i < this.rows.length; i++) {
+      const ua = this.rows[i];
+      const u = ua[0];
+      const a = ua[1];
+      lst.push(`${USER}\n${u}\n${ASSISTANT}\n${a}\n`);
+    }
+    return lst.join("\n");
+  },
+  getThreadRows() {
+    this.first = false;
+    const lst = this.rows.filter((e, i) => i !== 1);
+    return lst;
   },
   isFirst() {
-    return this.rows.length < 2;
+    return this.first;
   },
 };
