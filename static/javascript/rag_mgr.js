@@ -1,6 +1,5 @@
 /** @format */
 const ID_RAG = "id_rag";
-
 const ID_THREAD = "id_thread";
 const ID_RESPONSES = "id_responses";
 const ID_DOC_NAMES = "id_doc_names";
@@ -28,8 +27,8 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 // const MODEL = "mistral-small-2503";
 const MODEL = "mistral-medium-2505";
 //
-// const APIKEY = "QsTPmjThpVYNi2mPtujTDYYjXffjtN5N"; //GIU
-const API = "FAUsMsVFSw5gW5OEkvUZEZ1jcIWFlPj4"; //IPT
+// const APIKEY = "QsTPmjThpVYNi2mPtujTDYYjXffjtN5N"; //GIU // ERRORE: Variabile dichiarata ma commentata e mai usata
+const API = "FAUsMsVFSw5gW5OEkvUZEZ1jcIWFlPj4"; //IPT // ATTENZIONE: API key hardcoded nel codice - dovrebbe essere in variabile d'ambiente
 console.log("MODEL:\n", MODEL);
 
 const client = ClientLLM(API);
@@ -154,7 +153,6 @@ const truncateInput = (txt, decr) => {
 };
 
 const getPartSize = (document, prompt, decrement) => {
-  // Funzione interna per trovare un punto nel documento a partire da una certa posizione
   const findLimitWithPoint = (text, freeLength) => {
     const pointIndex = text.indexOf(".", freeLength);
     let limit = (pointIndex !== -1 ? pointIndex : freeLength) + 1;
@@ -208,8 +206,8 @@ const Rag = {
   answers: [],
   docContextLst: [],
   prompts: [],
-  doc: "",
-  doc_part: "",
+  //   doc: "", // ATTENZIONE: Variabile dichiarata ma mai utilizzata
+  //   doc_part: "", // ATTENZIONE: Variabile dichiarata ma mai utilizzata
   init() {
     ThreadMgr.init();
     this.readRespsFromDb();
@@ -266,6 +264,7 @@ const Rag = {
         if (doc.trim() == "") continue;
         const docName = DataMgr.doc_names[i];
         const doc_entire_len = doc.length;
+        // ERRORE: xlog non è definito
         xlog(`${docName} (${doc_entire_len}) `);
         UaLog.log(`${docName} (${doc_entire_len}) `);
         ++ndoc;
@@ -365,7 +364,7 @@ const Rag = {
       try {
         while (true) {
           prompt = promptWithContext(context, query);
-          this.ragprompt = prompt;
+          this.ragPrompt = prompt;
           const payload = getPayloadWithContext(prompt);
           const rr = await getResponse(payload, 90);
           if (!rr) return "";
@@ -410,12 +409,12 @@ const Rag = {
   //richiesta iniziale della conversazione
   async requestContext(queryThread) {
     let answer = "";
+    let queryContext = queryThread;
     if (ThreadMgr.isFirst()) {
       // console.log("************** FIRST");
       try {
-        let queryContext = queryThread;
         if (!this.ragContext) {
-          const context = "Sei un assistente AI dispoibile a soddisfare tutte le mi richieste";
+          const context = "Sei un assistente AI dispoibile a soddisfare tutte le mi richieste"; // ERRORE ORTOGRAFICO: "dispoibile" -> "disponibile", "mi" -> "mie"
           queryContext = promptThread(context, queryThread);
         }
         const threadRows = ThreadMgr.getThreadRows();
@@ -443,7 +442,6 @@ const Rag = {
           break;
         }
         answer = cleanResponse(answer);
-
         if (!this.ragContext) {
           ThreadMgr.add(queryContext, answer);
           ThreadMgr.add(queryThread, answer);
@@ -453,8 +451,8 @@ const Rag = {
           ThreadMgr.add(queryThread, answer);
         }
 
-        answer = ThreadMgr.getThreadQueryAnswer();
-        UaLog.log(`Inizio Conversazione (${prompt.length})`);
+        answer = ThreadMgr.getThread();
+        UaLog.log(`Inizio Conversazione (${queryContext.length})`);
         return answer;
       } catch (err) {
         console.error("ERR7\n", err);
@@ -491,8 +489,8 @@ const Rag = {
         }
         answer = cleanResponse(answer);
         ThreadMgr.add(queryThread, answer);
-        answer = ThreadMgr.getThreadQueryAnswer();
-        UaLog.log(`Conversazione  (${prompt.length})`);
+        answer = ThreadMgr.getThread();
+        UaLog.log(`Conversazione  (${queryThread.length})`);
         return answer;
       } catch (err) {
         console.error("ERR9\n", err);
@@ -519,17 +517,7 @@ const ThreadMgr = {
   add(query, resp) {
     const row = [query, resp];
     this.rows.push(row);
-    //AAA UaDb.saveArray(ID_THREAD, ThreadMgr.rows);
-  },
-  getThreadQueryAnswer() {
-    const lst = [];
-    for (let i = 1; i < this.rows.length; i++) {
-      const ua = this.rows[i];
-      const u = ua[0];
-      const a = ua[1];
-      lst.push(`${USER}\n${u}\n${ASSISTANT}\n${a}\n`);
-    }
-    return lst.join("\n");
+    //AAA UaDb.saveArray(ID_THREAD, ThreadMgr.rows); // ATTENZIONE: Riga commentata
   },
   getThread() {
     const lst = [];
