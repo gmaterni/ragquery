@@ -127,49 +127,83 @@ function cleanResponse(s) {
   }
 }
 
-function answerFormtter(inputText) {
-  if (inputText.trim() == "") return "";
+// function outFormatter(inputText, utag, atag) {
+//   if (inputText.trim() == "") return "";
+//   const hasUserTag = inputText.includes(utag);
+//   const hasAssistantTag = inputText.includes(atag);
+//   if (!hasUserTag || !hasAssistantTag) {
+//     return `<div class="assistant"><b>Assistant:</b><br>${inputText.split("\n").join("<br>")}</div>`;
+//   }
+//   const lines = inputText.split("\n");
+//   let currentSpeaker = null;
+//   let resultHtml = "";
+//   lines.forEach((line) => {
+//     line = line.trim();
+//     if (line.startsWith(utag)) {
+//       if (currentSpeaker) resultHtml += `</div>`;
+//       currentSpeaker = "user";
+//       resultHtml += `<div class="${currentSpeaker}"><b>User:</b>`;
+//     } else if (line.startsWith(atag)) {
+//       if (currentSpeaker) resultHtml += `</div>`;
+//       currentSpeaker = "assistant";
+//       resultHtml += `<div class="${currentSpeaker}"><b>Assistant:</b>`;
+//     } else if (line.length > 0) {
+//       if (currentSpeaker) resultHtml += `<br>${line}`;
+//     }
+//   });
 
-  // Controlla se entrambi i tag # User e # Assistant sono presenti nel testo di input
-  const hasUserTag = inputText.includes("# User:");
-  const hasAssistantTag = inputText.includes("# Assistant:");
+//   if (currentSpeaker) {
+//     resultHtml += `</div>`;
+//   }
 
-  if (!hasUserTag || !hasAssistantTag) {
-    // Se almeno uno dei due tag non è presente, inserisci tutto in un unico div con classe assistant
-    return `<div class="assistant"><b>Assistant:</b><br>${inputText.split("\n").join("<br>")}</div>`;
-  }
+//   return resultHtml;
+// }
 
-  // Altrimenti, procedi come prima
-  const lines = inputText.split("\n");
-  let currentSpeaker = null;
-  let resultHtml = "";
-
-  lines.forEach((line) => {
-    line = line.trim();
-    if (line.startsWith("# User:")) {
-      if (currentSpeaker) {
-        resultHtml += `</div>`;
-      }
-      currentSpeaker = "user";
-      resultHtml += `<div class="${currentSpeaker}"><b>User:</b>`;
-    } else if (line.startsWith("# Assistant:")) {
-      if (currentSpeaker) {
-        resultHtml += `</div>`;
-      }
-      currentSpeaker = "assistant";
-      resultHtml += `<div class="${currentSpeaker}"><b>Assistant:</b>`;
-    } else if (line.length > 0) {
-      if (currentSpeaker) {
-        resultHtml += `<br>${line}`;
-      }
+function messages2html(messages) {
+  lst = [];
+  for (const msg of messages) {
+    const role = msg["role"];
+    const content = msg["content"];
+    const cnt = content.split("\n").join("<br>");
+    let text = "";
+    if (role == "assistant") {
+      text = `<div class="assistant"><b>Assistant:</b><br>${cnt}</div>`;
+    } else if (role == "user") {
+      text = `<div class="user"><b>User:</b><br>${cnt}</div>`;
+    } else if (role == "system") {
+      text = `<div class="system"><b>System:</b><br>${cnt}</div>`;
+    } else {
+      alert("ERROR  in role");
+      text = `<div >ERRROR ROLE</div>`;
     }
-  });
-
-  if (currentSpeaker) {
-    resultHtml += `</div>`;
+    lst.push(text);
   }
+  const html = lst.join("\n");
+  return html;
+}
 
-  return resultHtml;
+function messages2text(messages) {
+  lst = [];
+  for (const msg of messages) {
+    const role = msg["role"];
+    const content = msg["content"];
+    // const cnt = content.split("\n").join("<br>");
+    const cnt = content.trim();
+    let text = "";
+    if (role == "assistant") {
+      text = `Assistant:\n${cnt}\n`;
+    } else if (role == "user") {
+      text = `User:\n${cnt}`;
+    } else if (role == "system") {
+      text = `System:\n${cnt}`;
+    } else {
+      alert("ERROR  in role");
+      text = `ERRROR ROLE`;
+    }
+    lst.push(text);
+  }
+  const text = lst.join("\n");
+  return text;
 }
 
 function textFormatter(txt) {

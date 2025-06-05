@@ -186,10 +186,9 @@ const Menu = {
   },
 };
 
-const setOutText = (txt) => {
-  txt = answerFormtter(txt);
+const setResponseHtml = (html) => {
   const p = document.querySelector("#id-text-out .div-text");
-  p.innerHTML = txt;
+  p.innerHTML = html;
   p.scrollTop = p.scrollHeight;
 };
 
@@ -276,11 +275,11 @@ const TextInput = {
       if (!ok) return "";
     }
     showSpinner();
-    setOutText("");
+    setResponseHtml("");
     const msg = this.inp.value.trim();
     try {
-      let text = await Rag.requestDocsRAG(msg);
-      setOutText(text);
+      let html = await Rag.requestDocsRAG(msg);
+      setResponseHtml(html);
       this.inp.value = "";
       UaLog.close();
     } catch (err) {
@@ -308,7 +307,7 @@ const TextInput = {
         hideSpinner();
         return;
       }
-      setOutText(text);
+      setResponseHtml(text);
       this.inp.value = "";
     } catch (err) {
       console.error("Error send2", err);
@@ -321,7 +320,7 @@ const TextInput = {
     const ok = await confirm("Confermi cancellazione conversazione? ");
     if (!ok) return;
     this.inp.value = "";
-    setOutText("");
+    setResponseHtml("");
     ThreadMgr.delete();
   },
 };

@@ -31,9 +31,15 @@ const MODEL = "mistral-medium-2505";
 const API = "FAUsMsVFSw5gW5OEkvUZEZ1jcIWFlPj4"; //IPT // ATTENZIONE: API key hardcoded nel codice - dovrebbe essere in variabile d'ambiente
 console.log("MODEL:\n", MODEL);
 
+// const SYSTEM = "##SYSTEM##";
+// const ASSISTANT = "##Assistant##";
+// const USER = "##User##";
+
 const client = ClientLLM(API);
 
 const getResponse = async (payload, timeout = 60) => {
+  // console.log("*** PAYLOAD:\n", payload["messages"]);
+
   payload["model"] = MODEL;
   const url = "https://api.mistral.ai/v1/chat/completions";
 
@@ -199,15 +205,11 @@ const Rag = {
   ragContext: "",
   //query usata per creare la lista delle rispste
   ragQuery: "",
-  //prompt con il contest
-  ragPrompt: "",
   // risposta finale alla prompt contetso
   ragAnswer: "",
   answers: [],
   docContextLst: [],
   prompts: [],
-  //   doc: "", // ATTENZIONE: Variabile dichiarata ma mai utilizzata
-  //   doc_part: "", // ATTENZIONE: Variabile dichiarata ma mai utilizzata
   init() {
     ThreadMgr.init();
     this.readRespsFromDb();
@@ -222,7 +224,6 @@ const Rag = {
     const js = {
       context: this.ragContext,
       ragquery: this.ragQuery,
-      ragprompt: this.ragPrompt,
       raganswer: this.ragAnswer,
     };
     UaDb.saveJson(ID_RAG, js);
@@ -232,7 +233,6 @@ const Rag = {
     const js = UaDb.readJson(ID_RAG);
     this.ragContext = js.context || "";
     this.ragQuery = js.ragquery || "";
-    this.ragPrompt = js.ragprompt || "";
     this.ragAnswer = js.raganswer || "";
     ThreadMgr.rows = UaDb.readArray(ID_THREAD);
   },
@@ -264,13 +264,11 @@ const Rag = {
         if (doc.trim() == "") continue;
         const docName = DataMgr.doc_names[i];
         const doc_entire_len = doc.length;
-        // ERRORE: xlog non è definito
         xlog(`${docName} (${doc_entire_len}) `);
         UaLog.log(`${docName} (${doc_entire_len}) `);
         ++ndoc;
         let npart = 1;
         let decr = 0;
-        let prompt = "";
         let lft = "";
         let rgt = "";
         let answer = "";
@@ -280,9 +278,8 @@ const Rag = {
           if (partSize < 10) break;
           [lft, rgt] = getPartDoc(doc, partSize);
           ragLog(`${j}) ${ndoc},${npart}`, lft.length, rgt.length, this.answers);
-          prompt = promptDoc(lft, query, docName);
-          this.addPrompt(prompt);
-          const payload = getPayloadDoc(prompt);
+          const messages = promptDoc(lft, this.ragquery);
+          const payload = getPayloadDoc(messages);
           const rr = await getResponse(payload, 90);
           if (!rr) return "";
           const err = rr.error;
@@ -313,14 +310,12 @@ const Rag = {
           const s = `DOCUMENTO : ${docName}_${npart}\n${answer}`;
           this.answers.push(s);
         } // end while
-
-        // doc answer list => cContext
         const docAnswersLen = docAnswersLst.length;
         let docAnswresTxt = docAnswersLst.join("\n\n");
         let docContext = "";
         while (true) {
-          prompt = promptBuildContext(docAnswresTxt, this.ragQuery);
-          const payload = getPayloadBuildContext(prompt);
+          const messages = promptBuildContext(docAnswresTxt, this.ragQuery);
+          const payload = getPayloadBuildContext(messages);
           const rr = await getResponse(payload, 90);
           if (!rr) return "";
           const err = rr.error;
@@ -352,20 +347,18 @@ const Rag = {
       console.error("ERR3\n", err);
       throw err;
     }
-    // console.log("tagContext_0\n", this.ragContext);
     this.ragContext = this.docContextLst.join("\n\n");
-    // console.log("tagContext_1\n", this.ragContext);
+    // console.log("ragContext:\n", this.ragContext);
     this.saveToDb();
+    //
     // queryWithContext finale che utilizza context e genera la prima risposta
     {
       let answer = "";
       let context = this.ragContext;
-      let prompt = "";
       try {
         while (true) {
-          prompt = promptWithContext(context, query);
-          this.ragPrompt = prompt;
-          const payload = getPayloadWithContext(prompt);
+          const messages = promptWithContext(context, this.ragQuery);
+          const payload = getPayloadWithContext(messages);
           const rr = await getResponse(payload, 90);
           if (!rr) return "";
           const err = rr.error;
@@ -374,7 +367,7 @@ const Rag = {
             const code = err.code;
             if (code == 400) {
               if (isTooLarge(err)) {
-                UaLog.log(`Error tokens with Context ${prompt.length}`);
+                UaLog.log(`Error tokens with Context ${messages.length}`);
                 context = truncateInput(context, PROMPT_DECR);
                 continue;
               } else throw err;
@@ -398,7 +391,12 @@ const Rag = {
         const itks = calcTokens.get_sum_input_tokens();
         const gtks = calcTokens.get_sum_generate_tokens();
         UaLog.log(`Tokens: ${itks} ${gtks}`);
-        return answer;
+        // costruzione html  per query e risposta
+        const messages = [];
+        messages.push({ role: "user", content: this.ragQuery });
+        messages.push({ role: "assistant", content: answer });
+        const html = messages2html(messages);
+        return html;
       } catch (err) {
         console.error("ERR5\n", err);
         throw err;
@@ -409,132 +407,88 @@ const Rag = {
   //richiesta iniziale della conversazione
   async requestContext(queryThread) {
     let answer = "";
-    let queryContext = queryThread;
     if (ThreadMgr.isFirst()) {
-      // console.log("************** FIRST");
-      try {
-        if (!this.ragContext) {
-          const context = "Sei un assistente AI dispoibile a soddisfare tutte le mi richieste"; // ERRORE ORTOGRAFICO: "dispoibile" -> "disponibile", "mi" -> "mie"
-          queryContext = promptThread(context, queryThread);
-        }
-        const threadRows = ThreadMgr.getThreadRows();
-        const payload = getPayloadThreadRows(threadRows, queryContext);
-        while (true) {
-          const rr = await getResponse(payload, 90);
-          if (!rr) return "";
-          const err = rr.error;
-          if (!rr.ok) {
-            console.error(`ERR6\n`, err);
-            const code = err.code;
-            if (code == 400) {
-              if (isTooLarge(err)) {
-                alert("Conversazione troppo lunga");
-              }
-              throw err;
-            } else if (code == 408) continue;
-            else throw err;
-          }
-          answer = rr.data;
-          if (!answer) return "";
-          const rsp = rr.response;
-          showTokens(rsp);
-          calcTokens.add(rsp);
-          break;
-        }
-        answer = cleanResponse(answer);
-        if (!this.ragContext) {
-          ThreadMgr.add(queryContext, answer);
-          ThreadMgr.add(queryThread, answer);
-        } else {
-          ThreadMgr.add(this.ragPrompt, this.ragAnswer);
-          ThreadMgr.add(this.ragQuery, this.ragAnswer);
-          ThreadMgr.add(queryThread, answer);
-        }
-
-        answer = ThreadMgr.getThread();
-        UaLog.log(`Inizio Conversazione (${queryContext.length})`);
-        return answer;
-      } catch (err) {
-        console.error("ERR7\n", err);
-        throw err;
+      // console.log("******** FIRST");
+      if (!!this.ragContext) {
+        const messages = promptThreadRag(this.ragContext, this.ragQuery, this.ragAnswer, this.ragQuery);
+        ThreadMgr.addMessages(messages);
+      } else {
+        const messages = promptThread(queryThread);
+        ThreadMgr.addMessages(messages);
       }
     } else {
-      // console.log("************** NEXT");
-      try {
-        const threadRows = ThreadMgr.getThreadRows();
-        const payload = getPayloadThreadRows(threadRows, queryThread);
-        while (true) {
-          const rr = await getResponse(payload, 90);
-          if (!rr) return "";
-          const err = rr.error;
-          if (!rr.ok) {
-            console.error(`ERR8\n`, err);
-            const code = err.code;
-            if (code == 400) {
-              if (isTooLarge(err)) {
-                alert("Conversazione troppo lunga");
-              }
-              throw err;
-            } else if (code == 408) {
-              UaLog.log(`Error timeout Context`);
-              continue;
-            } else throw err;
-          }
-          answer = rr.data;
-          if (!answer) return "";
-          const rsp = rr.response;
-          showTokens(rsp);
-          calcTokens.add(rsp);
-          break;
+      // console.log("******** NEXT");
+      ThreadMgr.addQuery(queryThread);
+    }
+    try {
+      const messages = ThreadMgr.getMessages();
+      const payload = getPayloadThread(messages);
+      while (true) {
+        const rr = await getResponse(payload, 90);
+        if (!rr) return "";
+        const err = rr.error;
+        if (!rr.ok) {
+          console.error(`ERR6\n`, err);
+          const code = err.code;
+          if (code == 400) {
+            if (isTooLarge(err)) {
+              alert("Conversazione troppo lunga");
+            }
+            throw err;
+          } else if (code == 408) continue;
+          else throw err;
         }
-        answer = cleanResponse(answer);
-        ThreadMgr.add(queryThread, answer);
-        answer = ThreadMgr.getThread();
-        UaLog.log(`Conversazione  (${queryThread.length})`);
-        return answer;
-      } catch (err) {
-        console.error("ERR9\n", err);
-        throw err;
+        answer = rr.data;
+        if (!answer) return "";
+        const rsp = rr.response;
+        showTokens(rsp);
+        calcTokens.add(rsp);
+        break;
       }
+      answer = cleanResponse(answer);
+      ThreadMgr.addAnswer(answer);
+      const msgs = ThreadMgr.getUserMessages();
+      const html = messages2html(msgs);
+      UaLog.log(`Inizio Conversazione (${prompt.length})`);
+      return html;
+    } catch (err) {
+      console.error("ERR7\n", err);
+      throw err;
     }
   },
 };
 
-const ASSISTANT = "# Assistant:";
-const USER = "# User:";
-
 const ThreadMgr = {
   rows: [],
-  first: true,
   init() {
     this.rows = [];
-    this.first = true;
   },
   delete() {
     this.rows = [];
-    this.first = true;
   },
-  add(query, resp) {
-    const row = [query, resp];
-    this.rows.push(row);
-    //AAA UaDb.saveArray(ID_THREAD, ThreadMgr.rows); // ATTENZIONE: Riga commentata
-  },
-  getThread() {
-    const lst = [];
-    for (let i = 1; i < this.rows.length; i++) {
-      const ua = this.rows[i];
-      const u = ua[0];
-      const a = ua[1];
-      lst.push(`${USER}\n${u}\n${ASSISTANT}\n${a}\n`);
+  addMessages(rows) {
+    for (const row of rows) {
+      this.rows.push(row);
     }
-    return lst.join("\n");
+    UaDb.saveArray(ID_THREAD, ThreadMgr.rows);
   },
-  getThreadRows() {
-    this.first = false;
-    const lst = this.rows.filter((e, i) => i !== 1);
+  getMessages() {
+    return this.rows;
+  },
+  getUserMessages() {
+    const lst = this.rows.filter((e, i) => e["role"] !== "system");
     return lst;
   },
+  addQuery(row) {
+    const messages = [{ role: "user", content: row }];
+    this.addMessages(messages);
+  },
+  addAnswer(row) {
+    const messages = [{ role: "assistant", content: row }];
+    this.addMessages(messages);
+  },
   isFirst() {
-    return this.first;
+    const first = this.rows.length < 1;
+    return first;
   },
 };

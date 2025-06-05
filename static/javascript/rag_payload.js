@@ -1,6 +1,6 @@
 /** @format */
 
-function getPayloadDoc(prompt) {
+function getPayloadDoc(messages) {
   return {
     model: "",
     temperature: 0.3,
@@ -9,8 +9,8 @@ function getPayloadDoc(prompt) {
     stream: false,
     //stop: "</s>",
     random_seed: 42,
-    messages: [{ role: "user", content: prompt }],
-    //AAA response_format: {
+    messages: messages,
+    //response_format: {
     //   type: "text",
     // },
     // tools: [
@@ -31,10 +31,10 @@ function getPayloadDoc(prompt) {
   };
 }
 
-function getPayloadBuildContext(prompt) {
+function getPayloadBuildContext(messages) {
   return {
     model: "",
-    messages: [{ role: "user", content: prompt }],
+    messages: messages,
     temperature: 0.3,
     max_tokens: 2000,
     stream: false,
@@ -43,10 +43,10 @@ function getPayloadBuildContext(prompt) {
   };
 }
 
-function getPayloadWithContext(prompt) {
+function getPayloadWithContext(messages) {
   return {
     model: "",
-    messages: [{ role: "user", content: prompt }],
+    messages: messages,
     temperature: 0.3,
     max_tokens: 2000,
     stream: false,
@@ -55,39 +55,15 @@ function getPayloadWithContext(prompt) {
   };
 }
 
-function getPayloadThread(prompt) {
+function getPayloadThread(messages) {
   return {
     model: "",
-    messages: [{ role: "user", content: prompt }],
+    messages: messages,
     temperature: 0.7,
     max_tokens: 2000,
     stream: false,
     safe_prompt: false,
-    random_seed: 42,
-  };
-}
-
-function getPayloadThreadRows(rows, query) {
-  const rows2msgs = (rows, query) => {
-    let result = [];
-    for (let i = 0; i < rows.length; i++) {
-      let q = rows[i][0];
-      let a = rows[i][1];
-      if (!q) continue;
-      result.push({ role: "user", content: q });
-      result.push({ role: "assistant", content: a });
-    }
-    result.push({ role: "user", content: query });
-    return result;
-  };
-  const msgs = rows2msgs(rows, query);
-  return {
-    model: "",
-    messages: msgs,
-    temperature: 0.7,
-    max_tokens: 2000,
-    stream: false,
-    safe_prompt: false,
+    // response_format: { type: "text" },
     random_seed: 42,
   };
 }

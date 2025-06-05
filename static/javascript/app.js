@@ -235,9 +235,11 @@ function openApp() {
 }
 
 // Visualizza la storia della conversazione
+// invocato da app.js all'inizio della sessione
 function showHistory() {
-  const txt = ThreadMgr.getThread();
-  setOutText(txt);
+  const msgs = ThreadMgr.getUserMessages();
+  const html = messages2html(msgs);
+  setResponseHtml(html);
 }
 
 function release() {
@@ -263,7 +265,9 @@ function showRagResponse(e) {
 
 //conversazione
 function showThread(e) {
-  const txt = ThreadMgr.getThread();
+  // const msgs = ThreadMgr.getUserMessages();
+  const msgs = ThreadMgr.getMessages();
+  const txt = messages2text(msgs);
   wnds.wpre.show(txt);
 }
 
