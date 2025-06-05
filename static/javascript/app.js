@@ -265,8 +265,8 @@ function showRagResponse(e) {
 
 //conversazione
 function showThread(e) {
-  // const msgs = ThreadMgr.getUserMessages();
-  const msgs = ThreadMgr.getMessages();
+  const msgs = ThreadMgr.getUserMessages();
+  // const msgs = ThreadMgr.getMessages();
   const txt = messages2text(msgs);
   wnds.wpre.show(txt);
 }

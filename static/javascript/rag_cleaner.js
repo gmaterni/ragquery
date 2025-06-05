@@ -127,58 +127,29 @@ function cleanResponse(s) {
   }
 }
 
-// function outFormatter(inputText, utag, atag) {
-//   if (inputText.trim() == "") return "";
-//   const hasUserTag = inputText.includes(utag);
-//   const hasAssistantTag = inputText.includes(atag);
-//   if (!hasUserTag || !hasAssistantTag) {
-//     return `<div class="assistant"><b>Assistant:</b><br>${inputText.split("\n").join("<br>")}</div>`;
-//   }
-//   const lines = inputText.split("\n");
-//   let currentSpeaker = null;
-//   let resultHtml = "";
-//   lines.forEach((line) => {
-//     line = line.trim();
-//     if (line.startsWith(utag)) {
-//       if (currentSpeaker) resultHtml += `</div>`;
-//       currentSpeaker = "user";
-//       resultHtml += `<div class="${currentSpeaker}"><b>User:</b>`;
-//     } else if (line.startsWith(atag)) {
-//       if (currentSpeaker) resultHtml += `</div>`;
-//       currentSpeaker = "assistant";
-//       resultHtml += `<div class="${currentSpeaker}"><b>Assistant:</b>`;
-//     } else if (line.length > 0) {
-//       if (currentSpeaker) resultHtml += `<br>${line}`;
-//     }
-//   });
-
-//   if (currentSpeaker) {
-//     resultHtml += `</div>`;
-//   }
-
-//   return resultHtml;
-// }
-
 function messages2html(messages) {
   lst = [];
   for (const msg of messages) {
     const role = msg["role"];
     const content = msg["content"];
-    const cnt = content.split("\n").join("<br>");
+    let s = content.replace(/\n{2,}/g, "\n");
+    // s = s.split("\n").join("<br>");
     let text = "";
     if (role == "assistant") {
-      text = `<div class="assistant"><b>Assistant:</b><br>${cnt}</div>`;
+      s = s.replace(/\./g, ".\n").replace(/\n{2,}/g, "\n");
+      text = `<div class="assistant"><b>Assistant:</b><br>${s}</div>`;
     } else if (role == "user") {
-      text = `<div class="user"><b>User:</b><br>${cnt}</div>`;
+      text = `<div class="user"><b>User:</b><br>${s}</div>`;
     } else if (role == "system") {
-      text = `<div class="system"><b>System:</b><br>${cnt}</div>`;
+      text = `<div class="system"><b>System:</b><br>${s}</div>`;
     } else {
       alert("ERROR  in role");
-      text = `<div >ERRROR ROLE</div>`;
+      text = `<div>ERRROR ROLE</div>`;
     }
     lst.push(text);
   }
   const html = lst.join("\n");
+  // console.log("***HTML:\n", html);
   return html;
 }
 
@@ -187,7 +158,6 @@ function messages2text(messages) {
   for (const msg of messages) {
     const role = msg["role"];
     const content = msg["content"];
-    // const cnt = content.split("\n").join("<br>");
     const cnt = content.trim();
     let text = "";
     if (role == "assistant") {
