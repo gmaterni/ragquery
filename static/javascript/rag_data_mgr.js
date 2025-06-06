@@ -116,7 +116,7 @@ const DataMgr = {
     Rag.ragContext = "";
     Rag.ragAnswer = "";
     Rag.answers = [];
-    Rag.prompts = [];
+    // AAA Rag.prompts = [];
     ThreadMgr.rows = [];
   },
 };

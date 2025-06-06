@@ -24,8 +24,8 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 // const MODEL = "mistral-medium-2505";
 // const MODEL = "open-mistral-7b";
 // const MODEL = "open-mixtral-8x7b";
-// const MODEL = "mistral-small-2503";
-const MODEL = "mistral-medium-2505";
+const MODEL = "mistral-small-2503";
+// const MODEL = "mistral-medium-2505";
 //
 // const APIKEY = "QsTPmjThpVYNi2mPtujTDYYjXffjtN5N"; //GIU // ERRORE: Variabile dichiarata ma commentata e mai usata
 const API = "FAUsMsVFSw5gW5OEkvUZEZ1jcIWFlPj4"; //IPT // ATTENZIONE: API key hardcoded nel codice - dovrebbe essere in variabile d'ambiente
@@ -209,9 +209,9 @@ const Rag = {
   ragAnswer: "",
   answers: [],
   docContextLst: [],
-  prompts: [],
+  // prompts: [],
   init() {
-    ThreadMgr.init();
+    ThreadMgr.initThread();
     this.readRespsFromDb();
     this.readFromDb();
     calcTokens.init();
@@ -255,6 +255,7 @@ const Rag = {
     DataMgr.readDbDocs();
     this.docContextLst = [];
     this.ragQuery = query;
+    ThreadMgr.initThread();
     this.saveToDb();
     let ndoc = 0;
     try {
@@ -408,16 +409,16 @@ const Rag = {
   async requestContext(queryThread) {
     let answer = "";
     if (ThreadMgr.isFirst()) {
-      // console.log("******** FIRST");
+      console.log("******** FIRST");
       if (!!this.ragContext) {
-        const messages = promptThreadRag(this.ragContext, this.ragQuery, this.ragAnswer, this.ragQuery);
+        const messages = promptThreadRag(this.ragContext, this.ragQuery, this.ragAnswer, queryThread);
         ThreadMgr.addMessages(messages);
       } else {
         const messages = promptThread(queryThread);
         ThreadMgr.addMessages(messages);
       }
     } else {
-      // console.log("******** NEXT");
+      console.log("******** NEXT");
       ThreadMgr.addQuery(queryThread);
     }
     try {
@@ -460,10 +461,11 @@ const Rag = {
 
 const ThreadMgr = {
   rows: [],
-  init() {
+  initThread() {
     this.rows = [];
   },
   delete() {
+    alert("DELETE");
     this.rows = [];
   },
   addMessages(rows) {
