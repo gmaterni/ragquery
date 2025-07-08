@@ -19,7 +19,6 @@ class LLMClient {
   }
 
   /**
-   * @abstract
    * @param {object} payload
    * @param {number} [timeout=60]
    * @returns {Promise<any>}
