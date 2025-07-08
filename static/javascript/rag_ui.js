@@ -186,9 +186,21 @@ const Menu = {
   },
 };
 
+// const setResponseHtml = (html) => {
+//   const p = document.querySelector("#id-text-out .div-text");
+//   p.innerHTML = html;
+//   p.scrollTop = p.scrollHeight;
+// };
+
 const setResponseHtml = (html) => {
   const p = document.querySelector("#id-text-out .div-text");
   p.innerHTML = html;
+
+  p.offsetHeight;
+  p.style.display = "none";
+  p.offsetHeight;
+  p.style.display = "";
+
   p.scrollTop = p.scrollHeight;
 };
 
@@ -279,6 +291,7 @@ const TextInput = {
     const msg = this.inp.value.trim();
     try {
       let html = await Rag.requestDocsRAG(msg);
+      console.log("send2\n", html);
       setResponseHtml(html);
       this.inp.value = "";
       UaLog.close();
@@ -302,12 +315,13 @@ const TextInput = {
     }
     const query = this.inp.value.trim();
     try {
-      let text = await Rag.requestContext(query);
-      if (text == "") {
+      let html = await Rag.requestContext(query);
+      console.log("send2:\n", html);
+      if (html == "") {
         hideSpinner();
         return;
       }
-      setResponseHtml(text);
+      setResponseHtml(html);
       this.inp.value = "";
     } catch (err) {
       console.error("Error send2", err);

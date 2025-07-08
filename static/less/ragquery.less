@@ -376,38 +376,41 @@ div.container {
           padding: 2px;
           margin: 0;
           height: 100%;
+          width: 100%;
           box-sizing: border-box;
           overflow-y: scroll;
-        }
-        .user {
-          box-sizing: border-box;
-          display: inline-block;
-          border: 2px solid @color2 !important;
-          border-radius: 10px;
-          padding: 2px 5px 2px 5px;
-          margin: 10px 2px 10px 20vw;
-          width: 70vw;
-          b {
-            font-weight: bold;
-            text-decoration: underline;
-            color: @color1;
-            padding-bottom: 1px;
+
+          .user {
+            box-sizing: border-box;
+            display: inline-block;
+            border: 2px solid @color2 !important;
+            border-radius: 10px;
+            padding: 2px 5px 2px 5px;
+            margin: 10px 2px 10px 20vw;
+            width: 70vw;
+            b {
+              font-weight: bold;
+              text-decoration: underline;
+              color: @color1;
+              padding-bottom: 1px;
+            }
           }
-        }
-        .assistant {
-          box-sizing: border-box;
-          display: inline-block;
-          border: 2px solid @color1 !important;
-          border-radius: 10px;
-          padding: 2px 2vw 2px 5px;
-          margin: 0px 1vw 0px 2px;
-          text-align: justify;
-          width: 90vw;
-          b {
-            font-weight: bold;
-            text-decoration: underline;
-            color: @color2;
-            padding-bottom: 1px;
+
+          .assistant {
+            box-sizing: border-box;
+            display: inline-block;
+            border: 2px solid @color1 !important;
+            border-radius: 10px;
+            padding: 2px 2vw 2px 5px;
+            margin: 0px 1vw 0px 2px;
+            text-align: justify;
+            width: 90vw !important;
+            b {
+              font-weight: bold;
+              text-decoration: underline;
+              color: @color2;
+              padding-bottom: 1px;
+            }
           }
         }
       }

@@ -196,7 +196,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const VERS = "0.2.0";
+const VERS = "M 0.2.0";
 
 // var xlog = console.log;
 var xlog = function () {};
