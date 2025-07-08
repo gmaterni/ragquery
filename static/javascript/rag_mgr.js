@@ -8,10 +8,6 @@ const ID_DOCS = "id_docs";
 const PROMPT_DECR = 1024 * 10;
 
 const maxLenRequest = (nk = 32) => {
-  //  1024   * 32 = 32758
-  //  32768  * 6 = 196698
-  //  196608 x 0,15 = 29591
-  //  196608 + 29591 = 226199
   const nc = 1024 * nk * 3;
   const sp = nc * 0.1;
   const mlr = Math.trunc(nc + sp);
@@ -21,44 +17,39 @@ const MAX_PROMPT_LENGTH = maxLenRequest(100);
 // MISTRAL
 // const MODEL = "mistral-large-2411"
 // const MODEL = "open-mistral-nemo-2407";
-// const MODEL = "mistral-medium-2505";
-// const MODEL = "open-mistral-7b";
+// const MODEL = "codestral-2501";
 // const MODEL = "open-mixtral-8x7b";
-const MODEL = "mistral-small-2503";
-// const MODEL = "mistral-medium-2505";
-//
-// const APIKEY = "QsTPmjThpVYNi2mPtujTDYYjXffjtN5N"; //GIU // ERRORE: Variabile dichiarata ma commentata e mai usata
-const API = "FAUsMsVFSw5gW5OEkvUZEZ1jcIWFlPj4"; //IPT // ATTENZIONE: API key hardcoded nel codice - dovrebbe essere in variabile d'ambiente
-console.log("MODEL:\n", MODEL);
+// const MODEL = "mistral-small-2503";
+const MODEL = "mistral-medium-2505";
+// const MODEL = "gemini-2.0-flash";
+// ;
 
 // const SYSTEM = "##SYSTEM##";
 // const ASSISTANT = "##Assistant##";
 // const USER = "##User##";
+// const client = ClientLLM(API);
+const client = getLlmClient(MODEL);
 
-const client = ClientLLM(API);
+// const getResponse = async (payload, timeout = 60) => {
+//   payload["model"] = MODEL;
+//   const url = "https://api.mistral.ai/v1/chat/completions";
 
-const getResponse = async (payload, timeout = 60) => {
-  // console.log("*** PAYLOAD:\n", payload["messages"]);
-
-  payload["model"] = MODEL;
-  const url = "https://api.mistral.ai/v1/chat/completions";
-
-  const rr = await client.sendRequest(url, payload, timeout);
-  if (rr.error) {
-    if (rr.error.code === 499) {
-      alert("Request Interrotta");
-      return null;
-    } else {
-      return rr;
-    }
-  }
-  if (!rr.response.choices || !rr.response.choices[0] || !rr.response.choices[0].message || rr.response.choices[0].message.content === undefined) {
-    const err = client.createError("Risposta non valida", "ParseError", 500, { message: "La risposta non contiene il contenuto atteso" });
-    return RequestResult(false, null, null, err);
-  }
-  rr.data = rr.response.choices[0].message.content;
-  return rr;
-};
+//   const rr = await client.sendRequest(url, payload, timeout);
+//   if (rr.error) {
+//     if (rr.error.code === 499) {
+//       alert("Request Interrotta");
+//       return null;
+//     } else {
+//       return rr;
+//     }
+//   }
+//   if (!rr.response.choices || !rr.response.choices[0] || !rr.response.choices[0].message || rr.response.choices[0].message.content === undefined) {
+//     const err = client.createError("Risposta non valida", "ParseError", 500, { message: "La risposta non contiene il contenuto atteso" });
+//     return RequestResult(false, null, null, err);
+//   }
+//   rr.data = rr.response.choices[0].message.content;
+//   return rr;
+// };
 
 const responseDetails = {
   set(response) {
@@ -280,8 +271,9 @@ const Rag = {
           [lft, rgt] = getPartDoc(doc, partSize);
           ragLog(`${j}) ${ndoc},${npart}`, lft.length, rgt.length, this.answers);
           const messages = promptDoc(lft, this.ragquery);
-          const payload = getPayloadDoc(messages);
-          const rr = await getResponse(payload, 90);
+          const payload = getPayloadDoc(MODEL, messages);
+          // const rr = await getResponse(payload, 90);
+          const rr = await client.sendRequest(payload, 90);
           if (!rr) return "";
           const err = rr.error;
           if (!rr.ok) {
@@ -316,8 +308,9 @@ const Rag = {
         let docContext = "";
         while (true) {
           const messages = promptBuildContext(docAnswresTxt, this.ragQuery);
-          const payload = getPayloadBuildContext(messages);
-          const rr = await getResponse(payload, 90);
+          const payload = getPayloadBuildContext(MODEL, messages);
+          // const rr = await getResponse(payload, 90);
+          const rr = await client.sendRequest(payload, 90);
           if (!rr) return "";
           const err = rr.error;
           if (!rr.ok) {
@@ -359,8 +352,9 @@ const Rag = {
       try {
         while (true) {
           const messages = promptWithContext(context, this.ragQuery);
-          const payload = getPayloadWithContext(messages);
-          const rr = await getResponse(payload, 90);
+          const payload = getPayloadWithContext(MODEL, messages);
+          // const rr = await getResponse(payload, 90);
+          const rr = await client.sendRequest(payload, 90);
           if (!rr) return "";
           const err = rr.error;
           if (!rr.ok) {
@@ -423,9 +417,10 @@ const Rag = {
     }
     try {
       const messages = ThreadMgr.getMessages();
-      const payload = getPayloadThread(messages);
+      const payload = getPayloadThread(MODEL, messages);
       while (true) {
-        const rr = await getResponse(payload, 90);
+        // const rr = await getResponse(payload, 90);
+        const rr = await client.sendRequest(payload, 90);
         if (!rr) return "";
         const err = rr.error;
         if (!rr.ok) {

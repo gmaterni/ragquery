@@ -1,8 +1,8 @@
 /** @format */
 
-function getPayloadDoc(messages) {
+function getPayloadDoc(model, messages) {
   return {
-    model: "",
+    model: model,
     temperature: 0.3,
     //top_p": 1,
     max_tokens: 1024,
@@ -31,9 +31,9 @@ function getPayloadDoc(messages) {
   };
 }
 
-function getPayloadBuildContext(messages) {
+function getPayloadBuildContext(model, messages) {
   return {
-    model: "",
+    model: model,
     messages: messages,
     temperature: 0.3,
     max_tokens: 2000,
@@ -43,9 +43,9 @@ function getPayloadBuildContext(messages) {
   };
 }
 
-function getPayloadWithContext(messages) {
+function getPayloadWithContext(model, messages) {
   return {
-    model: "",
+    model: model,
     messages: messages,
     temperature: 0.3,
     max_tokens: 2000,
@@ -55,9 +55,9 @@ function getPayloadWithContext(messages) {
   };
 }
 
-function getPayloadThread(messages) {
+function getPayloadThread(model, messages) {
   return {
-    model: "",
+    model: model,
     messages: messages,
     temperature: 0.7,
     max_tokens: 2000,
