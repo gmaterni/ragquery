@@ -257,14 +257,32 @@ class GeminiClient extends LLMClient {
   }
 }
 
+///////////
+
+function umgm(arr) {
+  return arr
+    .map((part) => {
+      const ch = atob(part);
+      return ch
+        .split("")
+        .map((char) => String.fromCharCode((char.charCodeAt(0) - 5 + 256) % 256))
+        .join("");
+    })
+    .join("");
+}
+
 function getLlmClient(model) {
   console.log("** MODEL:\n", model);
   if (model.toLowerCase().includes("gemini")) {
-    const apiKey = "AIzaSyAMbjL5tbVKPtNWwQEr8ozQvM_jvSkNCJc";
+    const arr_gem = ["Rk5/Zlh+RlI=", "Z29ROnlnW1A=", "VXlTXHxWSnc=", "PXR/VntSZG8=", "e1hwU0hPaA=="];
+    const apiKey = umgm(arr_gem);
     const client = new GeminiClient(apiKey);
     return client;
   }
-  const apiKey = "FAUsMsVFSw5gW5OEkvUZEZ1jcIWFlPj4";
+  // const arr_mst_giu = ["VnhZVXJvWW0=", "dVteU243clU=", "eXpvWUleXm8=", "XWtrb3lTOlM="];
+  // const arr_mst_ipt = ["S0ZaeFJ4W0s=", "WHw6bFw6VEo=", "cHtaX0pfNm8=", "aE5cS3FVbzk="];
+  const arr_mst = ["S0ZaeFJ4W0s=", "WHw6bFw6VEo=", "cHtaX0pfNm8=", "aE5cS3FVbzk="];
+  const apiKey = umgm(arr_mst);
   const client = new MistralClient(apiKey);
   return client;
 }

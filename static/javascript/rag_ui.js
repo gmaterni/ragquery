@@ -196,9 +196,9 @@ const setResponseHtml = (html) => {
   const p = document.querySelector("#id-text-out .div-text");
   p.innerHTML = html;
 
-  p.offsetHeight;
+  const height = p.offsetHeight;
   p.style.display = "none";
-  p.offsetHeight;
+  const height2 = p.offsetHeight;
   p.style.display = "";
 
   p.scrollTop = p.scrollHeight;
@@ -291,7 +291,6 @@ const TextInput = {
     const msg = this.inp.value.trim();
     try {
       let html = await Rag.requestDocsRAG(msg);
-      console.log("send2\n", html);
       setResponseHtml(html);
       this.inp.value = "";
       UaLog.close();
@@ -316,7 +315,6 @@ const TextInput = {
     const query = this.inp.value.trim();
     try {
       let html = await Rag.requestContext(query);
-      console.log("send2:\n", html);
       if (html == "") {
         hideSpinner();
         return;
