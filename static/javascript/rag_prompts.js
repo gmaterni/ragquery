@@ -9,7 +9,7 @@ Sei un estrattore semantico di informazioni.
 Estrai e condensa le informazioni essenziali dal TESTO fornito per rispondere alla DOMANDA. Il formato di output deve essere ottimizzato per l'elaborazione da parte di un LLM.
 
 ## ISTRUZIONI:
-1. Analizza il TESTO e seleziona SOLO le informazioni direttamente rilevanti per la DOMANDA.
+1. Analizza il TESTO e seleziona le informazioni direttamente rilevanti per la DOMANDA.
 2. Elimina contenuti irrilevanti o ridondanti.
 3. Mantieni le relazioni logiche essenziali (causali, temporali, concettuali).
 4. Preserva la terminologia specialistica necessaria.
@@ -23,21 +23,16 @@ Estrai e condensa le informazioni essenziali dal TESTO fornito per rispondere al
 - Non numerare le proposizioni.
 - Non usare introduzioni o conclusioni (es. "Ecco l'estrazione:").
 - Non includere spiegazioni meta-testuali.
-- Non inserire frasi di collegamento tra le proposizioni.
 `;
 
   const userContent = `
 # TESTO:
-\`\`\`text
 ${testo}
-\`\`\`
 
 ## DOMANDA:
-\`\`\`text
 ${domanda}
-\`\`\`
 
-Procedi con l'estrazione semantica.`;
+# RISPOSTA`;
 
   const msgs = [
     { role: "system", content: sysContent },
@@ -73,15 +68,11 @@ Raggruppa e compatta le informazioni estratte da frammenti di un documento. Asso
 `;
 
   const userContent = `
-# TESTO:
-\`\`\`text
+## TESTO:
 ${testo}
-\`\`\`
 
 ## DOMANDA:
-\`\`\`text
 ${domanda}
-\`\`\`
 
 Procedi con il raggruppamento e la compattazione.`;
 
@@ -114,14 +105,10 @@ Fornisci la risposta in un formato semplice e lineare, suddiviso in paragrafi.
 
   const userContent = `
 # CONTESTO:
-\`\`\`text
 ${contesto}
-\`\`\`
 
 ## DOMANDA:
-\`\`\`text
 ${domanda}
-\`\`\`
 `;
 
   const msgs = [
@@ -153,24 +140,16 @@ Elabora la risposta alla richiesta dell'utente basandoti sul CONTESTO fornito e 
 
   const userContent = `
 ## CONTESTO:
-\`\`\`text
 ${contesto}
-\`\`\`
 
 ## DOMANDA INIZIALE:
-\`\`\`text
 ${queryRag}
-\`\`\`
 
 ## RISPOSTA:
-\`\`\`text
 ${responseRag}
-\`\`\`
 
 ## DOMANDA:
-\`\`\`text
 ${query}
-\`\`\`
 `;
 
   const msgs = [
@@ -201,9 +180,7 @@ Elabora la risposta alla richiesta dell'utente basandoti sulla conversazione pre
 
   const userContent = `
 ## DOMANDA:
-\`\`\`text
 ${query}
-\`\`\`
 `;
 
   const msgs = [
