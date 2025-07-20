@@ -27,7 +27,6 @@ const errorDumps = (err) => {
 const WndPre = (id) => {
   return {
     w: UaWindowAdm.create(id),
-    out: null,
     show(s) {
       const fh = (txt) => {
         return `
@@ -74,7 +73,6 @@ const WndPre = (id) => {
 const WndDiv = (id) => {
   return {
     w: UaWindowAdm.create(id),
-    out: null,
     show(s) {
       const fh = (txt) => {
         return `
