@@ -13,14 +13,12 @@ const UaDb = {
   read(id) {
     const data = localStorage.getItem(id);
     if (data === null) {
-      xlog(`UaDb.read  ${id} not found.`);
       return "";
     }
     return data;
   },
   update(id, data) {
     if (!localStorage.getItem(id)) {
-      xlog(`UaDb.update ${id} not found.`);
       return;
     }
     localStorage.setItem(id, data);

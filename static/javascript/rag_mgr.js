@@ -3,22 +3,22 @@
 // GESTIONE LLM_CLIEN
 //////////////////////
 
-const PROVVIDER = "mistral";
+// const PROVVIDER = "mistral";
 // const MODEL = "codestral-2501";
 // const MODEL = "magistral-medium-2506";
 // const MODEL = "magistral-small-2506";
 // const MODEL = "devstral-medium-2507";
 // const MODEL = "devstral-small-2507";
 // const MODEL = "mistral-large-2411";
-const MODEL = "mistral-medium-2505";
+// const MODEL = "mistral-medium-2505";
 // const MODEL = "mistral-small-2506";
 // const MODEL = "open-mixtral-8x7b";
-const adapter = window.MistralAdapter;
+// const adapter = window.MistralAdapter;
 
-// const PROVVIDER = "gemini";
+const PROVVIDER = "gemini";
 // const MODEL = "gemini-2.5-flash";
-// const MODEL = "gemini-2.0-flash";
-// const adapter = window.GeminiAdapter;
+const MODEL = "gemini-2.0-flash";
+const adapter = window.GeminiAdapter;
 
 // const PROVVIDER = "groq";
 // const MODEL = "llama-3.3-70b-versatile";
@@ -126,8 +126,6 @@ const ragLog = (msg, lftL, rgtL, answers) => {
   const rspsL = answers.reduce((acc, cur) => {
     return acc + cur.length;
   }, 0);
-  let s = `${msg} mx:${maxl} lft:${lftL} rgt:${rgtL} arr:${rspsL}`;
-  xlog(s);
   const row = formatRow([msg, lftL, rgtL, rspsL], [8, -7, -7, -7]);
   UaLog.log(row);
 };
@@ -196,7 +194,6 @@ const Rag = {
         if (doc.trim() == "") continue;
         const docName = DataMgr.doc_names[i];
         const doc_entire_len = doc.length;
-        xlog(`${docName} (${doc_entire_len}) `);
         UaLog.log(`${docName} (${doc_entire_len}) `);
         ++ndoc;
         let npart = 1;

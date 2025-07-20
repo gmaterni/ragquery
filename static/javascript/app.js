@@ -196,10 +196,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const VERS = "M 0.2.0";
+const VERS = "G 0.2.1";
 
-// var xlog = console.log;
-var xlog = function () {};
+var xlog = console.log;
+// var xlog = function () {};
 
 const stopRequest = async () => {
   const ok = await confirm("Confermi Cancellazione Richeista ?");
