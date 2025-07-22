@@ -323,7 +323,7 @@ const Rag = {
   async requestContext(queryThread) {
     let answer = "";
     if (ThreadMgr.isFirst()) {
-      console.log("******** FIRST");
+      console.log("*** FIRST");
       if (!!this.ragContext) {
         const messages = promptThreadRag(this.ragContext, this.ragQuery, this.ragAnswer, queryThread);
         ThreadMgr.addMessages(messages);
@@ -332,7 +332,7 @@ const Rag = {
         ThreadMgr.addMessages(messages);
       }
     } else {
-      console.log("******** NEXT");
+      console.log("*** NEXT");
       ThreadMgr.addQuery(queryThread);
     }
     try {

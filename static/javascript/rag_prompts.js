@@ -137,24 +137,24 @@ Elabora la risposta alla richiesta dell'utente basandoti sul CONTESTO fornito e 
 7. Se l'intento non è chiaro, chiedi gentilmente chiarimenti.
 8. Se integri con conoscenze generali, specifica chiaramente che lo stai facendo.
 `;
-
-  const userContent = `
+  const userContent0 = `
 ## CONTESTO:
 ${contesto}
 
 ## DOMANDA INIZIALE:
 ${queryRag}
-
+`;
+  const assitantContent = `
 ## RISPOSTA:
 ${responseRag}
-
-## DOMANDA:
-${query}
 `;
+  const userContent1 = `${query}`;
 
   const msgs = [
     { role: "system", content: sysContent },
-    { role: "user", content: userContent },
+    { role: "user", content: userContent0 },
+    { role: "assistant", content: assitantContent },
+    { role: "user", content: userContent1 },
   ];
 
   return msgs;
@@ -178,10 +178,7 @@ Elabora la risposta alla richiesta dell'utente basandoti sulla conversazione pre
 8. Se integri con conoscenze generali, specifica chiaramente che lo stai facendo.
 `;
 
-  const userContent = `
-## DOMANDA:
-${query}
-`;
+  const userContent = ` ${query}`;
 
   const msgs = [
     { role: "system", content: sysContent },

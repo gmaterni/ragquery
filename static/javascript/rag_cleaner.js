@@ -128,17 +128,23 @@ function cleanResponse(s) {
 }
 
 function messages2html(messages) {
+  const clearHtml = (s) => {
+    const idxQuery = s.indexOf("DOMANDA INIZIALE:");
+    if (idxQuery !== -1) return s.slice(idxQuery + "DOMANDA INIZIALE:".length).trim();
+    else return s;
+  };
   lst = [];
   for (const msg of messages) {
-    const role = msg["role"];
+    const role = msg["role"].toLowerCase();
     const content = msg["content"];
     let s = content.replace(/\n{2,}/g, "\n");
-    // s = s.split("\n").join("<br>");
     let text = "";
     if (role == "assistant") {
+      s = s.replace("## RISPOSTA:", "").trim();
       s = s.replace(/\./g, ".\n").replace(/\n{2,}/g, "\n");
       text = `<div class="assistant"><b>Assistant:</b><br>${s}</div>`;
     } else if (role == "user") {
+      s = clearHtml(s);
       text = `<div class="user"><b>User:</b><br>${s}</div>`;
     } else if (role == "system") {
       text = `<div class="system"><b>System:</b><br>${s}</div>`;
@@ -156,7 +162,7 @@ function messages2html(messages) {
 function messages2text(messages) {
   lst = [];
   for (const msg of messages) {
-    const role = msg["role"];
+    const role = msg["role"].toLowerCase();
     const content = msg["content"];
     const cnt = content.trim();
     let text = "";
