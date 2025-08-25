@@ -6,7 +6,7 @@
 
 // Array di stringhe codificate per ogni provider
 const keys = {
-    gemini: ["Rk5/Zlh+RlI=", "Z29ROnlnW1A=", "VXlTXHxWSnc=", "PXR/VntSZG8=", "e1hwU0hPaA=="],
+    gemini:['Rk5/Zlh+Rjs=', 'f3B1fmxka2w=', 'XjlUfU8ydnQ=', 'aE41PnxcVlw=', 'VH49RzlXcA=='],
     mistral: ["S0ZaeFJ4W0s=", "WHw6bFw6VEo=", "cHtaX0pfNm8=", "aE5cS3FVbzk="],
     groq: ["bHhwZHp5WlU=", "VX9JS0p8TFM=", "eVl6XX9dPno=", "XExpfmc4S14=", "aVVOdX1vb3g=", "VHVsNjxZbW8=", "XWt3SGh+R2w="],
     huggingface: ["bWtkVndLdnw=", "aV59e3hGfEo=", "aHNJd2lIW2g=", "TEteWk9bVVU=", "SktKSmY="]

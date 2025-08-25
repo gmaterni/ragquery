@@ -196,7 +196,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const VERS = "G 0.2.2";
+const VEERSIONE = "G 0.2.3";
 
 var xlog = console.log;
 // var xlog = function () {};
@@ -243,7 +243,7 @@ function showHistory() {
 }
 
 function release() {
-  document.querySelector(".release").innerHTML = VERS;
+  document.querySelector(".release").innerHTML = VEERSIONE;
 }
 
 // README
