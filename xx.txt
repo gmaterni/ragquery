@@ -1,0 +1,14 @@
+404.html
+README.md
+bin
+data_src
+docs
+favicon.ico
+firebase.json
+gemini
+index.html
+js_arc
+ragtext.code-workspace
+static
+xindex.html
+xx.txt

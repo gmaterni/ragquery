@@ -20,9 +20,10 @@ const sendRequest = async (client, payload, errorTag) => {
         const rr = await client.sendRequest(payload, 90);
         last_rr = rr;
         if (!rr) return rr;
-        const s = JSON.stringify(payload.messages, null, 2);
-        console.info("======= query:\n", s);
-        console.info("======= aanswer:\n", rr.data);
+        // AAA
+        // const s = JSON.stringify(payload.messages, null, 2);
+        // console.info("======= query:\n", s);
+        // console.info("======= aanswer:\n", rr.data);
 
         if (rr.ok) return rr;
         const err = rr.error;
