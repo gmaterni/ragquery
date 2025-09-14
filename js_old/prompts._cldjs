@@ -1,0 +1,412 @@
+"use strict";
+import {
+    DocumentType,
+    getInstructions,
+    getDescription,
+    getFocus,
+    listTypes,
+    listExamples,
+    listTypeExample
+} from './llm_instructions.js';
+import { getTemplate } from './llm_templates.js';
+
+const SYSTEM = "system";
+const USER = "user";
+const ASSISTANT = "assistant";
+
+// Configurazioni JSON per system prompts ottimizzati
+const SYSTEM_CONFIGS = {
+    extraction: {
+        role: "structured_document_extractor",
+        primary_objective: "extract_structured_information",
+        behavior_profile: {
+            precision: "high",
+            completeness: "thorough_but_selective",
+            error_handling: "skip_missing_gracefully"
+        },
+        output_constraints: {
+            format: "template_based",
+            missing_fields: "omit",
+            consistency: "enforce_schema"
+        },
+        processing_guidelines: [
+            "prioritize_accuracy_over_completeness",
+            "maintain_source_context",
+            "preserve_semantic_relationships"
+        ]
+    },
+
+    unification: {
+        role: "knowledge_consolidator",
+        primary_objective: "merge_structured_documents",
+        behavior_profile: {
+            deduplication: "aggressive",
+            relationship_detection: "comprehensive",
+            conflict_resolution: "merge_and_annotate"
+        },
+        processing_guidelines: [
+            "identify_semantic_overlaps",
+            "preserve_unique_information",
+            "maintain_traceability",
+            "build_coherent_relationships"
+        ],
+        quality_checks: [
+            "verify_no_information_loss",
+            "ensure_logical_consistency",
+            "validate_relationship_integrity"
+        ]
+    },
+
+    extraction_query: {
+        role: "contextual_information_selector",
+        primary_objective: "extract_query_relevant_context",
+        behavior_profile: {
+            relevance_threshold: "moderate_to_high",
+            context_expansion: "include_supporting_info",
+            relationship_awareness: "maintain_connections"
+        },
+        selection_criteria: [
+            "direct_relevance_to_query",
+            "supporting_contextual_information",
+            "maintaining_comprehensibility"
+        ]
+    },
+
+    answer_generation: {
+        role: "conversational_expert_assistant",
+        primary_objective: "provide_natural_contextual_answers",
+        behavior_profile: {
+            tone: "conversational_professional",
+            knowledge_source_priority: "context_first_general_secondary",
+            transparency: "explicit_source_attribution",
+            completeness: "comprehensive_but_concise"
+        },
+        response_constraints: {
+            format: "plain_text_only",
+            structure: "natural_paragraphs",
+            lists: "integrate_in_prose",
+            length: "complete_but_focused"
+        },
+        source_handling: {
+            context_available: "use_as_primary_source",
+            context_insufficient: "supplement_with_general_knowledge",
+            attribution_required: true,
+            uncertainty_expression: "explicit_when_applicable"
+        }
+    }
+};
+
+// Funzione per costruire system message ottimizzato
+function buildOptimizedSystemMessage(config, dynamicData = {}) {
+    const systemInstruction = {
+        role_definition: {
+            role: config.role,
+            objective: config.primary_objective,
+            behavior: config.behavior_profile
+        },
+
+        operational_guidelines: config.processing_guidelines || [],
+
+        ...(config.output_constraints && {
+            output_specifications: config.output_constraints
+        }),
+
+        ...(config.selection_criteria && {
+            selection_rules: config.selection_criteria
+        }),
+
+        ...(config.response_constraints && {
+            response_format: config.response_constraints
+        }),
+
+        ...(config.source_handling && {
+            knowledge_source_management: config.source_handling
+        }),
+
+        ...(config.quality_checks && {
+            quality_assurance: config.quality_checks
+        }),
+
+        // Dati dinamici specifici per il task
+        task_context: dynamicData
+    };
+
+    // Converte la configurazione JSON in istruzioni naturali strutturate
+    return formatSystemInstructions(systemInstruction, dynamicData);
+}
+
+function formatSystemInstructions(config, dynamicData) {
+    let instructions = `## Ruolo e Obiettivo\n`;
+    instructions += `Tu sei un ${config.role_definition.role.replace(/_/g, ' ')} con l'obiettivo principale di ${config.role_definition.objective.replace(/_/g, ' ')}.\n\n`;
+
+    if (config.task_context.description) {
+        instructions += `## Contesto del Compito\n`;
+        instructions += `Stai analizzando ${config.task_context.description}.\n\n`;
+    }
+
+    if (config.task_context.focus) {
+        instructions += `## Principio Guida\n`;
+        instructions += `Durante l'elaborazione, la tua priorità assoluta è: "${config.task_context.focus}".\n\n`;
+    }
+
+    if (config.operational_guidelines.length > 0) {
+        instructions += `## Linee Guida Operative\n`;
+        config.operational_guidelines.forEach(guideline => {
+            instructions += `- ${guideline.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}\n`;
+        });
+        instructions += '\n';
+    }
+
+    if (config.selection_rules) {
+        instructions += `## Criteri di Selezione\n`;
+        config.selection_rules.forEach(rule => {
+            instructions += `- ${rule.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}\n`;
+        });
+        instructions += '\n';
+    }
+
+    if (config.knowledge_source_management) {
+        instructions += `## Gestione delle Fonti\n`;
+        const sourceRules = config.knowledge_source_management;
+        if (sourceRules.context_available) {
+            instructions += `- Quando il contesto è disponibile: ${sourceRules.context_available.replace(/_/g, ' ')}\n`;
+        }
+        if (sourceRules.context_insufficient) {
+            instructions += `- Quando il contesto è insufficiente: ${sourceRules.context_insufficient.replace(/_/g, ' ')}\n`;
+        }
+        if (sourceRules.attribution_required) {
+            instructions += `- Attribuzione delle fonti: richiesta quando si usa conoscenza generale\n`;
+        }
+        instructions += '\n';
+    }
+
+    if (config.response_format) {
+        instructions += `## Formato di Risposta\n`;
+        const format = config.response_format;
+        if (format.format) {
+            instructions += `- Formato: ${format.format.replace(/_/g, ' ')}\n`;
+        }
+        if (format.structure) {
+            instructions += `- Struttura: ${format.structure.replace(/_/g, ' ')}\n`;
+        }
+        if (format.lists) {
+            instructions += `- Gestione liste: ${format.lists.replace(/_/g, ' ')}\n`;
+        }
+        instructions += '\n';
+    }
+
+    if (config.task_context.instructions) {
+        instructions += `## Istruzioni Specifiche\n`;
+        instructions += `${config.task_context.instructions}\n\n`;
+    }
+
+    if (config.task_context.template) {
+        instructions += `## Template di Output\n`;
+        instructions += `${config.task_context.template}\n\n`;
+    }
+
+    if (config.quality_assurance) {
+        instructions += `## Controlli di Qualità\n`;
+        config.quality_assurance.forEach(check => {
+            instructions += `- ${check.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}\n`;
+        });
+        instructions += '\n';
+    }
+
+    return instructions.trim();
+}
+
+// Assembler ottimizzato con supporto per configurazioni JSON
+const optimizedAssembler = {
+    messages: [],
+    currentConfig: null,
+
+    setSystemMessageFromConfig(configKey, dynamicData = {}) {
+        if (!SYSTEM_CONFIGS[configKey]) {
+            throw new Error(`Configuration '${configKey}' not found`);
+        }
+
+        this.currentConfig = configKey;
+        this.messages = this.messages.filter((msg) => msg.role !== SYSTEM);
+
+        const systemContent = buildOptimizedSystemMessage(
+            SYSTEM_CONFIGS[configKey],
+            dynamicData
+        );
+
+        const systemMessage = {
+            role: SYSTEM,
+            content: systemContent,
+            metadata: {
+                config: configKey,
+                generated_at: new Date().toISOString(),
+                dynamic_data: dynamicData
+            }
+        };
+
+        this.messages.unshift(systemMessage);
+        return this;
+    },
+
+    addUserMessage(content) {
+        const userMessage = { role: USER, content: content };
+        this.messages.push(userMessage);
+        return this;
+    },
+
+    addAssistantMessage(content) {
+        const assistantMessage = { role: ASSISTANT, content: content };
+        this.messages.push(assistantMessage);
+        return this;
+    },
+
+    getMessages(includeMetadata = false) {
+        const msgs = [...this.messages];
+
+        // Pulisce le etichette e gestisce i metadati
+        for (let i = 0; i < msgs.length; i++) {
+            msgs[i].content = msgs[i].content.replace(/^(\S+):\s*/g, '');
+
+            if (!includeMetadata && msgs[i].metadata) {
+                delete msgs[i].metadata;
+            }
+        }
+
+        return msgs;
+    },
+
+    clear() {
+        this.messages = [];
+        this.currentConfig = null;
+        return this;
+    },
+
+    // Metodo per debugging e analisi
+    getSystemConfig() {
+        return {
+            current_config: this.currentConfig,
+            config_details: this.currentConfig ? SYSTEM_CONFIGS[this.currentConfig] : null,
+            message_count: this.messages.length
+        };
+    }
+};
+
+export const optimizedPromptBuilder = {
+    extractionPrompt: (docContent, docType) => {
+        const dynamicData = {
+            description: getDescription(docType),
+            focus: getFocus(docType),
+            instructions: getInstructions(docType),
+            template: getTemplate(docType)
+        };
+
+        const userMessage = `## Documento da analizzare
+\`\`\`text
+${docContent}
+\`\`\`
+---
+Estrai le informazioni dal documento seguendo le istruzioni e produci la risposta nel formato specificato. Ricorda di saltare i campi non presenti nel documento.`;
+
+        optimizedAssembler.messages = [];
+        optimizedAssembler.setSystemMessageFromConfig('extraction', dynamicData);
+        optimizedAssembler.addUserMessage(userMessage);
+
+        return optimizedAssembler.getMessages();
+    },
+
+    unificationPrompt: (contents, docType) => {
+        const dynamicData = {
+            template: getTemplate(docType),
+            document_type: docType
+        };
+
+        const userMessage = `## Informazioni da unificare
+\`\`\`text
+${contents}
+\`\`\`
+---
+Produci una knowledge base consolidata seguendo il template specificato. Elimina i duplicati e mantieni la coerenza delle relazioni.`;
+
+        optimizedAssembler.messages = [];
+        optimizedAssembler.setSystemMessageFromConfig('unification', dynamicData);
+        optimizedAssembler.addUserMessage(userMessage);
+
+        return optimizedAssembler.getMessages();
+    },
+
+    extractorPrompt: (kbContent, question, docType) => {
+        const dynamicData = {
+            template: getTemplate(docType),
+            query_context: question
+        };
+
+        const userMessage = `## Knowledge base completa
+\`\`\`text
+${kbContent}
+\`\`\`
+
+## Domanda
+${question}
+---
+Estrai le sezioni rilevanti per rispondere a questa domanda, includendo il contesto necessario per la comprensibilità.`;
+
+        optimizedAssembler.messages = [];
+        optimizedAssembler.setSystemMessageFromConfig('extraction_query', dynamicData);
+        optimizedAssembler.addUserMessage(userMessage);
+
+        return optimizedAssembler.getMessages();
+    },
+
+    answerPrompt: (context, history) => {
+        const dynamicData = {
+            context: context,
+            conversation_length: history.length
+        };
+
+        const contextualPrompt = `## Contesto Strutturato
+\`\`\`text
+${context}
+\`\`\`
+
+## Istruzioni Finali
+- Cerca prima la risposta nel CONTESTO STRUTTURATO
+- Se la risposta non è presente nel contesto, integra con conoscenza generale segnalando chiaramente la fonte
+- Considera la cronologia delle domande per fornire risposte coerenti
+- Mantieni un tono conversazionale e naturale`;
+
+        const userMessage = `## Domanda
+${history[0]}`;
+
+        optimizedAssembler.messages = [];
+        optimizedAssembler.setSystemMessageFromConfig('answer_generation', dynamicData);
+        optimizedAssembler.addUserMessage(contextualPrompt);
+        optimizedAssembler.addUserMessage(userMessage);
+
+        // Aggiunge la cronologia della conversazione
+        for (let i = 1; i < history.length; i++) {
+            if ((i - 1) % 2 === 0) {
+                optimizedAssembler.addAssistantMessage(history[i]);
+            } else {
+                optimizedAssembler.addUserMessage(history[i]);
+            }
+        }
+
+        return optimizedAssembler.getMessages();
+    },
+
+    // Metodi utili per debugging e analisi
+    getConfigurationDetails: () => SYSTEM_CONFIGS,
+    getCurrentConfig: () => optimizedAssembler.getSystemConfig()
+};
+
+// Manteniamo compatibilità con l'export originale
+export const promptBuilder = optimizedPromptBuilder;
+
+export {
+    DocumentType,
+    listTypes,
+    listExamples,
+    listTypeExample,
+    SYSTEM_CONFIGS,
+    optimizedAssembler
+};

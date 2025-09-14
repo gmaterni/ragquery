@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test DocsMgr</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: sans-serif;
+      display: flex;
+      height: 100vh;
+      margin: 0;
+    }
+    .controls {
+      width: 300px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #333;
+    }
+    .output-area {
+      flex: 1;
+      padding: 10px;
+      background-color: #000;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    input, textarea {
+      background-color: #333;
+      color: #e0e0e0;
+      border: 1px solid #555;
+      padding: 4px;
+      margin-bottom: 6px;
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 12px;
+    }
+    button {
+      background-color: #444;
+      color: #e0e0e0;
+      border: 1px solid #666;
+      padding: 3px 6px;
+      cursor: pointer;
+      font-size: 11px;
+      border-radius: 2px;
+    }
+    button.danger {
+        background-color: #7f1d1d;
+        border-color: #991b1b;
+    }
+    button.danger:hover {
+        background-color: #991b1b;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    h1 {
+        font-size: 1.3rem;
+        margin-top: 0;
+        margin-bottom: 8px;
+    }
+    h2 {
+      color: #ccc;
+      font-size: 0.85rem;
+      margin: 0;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: inline-block;
+      min-width: 80px;
+    }
+    .control-group {
+      margin-bottom: 10px;
+    }
+    .header-with-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .global-operations {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .global-operations h2 {
+      margin-bottom: 4px;
+      display: block;
+    }
+    .global-operations button {
+      width: 100%;
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+    #output {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      flex: 1;
+      background-color: #000;
+      color: #e0e0e0;
+      border: none;
+      padding: 0;
+    }
+    .output-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    .output-header button {
+      width: auto;
+      padding: 4px 8px;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <h1>Test DocsMgr</h1>
+
+    <div class="control-group">
+      <div class="header-with-button">
+        <h2>Aggiungi</h2>
+        <button id="addDoc">Aggiungi</button>
+      </div>
+      <input type="text" id="docName" placeholder="Nome...">
+      <textarea id="docContent" placeholder="Contenuto..." rows="2"></textarea>
+    </div>
+
+    <div class="control-group">
+      <div class="header-with-button">
+        <h2>Leggi</h2>
+        <button id="readDoc">Leggi</button>
+      </div>
+      <input type="text" id="readDocName" placeholder="Nome...">
+    </div>
+
+    <div class="control-group">
+      <div class="header-with-button">
+        <h2>Cancella</h2>
+        <button id="deleteDoc">Cancella</button>
+      </div>
+      <input type="text" id="deleteDocName" placeholder="Nome...">
+    </div>
+
+    <div class="control-group">
+      <div class="header-with-button">
+        <h2>Indice</h2>
+        <button id="readIndex">Leggi</button>
+      </div>
+      <input type="number" id="docIndex" placeholder="Indice...">
+    </div>
+
+    <div class="control-group global-operations">
+      <h2>Operazioni Globali</h2>
+      <button id="listDocs">Mostra Tutti i Nomi</button>
+      <button id="deleteAllDocs" class="danger">Cancella Tutti i Documenti</button>
+    </div>
+  </div>
+  <div class="output-area">
+      <div class="output-header">
+          <h2>Output</h2>
+          <button id="clearOutput">Pulisci</button>
+      </div>
+    <pre id="output"></pre>
+  </div>
+
+  <script type="module">
+    import { DocsMgr } from './js/services/docs_mgr.js';
+
+    const outputEl = document.getElementById('output');
+    const showOutput = (message) => {
+      outputEl.textContent = message;
+    };
+
+    document.getElementById('addDoc').addEventListener('click', () => {
+      const name = document.getElementById('docName').value;
+      const content = document.getElementById('docContent').value;
+      if (name && content) {
+        DocsMgr.add(name, content);
+        showOutput(`Documento '${name}' aggiunto.`);
+      } else {
+        showOutput('Per favore, inserisci nome e contenuto.');
+      }
+    });
+
+    document.getElementById('readDoc').addEventListener('click', () => {
+      const name = document.getElementById('readDocName').value;
+      if (name) {
+        const content = DocsMgr.read(name);
+        if (content) {
+          showOutput(`Contenuto di '${name}':\n\n${content}`);
+        } else {
+          showOutput(`Documento '${name}' non trovato.`);
+        }
+      } else {
+        showOutput('Per favore, inserisci il nome.');
+      }
+    });
+
+    document.getElementById('deleteDoc').addEventListener('click', () => {
+      const name = document.getElementById('deleteDocName').value;
+      if (name) {
+        if (DocsMgr.delete(name)) {
+          showOutput(`Documento '${name}' cancellato.`);
+        } else {
+          showOutput(`Documento '${name}' non trovato.`);
+        }
+      } else {
+        showOutput('Per favore, inserisci il nome.');
+      }
+    });
+
+    document.getElementById('deleteAllDocs').addEventListener('click', () => {
+        if (confirm("Sei sicuro di voler cancellare TUTTI i documenti?")) {
+            DocsMgr.deleteAll();
+            showOutput('Tutti i documenti sono stati cancellati.');
+        }
+    });
+
+    document.getElementById('listDocs').addEventListener('click', () => {
+      const names = DocsMgr.names();
+      if (names.length > 0) {
+        showOutput('Elenco dei documenti:\n\n' + names.join('\n'));
+      } else {
+        showOutput('Nessun documento trovato.');
+      }
+    });
+
+    document.getElementById('readIndex').addEventListener('click', () => {
+      const index = parseInt(document.getElementById('docIndex').value, 10);
+      if (!isNaN(index)) {
+        const doc = DocsMgr.doc(index);
+        if (doc) {
+          showOutput(`Contenuto del documento all\'indice ${index}:\n\n${doc}`);
+        } else {
+          showOutput(`Documento all\'indice ${index} non trovato.`);
+        }
+      } else {
+        showOutput('Per favore, inserisci un indice valido.');
+      }
+    });
+
+    document.getElementById('clearOutput').addEventListener('click', () => {
+        showOutput('');
+    });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+
+# Questo file documenta tutti i comandi disponibili nell'interfaccia utente di RaPce.
+
+# ===================================================================
+# 1. Comandi della Barra Superiore (Header)
+# ===================================================================
+header_commands:
+  - id: toggle-menu
+    description: Apre e chiude il menu di navigazione laterale.
+    origin:
+      type: "Checkbox (Hamburger Icon)"
+      id: "id-menu-btn"
+      event: "change"
+    flow:
+      - "Aggiunge/rimuove la classe 'menu-open' dal tag <body>."
+      - "Il CSS gestisce la transizione del menu laterale."
+    destination:
+      type: "UI"
+      description: "Visibilità del menu laterale."
+
+  - id: show-help
+    description: "Mostra la finestra di aiuto principale con la descrizione di tutti i comandi."
+    origin:
+      type: "Button"
+      id: "btn-help"
+      menu: "Header"
+    flow:
+      - "Chiama la funzione `Commands.help()` in `app_ui.js`."
+      - "Mostra una finestra modale (`wnds.wdiv`) con il contenuto di `help0_html`."
+    destination:
+      type: "UI Window"
+      id: "id_w0"
+      description: "Finestra modale con le istruzioni."
+
+  - id: open-uploader
+    description: "Apre la finestra di dialogo per il caricamento dei file."
+    origin:
+      type: "Button"
+      id: "btn-upload"
+      menu: "Header"
+    flow:
+      - "Chiama la funzione `Commands.upload()`."
+      - "Invoca `docuentUploader.open()` che crea una finestra per il drag-and-drop dei file."
+    destination:
+      type: "UI Window"
+      id: "id_upload"
+      description: "Finestra di dialogo per l'upload."
+
+  - id: toggle-log
+    description: "Mostra o nasconde la finestra di log del processo RAG."
+    origin:
+      type: "Button"
+      id: "id_log"
+      menu: "Header"
+    flow:
+      - "Chiama `Commands.log()` che a sua volta invoca `UaLog.toggle()`."
+    destination:
+      type: "UI Window"
+      id: "ualog_id"
+      description: "Finestra di log."
+
+  - id: select-doctype
+    description: "Apre il selettore per il tipo di documento da analizzare."
+    origin:
+      type: "Button"
+      id: "btn-doctype-settings"
+      menu: "Header"
+    flow:
+      - "Chiama `Commands.docTypeSettings()` che invoca `DocType.toggleTreeView()`."
+    destination:
+      type: "UI Window"
+      id: "doctype-tree-container"
+      description: "Albero di selezione del tipo documento."
+
+  - id: select-provider
+    description: "Apre il selettore per il provider e il modello LLM."
+    origin:
+      type: "Button"
+      id: "btn-provider-settings"
+      menu: "Header"
+    flow:
+      - "Chiama `Commands.providerSettings()` che invoca `LlmProvider.toggleTreeView()`."
+    destination:
+      type: "UI Window"
+      id: "provvider_id"
+      description: "Albero di selezione del provider/modello."
+
+  - id: set-theme
+    description: "Cambia il tema dell'applicazione tra scuro e chiaro."
+    origin:
+      type: "Button"
+      id: ["btn-dark-theme", "btn-light-theme"]
+      menu: "Header"
+    flow:
+      - "Chiama la funzione `setTheme('dark'|'light')`."
+      - "Aggiunge/rimuove le classi 'theme-dark'/'theme-light' dal tag <body>."
+      - "Salva la preferenza in `localStorage`."
+    destination:
+      type: "UI"
+      description: "Stile CSS globale dell'applicazione."
+
+# ===================================================================
+# 2. Comandi dei Pulsanti di Azione (Input/Output)
+# ===================================================================
+action_buttons:
+  - id: build-knbase
+    description: "Avvia il processo di creazione della Knowledge Base dai documenti caricati."
+    origin:
+      type: "Button"
+      id: ".send0-input"
+    flow:
+      - "Chiama `TextInput.send0()`."
+      - "Controlla se ci sono documenti caricati."
+      - "Mostra uno spinner di caricamento."
+      - "Invoca `ragEngine.buildKnBase()` che orchestra l'estrazione e l'unificazione."
+    destination:
+      type: "Data Store"
+      id: "IndexedDB"
+      description: "Salva la Knowledge Base finale con la chiave 'knbase'."
+
+  - id: build-context
+    description: "Estrae un contesto mirato dalla Knowledge Base in base alla domanda inserita."
+    origin:
+      type: "Button"
+      id: ".send1-input"
+    flow:
+      - "Chiama `TextInput.send1()`."
+      - "Recupera la query dall'input."
+      - "Mostra uno spinner."
+      - "Invoca `ragEngine.buildContext(query)`."
+    destination:
+      type: "Data Store"
+      id: "IndexedDB"
+      description: "Salva il contesto con la chiave 'context' e la cronologia con 'thread'."
+
+  - id: run-conversation
+    description: "Invia la domanda all'LLM usando il contesto e la cronologia per generare una risposta."
+    origin:
+      type: "Button or Keypress"
+      id: [".send2-input", ".text-input (Enter)"]
+    flow:
+      - "Chiama `TextInput.send2()` o `TextInput.handleEnter()`."
+      - "Recupera la query dall'input."
+      - "Mostra uno spinner."
+      - "Invoca `ragEngine.runConversation(query)`."
+    destination:
+      type: "UI & Data Store"
+      description: "Aggiorna la finestra di output e salva la nuova cronologia in IndexedDB ('thread')."
+
+  - id: copy-output
+    description: "Copia il contenuto della finestra di output negli appunti."
+    origin:
+      type: "Button"
+      id: ".copy-output"
+    flow:
+      - "Chiama `TextOutput.copy()`."
+      - "Legge il testo dalla finestra di output e lo formatta."
+      - "Usa l'API `navigator.clipboard.writeText()`."
+    destination:
+      type: "System Clipboard"
+      description: "Appunti del sistema operativo."
+
+  - id: open-output-window
+    description: "Mostra la conversazione corrente in una finestra separata più grande."
+    origin:
+      type: "Button"
+      id: ".wnd-output"
+    flow:
+      - "Chiama `TextOutput.openWnd()` che a sua volta chiama `showThread()`."
+      - "Legge la cronologia da IndexedDB e la mostra in una finestra modale."
+    destination:
+      type: "UI Window"
+      id: "id_w1"
+      description: "Finestra modale con la cronologia."
+
+  - id: new-conversation
+    description: "Cancella la cronologia della conversazione attiva."
+    origin:
+      type: "Button"
+      id: ".clear-history"
+    flow:
+      - "Chiama `TextOutput.clearHistory()`."
+      - "Chiede conferma all'utente."
+      - "Rimuove la chiave 'thread' da IndexedDB."
+    destination:
+      type: "Data Store & UI"
+      description: "Pulisce la cronologia in IndexedDB e la finestra di output."
+
+# ===================================================================
+# 3. Comandi del Menu Laterale
+# ===================================================================
+side_menu:
+  - id: show-readme
+    description: "Mostra la documentazione tecnica e architetturale."
+    origin:
+      type: "Link"
+      id: "menu-readme"
+    flow:
+      - "Chiama `showReadme()`."
+      - "Mostra una finestra modale con il contenuto di `help1_html`."
+    destination:
+      type: "UI Window"
+      id: "id_w0"
+
+  - id: show-quickstart
+    description: "Mostra la guida rapida all'uso."
+    origin:
+      type: "Link"
+      id: "menu-quickstart"
+    flow:
+      - "Chiama `showQuickstart()`."
+      - "Mostra una finestra modale con il contenuto di `help2_html`."
+    destination:
+      type: "UI Window"
+      id: "id_w0"
+
+  - id: list-docs
+    description: "Mostra l'elenco dei documenti caricati con opzioni per visualizzare o eliminare."
+    origin:
+      type: "Link"
+      id: "menu-elenco-docs"
+    flow:
+      - "Chiama `elencoDocs()`."
+      - "Recupera l'elenco da `DocsMgr` e costruisce una tabella HTML."
+    destination:
+      type: "UI Window"
+      id: "id_info"
+
+  - id: manage-knbase
+    description: "Visualizza, archivia o gestisce le Basi di Conoscenza salvate."
+    origin:
+      type: "Link"
+      id: ["menu-show-knbase", "menu-save-knbase", "menu-elenco-knbase"]
+    flow:
+      - "show: Legge 'knbase' da IndexedDB e la mostra."
+      - "save: Salva la 'knbase' corrente con un nuovo nome."
+      - "list: Mostra le 'knbase' archiviate con opzioni per caricarle o eliminarle."
+    destination:
+      type: "UI Window & Data Store"
+      description: "Interagisce con IndexedDB per le chiavi che iniziano con 'knbase_'."
+
+  - id: manage-context
+    description: "Visualizza, archivia o gestisce i Contesti salvati."
+    origin:
+      type: "Link"
+      id: ["menu-show-contesto", "menu-save-contesto", "menu-elenco-context"]
+    flow:
+      - "show: Legge 'context' da IndexedDB e lo mostra."
+      - "save: Salva il 'context' corrente con un nuovo nome."
+      - "list: Mostra i contesti archiviati con opzioni per caricarli o eliminarli."
+    destination:
+      type: "UI Window & Data Store"
+      description: "Interagisce con IndexedDB per le chiavi che iniziano con 'keycnt_'."
+
+  - id: manage-threads
+    description: "Archivia o gestisce le conversazioni salvate."
+    origin:
+      type: "Link"
+      id: ["menu-save-thread", "menu-elenco-threads"]
+    flow:
+      - "save: Salva la conversazione ('thread') corrente con un nuovo nome."
+      - "list: Mostra le conversazioni archiviate con opzioni per caricarle o eliminarle."
+    destination:
+      type: "UI Window & Data Store"
+      description: "Interagisce con IndexedDB per le chiavi che iniziano con 'keythr_'."
+
+  - id: delete-data
+    description: "Apre una finestra di dialogo per la cancellazione selettiva o totale dei dati."
+    origin:
+      type: "Link"
+      id: "menu-delete-all"
+    flow:
+      - "Chiama `deleteAllData()`."
+      - "Mostra una finestra con checkbox per tutti i dati in localStorage e IndexedDB."
+    destination:
+      type: "Data Store"
+      description: "Elimina le chiavi selezionate da localStorage e/o IndexedDB."

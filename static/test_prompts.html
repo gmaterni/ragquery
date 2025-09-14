@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Prompts Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 350px;
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-right: 1px solid #404040;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #1e1e1e;
+        }
+
+        h1 {
+            color: #bb86fc;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        h2 {
+            color: #03dac6;
+            font-size: 16px;
+            margin: 20px 0 12px 0;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #b3b3b3;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #404040;
+            border-radius: 8px;
+            background-color: #333333;
+            color: #e0e0e0;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: #bb86fc;
+            box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #bb86fc, #6200ea);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(187, 134, 252, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .output-container {
+            background-color: #252525;
+            border: 1px solid #404040;
+            border-radius: 12px;
+            padding: 24px;
+            min-height: calc(100vh - 100px);
+        }
+
+        .output-title {
+            color: #03dac6;
+            font-size: 18px;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        .message-block {
+            background-color: #1a1a1a;
+            border-left: 4px solid #bb86fc;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .message-role {
+            color: #03dac6;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .message-content {
+            color: #e0e0e0;
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 60px 20px;
+        }
+
+        .example-content {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #666;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: #6200ea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1>Prompt Generator</h1>
+        
+        <div class="form-group">
+            <label for="promptType">Tipo di Prompt</label>
+            <select id="promptType">
+                <option value="extraction">Extraction Prompt</option>
+                <option value="unification">Unification Prompt</option>
+                <option value="extractor">Extractor Prompt</option>
+                <option value="answer">Answer Prompt</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="docType">Tipo Documento</label>
+            <select id="docType">
+                <option value="normativi">Normativi</option>
+                <option value="procedurali">Procedurali</option>
+                <option value="documentali">Documentali</option>
+                <option value="informativi">Informativi</option>
+                <option value="narrativi">Narrativi</option>
+                <option value="argomentativi">Argomentativi</option>
+                <option value="analitici">Analitici</option>
+                <option value="progettuali">Progettuali</option>
+            </select>
+        </div>
+
+        <h2>Contenuto Documento</h2>
+        <div class="form-group">
+            <label for="docContent">
+                Testo del Documento 
+                <span class="badge">Auto-popolato</span>
+            </label>
+            <textarea id="docContent" placeholder="Il contenuto verrà caricato automaticamente..."></textarea>
+            <div class="example-content">Il contenuto si aggiorna automaticamente in base al tipo selezionato</div>
+        </div>
+
+        <div id="extraFields">
+            <!-- Campi aggiuntivi dinamici -->
+        </div>
+
+        <button onclick="generatePrompt()">Genera Prompt</button>
+    </div>
+
+    <div class="main-content">
+        <div class="output-container">
+            <div class="output-title">Prompt Generato</div>
+            <div id="output">
+                <div class="empty-state">
+                    Seleziona le opzioni e clicca "Genera Prompt" per vedere l'output
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Contenuti di esempio per ogni tipo di documento
+        const EXAMPLE_CONTENTS = {
+            normativi: `REGOLAMENTO AZIENDALE - GESTIONE ACCESSI
+
+Art. 1 - Definizioni
+Per "sistema informatico" si intende l'insieme di hardware, software e reti aziendali.
+Per "utente autorizzato" si intende il dipendente che ha ricevuto credenziali valide.
+
+Art. 2 - Accesso al Sistema  
+L'accesso è consentito esclusivamente agli utenti autorizzati muniti di credenziali valide.
+È vietato condividere le proprie credenziali con terzi.
+Le password devono essere cambiate ogni 90 giorni.
+
+Art. 3 - Sanzioni
+La violazione delle presenti norme comporta:
+- Prima violazione: richiamo scritto
+- Seconda violazione: sospensione di 3 giorni
+- Terza violazione: licenziamento per giusta causa`,
+
+            procedurali: `PROCEDURA INSTALLAZIONE SOFTWARE AZIENDALE
+
+OBIETTIVO: Installare correttamente il software gestionale su workstation Windows
+
+PREREQUISITI:
+- Windows 10 o superiore
+- 8GB RAM minimo
+- 50GB spazio libero su disco
+- Privilegi amministratore
+
+PROCEDURA:
+1. Scaricare il file installer dal server aziendale (\\\\server\\\\software\\\\gestionale.exe)
+2. Eseguire come amministratore
+3. Seguire la procedura guidata accettando le impostazioni di default
+4. Al termine, riavviare il sistema
+5. Verificare l'avvio corretto del software
+6. Contattare IT se si verificano errori durante l'installazione
+
+CONTROLLI QUALITÀ:
+- Il software si avvia senza errori
+- La connessione al database funziona
+- L'utente riesce ad accedere con le proprie credenziali`,
+
+            documentali: `VERBALE RIUNIONE PROGETTO ALPHA
+Data: 15 Gennaio 2024, ore 14:30
+Partecipanti: Mario Rossi (PM), Anna Verdi (Dev), Luca Bianchi (QA)
+
+PUNTI DISCUSSI:
+1. Stato avanzamento sviluppo
+   - Completato modulo autenticazione (Anna Verdi)
+   - In corso modulo reporting (previsto completamento 22/01)
+   - Identificato bug critico nel modulo pagamenti
+
+2. Decisioni prese:
+   - Priorità massima su fix bug pagamenti (assegnato ad Anna)
+   - Posticipo release di 1 settimana (nuova data: 30/01)
+   - Budget aggiuntivo approvato per test esterni
+
+3. Azioni da intraprendere:
+   - Anna: Fix bug pagamenti entro 18/01
+   - Luca: Preparare piano test aggiuntivi
+   - Mario: Comunicare nuovo timeline al cliente
+
+PROSSIMA RIUNIONE: 22 Gennaio 2024, ore 15:00`,
+
+            informativi: `COMUNICATO AZIENDALE - NUOVA SEDE
+
+Milano, 10 Marzo 2024
+
+Si comunica che a partire dal 1° Maggio 2024, la sede principale dell'azienda 
+si trasferirà presso il nuovo complesso in Via Roma 123, Milano.
+
+DETTAGLI DEL TRASFERIMENTO:
+- La nuova sede dispone di 2000 mq su 3 piani
+- Uffici moderni con postazioni ergonomiche
+- Sala conferenze da 50 posti
+- Parcheggio riservato con 80 posti auto
+
+TEMPISTICHE:
+- 25-30 Aprile: Trasloco graduale di uffici e attrezzature
+- 28 Aprile: Ultimo giorno nella sede attuale
+- 1 Maggio: Primo giorno operativo nella nuova sede
+
+TRASPORTI:
+La nuova sede è ben collegata con:
+- Metro linea M2 (fermata Cadorna, 5 min a piedi)
+- Autobus linee 61, 94 (fermata Via Roma)
+- Stazione Cadorna FS (collegamenti regionali)
+
+Per informazioni: hr@azienda.com`,
+
+            narrativi: `IL CASO THOMPSON
+
+Era una fredda mattina di novembre quando l'ispettore Reynolds ricevette la chiamata. 
+Un omicidio in una villa isolata fuori città. La vittima: il famoso antiquario 
+Jonathan Thompson, trovato morto nel suo studio.
+
+Arrivato sul posto, Reynolds notò immediatamente alcuni dettagli strani. 
+La porta d'ingresso non era stata forzata, segno che Thompson conosceva 
+l'assassino. Nel studio, tutto sembrava in ordine, tranne per un cassetto 
+della scrivania lasciato aperto.
+
+"Cosa mancava in quel cassetto?" si chiese l'ispettore. La governante, 
+Mrs. Wilson, gli spiegò che Thompson teneva lì documenti importanti e 
+una piccola chiave dorata di cui era molto geloso.
+
+Le indagini rivelarono che Thompson aveva tre visitatori abituali: 
+il socio in affari Marcus Reid, la nipote erede Sarah Thompson, 
+e il collezionista rivale Prof. Hartwell. Ognuno aveva motivi per volerlo morto.
+
+Ma fu l'analisi delle impronte sulla chiave dorata, trovata nascosta 
+nel giardino, a svelare la verità...`,
+
+            argomentativi: `ANALISI: PERCHÉ IL LAVORO REMOTO È IL FUTURO
+
+TESI: Il lavoro remoto rappresenta un'evoluzione irreversibile del mondo 
+del lavoro che porta benefici sia alle aziende che ai dipendenti.
+
+ARGOMENTI A FAVORE:
+
+1. PRODUTTIVITÀ AUMENTATA
+Studi recenti dimostrano che i lavoratori remoti sono più produttivi del 15-20%. 
+L'assenza di interruzioni da colleghi e la possibilità di personalizzare 
+l'ambiente di lavoro contribuiscono a una maggiore concentrazione.
+
+2. RIDUZIONE DEI COSTI AZIENDALI  
+Le aziende risparmiano su affitti, utenze e spese generali. Google ha stimato 
+un risparmio di 1 miliardo di dollari l'anno grazie al lavoro remoto.
+
+3. MIGLIOR WORK-LIFE BALANCE
+I dipendenti eliminano i tempi di pendolarismo e possono gestire meglio 
+famiglia e vita personale, risultando più soddisfatti e meno stressati.
+
+OBIEZIONI E CONFUTAZIONI:
+
+"Il lavoro remoto danneggia la collaborazione"
+RISPOSTA: Tools come Slack, Zoom e Microsoft Teams hanno dimostrato che 
+la collaborazione digitale può essere più efficiente di quella fisica.
+
+"Si perde il controllo sui dipendenti"  
+RISPOSTA: Il controllo deve spostarsi dai tempi ai risultati. KPI chiari 
+e obiettivi misurabili sono più efficaci della supervisione fisica.
+
+CONCLUSIONE: Le evidenze dimostrano che il lavoro remoto non è solo una 
+tendenza temporanea, ma il futuro del lavoro moderno.`,
+
+            analitici: `ANALISI PERFORMANCE VENDITE Q4 2023
+
+OGGETTO DELLO STUDIO:
+Analisi delle performance di vendita nell'ultimo trimestre 2023 per identificare 
+trend e opportunità di miglioramento.
+
+METODOLOGIA:
+- Dati da CRM aziendale (10,000+ transazioni)  
+- Periodo: Ottobre-Dicembre 2023
+- Segmentazione per area geografica, prodotto, canale di vendita
+- Confronto con stesso periodo 2022
+
+RISULTATI PRINCIPALI:
+
+1. PERFORMANCE GENERALE
+- Fatturato totale: €2.3M (+12% vs Q4 2022)
+- Numero transazioni: 1,847 (+8% vs Q4 2022)  
+- Valore medio ordine: €1,245 (+4% vs Q4 2022)
+
+2. ANALISI PER AREA GEOGRAFICA
+- Nord Italia: €1.2M (52% del totale, +15% crescita)
+- Centro Italia: €680K (30% del totale, +8% crescita)
+- Sud Italia: €420K (18% del totale, +5% crescita)
+
+3. PATTERN IDENTIFICATI
+- Picco vendite nella seconda settimana di dicembre (+40% vs media trimestre)
+- Prodotti premium mostrano crescita del 25%
+- Vendite online crescono del 35%, vendite retail del 3%
+
+CORRELAZIONI SIGNIFICATIVE:
+- Forte correlazione tra investimenti marketing digitale e vendite online (r=0.87)
+- Correlazione negativa tra temperature e vendite prodotti stagionali (r=-0.72)
+
+CONCLUSIONI:
+Il trimestre mostra una crescita solida guidata da e-commerce e prodotti premium. 
+Si raccomanda di aumentare gli investimenti nel digitale e nei prodotti high-end.`,
+
+            progettuali: `PIANO PROGETTO: SISTEMA CRM AZIENDALE
+
+OBIETTIVI DEL PROGETTO:
+- Implementare nuovo sistema CRM per gestire 5000+ clienti
+- Migliorare efficienza commerciale del 30%
+- Centralizzare dati clienti attualmente dispersi
+- Go-live previsto: 30 Giugno 2024
+
+MILESTONE PRINCIPALI:
+1. Analisi requisiti (1-15 Febbraio 2024)
+2. Selezione fornitore (16 Febbraio - 1 Marzo)  
+3. Configurazione sistema (2-31 Marzo)
+4. Migrazione dati (1-15 Aprile)
+5. Training utenti (16-30 Aprile)
+6. Test e go-live (1-30 Giugno)
+
+RISORSE NECESSARIE:
+- Project Manager (100%, Mario Rossi)
+- Analista Business (50%, Anna Verdi) 
+- Sviluppatore senior (75%, Luca Bianchi)
+- Budget software: €50,000
+- Budget consulenza: €30,000
+- Budget training: €10,000
+
+RISCHI IDENTIFICATI:
+1. RITARDO MIGRAZIONE DATI
+   - Probabilità: Media
+   - Impatto: Alto  
+   - Mitigazione: Backup plan con migrazione manuale
+
+2. RESISTENZA AL CAMBIAMENTO  
+   - Probabilità: Alta
+   - Impatto: Medio
+   - Mitigazione: Programma change management dedicato
+
+3. PROBLEMI INTEGRAZIONE SISTEMI ESISTENTI
+   - Probabilità: Media
+   - Impatto: Alto
+   - Mitigazione: POC tecnico anticipato
+
+CRITERI DI SUCCESSO:
+- Sistema operativo entro deadline
+- 95% utenti trainati e operativi
+- Migrazione dati completa senza perdite
+- Tempo di risposta sistema < 2 secondi`
+        };
+
+        // Inizializza la pagina caricando il contenuto di default
+        function initializePage() {
+            const docType = document.getElementById('docType').value;
+            const contentTextarea = document.getElementById('docContent');
+            contentTextarea.value = EXAMPLE_CONTENTS[docType] || '';
+            updateExtraFields();
+        }
+
+        // Aggiorna contenuto automaticamente quando cambia il tipo
+        document.getElementById('docType').addEventListener('change', function() {
+            const selectedType = this.value;
+            const contentTextarea = document.getElementById('docContent');
+            contentTextarea.value = EXAMPLE_CONTENTS[selectedType] || '';
+        });
+
+        // Aggiorna campi extra quando cambia il tipo di prompt
+        document.getElementById('promptType').addEventListener('change', function() {
+            updateExtraFields();
+        });
+
+        function updateExtraFields() {
+            const promptType = document.getElementById('promptType').value;
+            const extraFields = document.getElementById('extraFields');
+            
+            extraFields.innerHTML = '';
+            
+            if (promptType === 'unification') {
+                extraFields.innerHTML = `
+                    <h2>Contenuti Multipli</h2>
+                    <div class="form-group">
+                        <label for="unificationContent">Contenuti da Unificare</label>
+                        <textarea id="unificationContent" placeholder="Inserisci più contenuti strutturati da unificare...">DOCUMENTO 1 - ESTRATTO:
+SOGGETTI:
+amministratore_sistema: gestione_accessi | sistemi_informatici | modifica_utenti | attivo
+
+REGOLE:
+accesso_autorizzato: solo_utenti_con_credenziali_valide | sempre | blocco_accesso | nessuna
+
+---
+
+DOCUMENTO 2 - ESTRATTO:  
+SOGGETTI:
+responsabile_IT: manutenzione_sistemi | infrastruttura_tecnica | approvazione_software | attivo
+
+REGOLE:
+cambio_password: ogni_90_giorni | tutti_utenti | account_sospeso | emergenza_medica</textarea>
+                    </div>
+                `;
+            } else if (promptType === 'extractor') {
+                extraFields.innerHTML = `
+                    <h2>Knowledge Base e Domanda</h2>
+                    <div class="form-group">
+                        <label for="kbContent">Knowledge Base</label>
+                        <textarea id="kbContent" placeholder="Inserisci la knowledge base...">SOGGETTI:
+amministratore_sistema: gestione_accessi | sistemi_informatici | modifica_utenti | attivo
+responsabile_IT: manutenzione_sistemi | infrastruttura_tecnica | approvazione_software | attivo
+
+REGOLE:
+accesso_autorizzato: solo_utenti_con_credenziali_valide | sempre | blocco_accesso | nessuna
+cambio_password: ogni_90_giorni | tutti_utenti | account_sospeso | emergenza_medica
+condivisione_credenziali: vietata | tutti_utenti | licenziamento | nessuna
+
+SANZIONI_VIOLAZIONI:
+prima_violazione: accesso_non_autorizzato | richiamo_scritto | lieve | ricorso_entro_10_giorni
+seconda_violazione: condivisione_credenziali | sospensione_3_giorni | media | ricorso_entro_5_giorni</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="question">Domanda</label>
+                        <textarea id="question" style="min-height: 60px;" placeholder="Inserisci la domanda...">Chi può modificare gli utenti nel sistema e quali sono le conseguenze per chi condivide le credenziali?</textarea>
+                    </div>
+                `;
+            } else if (promptType === 'answer') {
+                extraFields.innerHTML = `
+                    <h2>Contesto e Storia Conversazione</h2>
+                    <div class="form-group">
+                        <label for="context">Contesto Rilevante</label>
+                        <textarea id="context" placeholder="Inserisci il contesto estratto...">SOGGETTI:
+amministratore_sistema: gestione_accessi | sistemi_informatici | modifica_utenti | attivo
+
+REGOLE:
+condivisione_credenziali: vietata | tutti_utenti | licenziamento | nessuna
+
+SANZIONI_VIOLAZIONI:
+condivisione_credenziali: condivisione_credenziali | licenziamento | grave | ricorso_entro_5_giorni</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="history">Storia Conversazione</label>
+                        <textarea id="history" style="min-height: 80px;" placeholder="Inserisci domande e risposte precedenti...">Chi può modificare gli utenti nel sistema?
+L'amministratore di sistema ha il potere di modificare gli utenti. Ha gestione degli accessi sui sistemi informatici ed è autorizzato alla modifica degli utenti.
+Cosa succede se condivido la password?</textarea>
+                    </div>
+                `;
+            }
+        }
+
+        function generatePrompt() {
+            const promptType = document.getElementById('promptType').value;
+            const docType = document.getElementById('docType').value;
+            const docContent = document.getElementById('docContent').value;
+            
+            let messages = [];
+            
+            if (promptType === 'extraction') {
+                messages = generateExtractionPrompt(docContent, docType);
+            } else if (promptType === 'unification') {
+                const unificationContentEl = document.getElementById('unificationContent');
+                const unificationContent = unificationContentEl ? unificationContentEl.value : '';
+                messages = generateUnificationPrompt(unificationContent, docType);
+            } else if (promptType === 'extractor') {
+                const kbContentEl = document.getElementById('kbContent');
+                const questionEl = document.getElementById('question');
+                const kbContent = kbContentEl ? kbContentEl.value : '';
+                const question = questionEl ? questionEl.value : '';
+                messages = generateExtractorPrompt(kbContent, question, docType);
+            } else if (promptType === 'answer') {
+                const contextEl = document.getElementById('context');
+                const historyEl = document.getElementById('history');
+                const context = contextEl ? contextEl.value : '';
+                const history = historyEl ? historyEl.value.split('\n').filter(line => line.trim()) : [];
+                messages = generateAnswerPrompt(context, history);
+            }
+            
+            displayMessages(messages);
+        }
+
+        function generateExtractionPrompt(docContent, docType) {
+            const templates = {
+                normativi: `SOGGETTI:
+nome: ruolo_funzione | ambito_applicazione | poteri_specifici | status_attivo
+
+REGOLE:
+regola_id: descrizione_completa | condizioni_applicazione | conseguenze_obbligatorie | eccezioni_se_presenti`,
+                procedurali: `OBIETTIVO_PROCEDURA:
+nome: risultato_atteso | prerequisiti_necessari | output_finale | criticità_operativa
+
+SEQUENZA_AZIONI:
+passo_N: descrizione_azione | parametri_operativi | controlli_qualità | punti_attenzione`,
+                documentali: `CRONOLOGIA_EVENTI:
+momento: descrizione_evento | partecipanti_coinvolti | risultati_ottenuti | documentazione_associata
+
+DECISIONI_PRESE:
+decisione: responsabili_decisione | momento_temporale | motivazioni_dichiarate | impatti_previsti`,
+                informativi: `INFORMAZIONI_PRINCIPALI:
+argomento: descrizione_dettagliata | destinatari_target | data_validità | fonte_autorità
+
+DATI_SPECIFICI:
+elemento: valore_preciso | unità_misura | data_riferimento | note_aggiuntive`,
+                narrativi: `PERSONAGGI:
+nome: ruolo_narrativa | caratteristiche_principali | motivazioni | status_storia
+
+EVENTI_SEQUENZA:
+momento: descrizione_evento | protagonisti_coinvolti | conseguenze | sviluppi_trama`,
+                argomentativi: `TESI_PRINCIPALE:
+argomento: posizione_sostenuta | evidenze_presentate | forza_persuasiva | target_audience
+
+ARGOMENTAZIONI:
+punto: descrizione_argomento | prove_supporto | controargomentazioni_previste | efficacia_retorica`,
+                analitici: `METRICHE_PRINCIPALI:
+indicatore: valore_misurato | unità_misura | periodo_riferimento | variazione_precedente
+
+CORRELAZIONI_IDENTIFICATE:
+relazione: variabili_coinvolte | forza_correlazione | significatività_statistica | implicazioni_pratiche`,
+                progettuali: `OBIETTIVI_PROGETTO:
+obiettivo: descrizione_dettagliata | criteri_successo | priorità | deadline
+
+ATTIVITÀ_PIANIFICATE:
+fase: descrizione_attività | responsabile | durata_stimata | dipendenze`
+            };
+
+            const descriptions = {
+                normativi: "Documenti con valore vincolante che prescrivono comportamenti obbligatori",
+                procedurali: "Documenti che guidano all'esecuzione corretta di attività specifiche", 
+                documentali: "Documenti che registrano fatti accaduti per consultazione e tracciabilità",
+                informativi: "Documenti che trasmettono informazioni specifiche a destinatari definiti",
+                narrativi: "Documenti che raccontano eventi in sequenza temporale con protagonisti e sviluppi",
+                argomentativi: "Documenti che sostengono una tesi con argomentazioni e prove a supporto",
+                analitici: "Documenti che presentano analisi di dati con correlazioni e interpretazioni",
+                progettuali: "Documenti che definiscono obiettivi, attività e piani per raggiungere risultati"
+            };
+
+            const systemMessage = `## Obiettivo
+Estrai informazioni strutturate dal documento fornito.
+
+## Contesto del compito  
+Stai analizzando ${descriptions[docType] || "un documento specifico"}
+
+## Principio guida
+Durante l'estrazione, la tua priorità assoluta è: "Massima precisione terminologica - ogni parola può avere valore legale".
+
+## Formato risposta
+${templates[docType] || templates.normativi}
+
+## Note
+Salta i campi non presenti nel documento.`;
+
+            const userMessage = `## Documento da analizzare
+\`\`\`text
+${docContent}
+\`\`\`
+---
+
+Estrai le informazioni dal documento seguendo le istruzioni e produci la risposta in base al formato risposta.`;
+
+            return [
+                { role: "system", content: systemMessage },
+                { role: "user", content: userMessage }
+            ];
+        }
+
+        function generateUnificationPrompt(contents, docType) {
+            const template = `SOGGETTI:
+nome: ruolo_funzione | ambito_applicazione | poteri_specifici | status_attivo
+
+REGOLE:
+regola_id: descrizione_completa | condizioni_applicazione | conseguenze_obbligatorie | eccezioni_se_presenti`;
+
+            const systemMessage = `## Obiettivo
+Unifica i documenti strutturati in un'unica knowledge base.
+
+## Istruzioni  
+1. Analizza i documenti strutturati forniti
+2. Identifica argomenti comuni e correlazioni tra le informazioni
+3. Consolida le informazioni eliminando duplicati
+4. Unifica le relazioni causali e sequenziali
+
+## Formato risposta
+${template}`;
+
+            const userMessage = `## Informazioni da unificare
+\`\`\`text
+${contents}
+\`\`\`
+Produci una knowledge base consolidata seguendo il formato risposta.`;
+
+            return [
+                { role: "system", content: systemMessage },
+                { role: "user", content: userMessage }
+            ];
+        }
+
+        function generateExtractorPrompt(kbContent, question, docType) {
+            const template = `SOGGETTI:
+nome: ruolo_funzione | ambito_applicazione | poteri_specifici | status_attivo
+
+REGOLE:
+regola_id: descrizione_completa | condizioni_applicazione | conseguenze_obbligatorie | eccezioni_se_presenti`;
+
+            const systemMessage = `## Obiettivo
+Seleziona dalla knowledge base le informazioni che aiutano a rispondere alla domanda.
+
+## Criteri di selezione
+- Includi informazioni collegate alla domanda  
+- Includi contesto necessario per capire le informazioni selezionate
+
+## Formato risposta
+${template}`;
+
+            const userMessage = `## Knowledge base completa
+\`\`\`text
+${kbContent}
+\`\`\`
+## Domanda
+${question}
+
+---
+Estrai le sezioni rilevanti per questa domanda e rispetta il formato risposta.`;
+
+            return [
+                { role: "system", content: systemMessage },
+                { role: "user", content: userMessage }
+            ];
+        }
+
+        function generateAnswerPrompt(context, history) {
+            const systemMessage = `Sei un assistente esperto che risponde in modo chiaro e naturale.
+
+## Regole
+- La tua fonte di verità principale è il CONTESTO strutturato fornito
+- Usa la cronologia della conversazione per comprendere il filo logico
+- Se usi conoscenza generale, segnala chiaramente: "Nel contesto non ho trovato questa informazione, ma posso dirti che..."
+- Mantieni un tono conversazionale e naturale
+- Rispondi in modo completo ma conciso
+
+## Formato risposta
+- Rispondi ESCLUSIVAMENTE in testo piano senza alcun artificio grafico
+- Scrivi in paragrafi fluidi e naturali come in una conversazione
+- Se devi elencare elementi, scrivili in forma discorsiva nel testo
+
+## Contesto
+\`\`\`text
+${context}
+\`\`\`
+## Istruzioni
+- Cerca prima la risposta nel CONTESTO
+- Utilizza le informazioni delle sezioni strutturate disponibili
+- Se la risposta non è presente nel contesto, usa la conoscenza generale segnalando chiaramente
+- Considera la cronologia delle domande per fornire risposte coerenti
+- Formula una risposta chiara, concisa e naturale`;
+
+            const messages = [{ role: "system", content: systemMessage }];
+            
+            // Aggiungi la storia della conversazione
+            for (let i = 0; i < history.length; i++) {
+                const role = i % 2 === 0 ? "user" : "assistant";
+                if (history[i].trim()) {
+                    messages.push({ role: role, content: history[i].trim() });
+                }
+            }
+
+            return messages;
+        }
+
+        function displayMessages(messages) {
+            const output = document.getElementById('output');
+            
+            if (!messages || messages.length === 0) {
+                output.innerHTML = '<div class="empty-state">Errore nella generazione del prompt</div>';
+                return;
+            }
+
+            let html = '';
+            messages.forEach(message => {
+                const roleColor = message.role === 'system' ? '#ff6b6b' : 
+                                 message.role === 'user' ? '#4ecdc4' : '#95e1d3';
+                
+                html += `
+                    <div class="message-block">
+                        <div class="message-role" style="color: ${roleColor};">${message.role.toUpperCase()}</div>
+                        <div class="message-content">${escapeHtml(message.content)}</div>
+                    </div>
+                `;
+            });
+
+            output.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Inizializza la pagina al caricamento
+        document.addEventListener('DOMContentLoaded', function() {
+            initializePage();
+        });
+    </script>
+</body>
+</html>

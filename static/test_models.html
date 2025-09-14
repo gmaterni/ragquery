@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Modelli LLM</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 2em;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        h1, h2 {
+            color: #e0e0e0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1em;
+        }
+        th, td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #333;
+        }
+        #log-container {
+            margin-top: 1em;
+            padding: 1em;
+            border: 1px solid #444;
+            background-color: #1e1e1e;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+        }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test di Disponibilità Modelli LLM</h1>
+    <button id="start-test-btn">Avvia Test</button>
+    <table id="results-table">
+        <thead>
+            <tr>
+                <th>Provider</th>
+                <th>Modello</th>
+                <th>Stato</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- I risultati verranno inseriti qui -->
+        </tbody>
+    </table>
+    <h2>Log</h2>
+    <div id="log-container"></div>
+
+    <script type="module" src="test_models.js"></script>
+</body>
+</html>

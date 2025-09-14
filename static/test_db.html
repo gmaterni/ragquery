@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test DB</title>
+    <script type="module" src="test_db.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #E0E0E0;
+            --primary-color: #4CAF50; /* Verde per i titoli */
+            --secondary-color: #FFC107; /* Giallo per i pulsanti */
+            --surface-color: #1E1E1E;
+            --border-color: #333;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 16px; /* Dimensione base più contenuta */
+        }
+
+        .layout-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 350px;
+            flex-shrink: 0;
+            background-color: var(--surface-color);
+            padding: 1em;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .main-content {
+            flex-grow: 1;
+            padding: 1em;
+            overflow-y: auto;
+        }
+
+        h2 {
+            font-size: 1.4rem;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5em;
+        }
+
+        section {
+            margin-bottom: 1.5em;
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px; /* Spazio tra i pulsanti */
+        }
+
+        button {
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 0.6em 0.8em;
+            margin: 0;
+            border: 1px solid var(--secondary-color);
+            border-radius: 5px;
+            background-color: transparent;
+            color: var(--secondary-color);
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            width: 100%;
+            text-align: left; /* Allinea il testo del pulsante a sinistra */
+        }
+
+        button:hover, button:focus {
+            background-color: var(--secondary-color);
+            color: var(--bg-color);
+            outline: none;
+        }
+
+        #output-display {
+            height: 100%;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: 'Menlo', 'Consolas', monospace;
+            font-size: 1rem;
+        }
+
+        #output-display h2 {
+            color: var(--secondary-color);
+            font-size: 1.3rem;
+        }
+
+        #output-display pre {
+            margin-top: 0.5em;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="layout-container">
+        <div class="sidebar" id="controls-container">
+            <!-- I controlli verranno iniettati qui da test_db.js -->
+        </div>
+        <div class="main-content" id="output-container">
+            <div id="output-display">
+                <pre>(Pronto per eseguire i test)</pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

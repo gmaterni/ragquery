@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="it">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Search IndexedDB</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #1a1a1a;
+                color: #e0e0e0;
+                min-height: 100vh;
+                display: flex;
+            }
+            .container {
+                display: flex;
+                width: 100%;
+                min-height: 100vh;
+            }
+            .main-content {
+                flex: 1;
+                padding: 2rem;
+                overflow-y: auto;
+                background-color: #1e1e1e;
+            }
+            .sidebar {
+                width: 350px;
+                background-color: #2d2d2d;
+                border-right: 1px solid #444;
+                padding: 1rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .header {
+                margin-bottom: 1rem;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+                color: #fff;
+            }
+            .header p {
+                color: #aaa;
+                margin-top: 0.5rem;
+            }
+            .btn {
+                background-color: #3a8cff;
+                border: none;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1rem;
+                transition: background-color 0.3s ease;
+                width: 100%;
+                text-align: center;
+            }
+            .btn:hover {
+                background-color: #2a6cdf;
+            }
+            .btn:disabled {
+                background-color: #555;
+                cursor: not-allowed;
+            }
+            .card {
+                background-color: #2d2d2d;
+                border: 1px solid #444;
+                border-radius: 4px;
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            .db-list {
+                max-height: 300px;
+                overflow-y: auto;
+                border: 1px solid #444;
+                border-radius: 4px;
+                background-color: #2d2d2d;
+            }
+            .db-item,
+            .data-item {
+                padding: 0.75rem;
+                border-bottom: 1px solid #444;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                font-size: 0.8rem;
+            }
+            .db-item:hover,
+            .data-item:hover {
+                background-color: #3a3a3a;
+            }
+            .db-item.selected {
+                background-color: #3a8cff;
+                color: white;
+            }
+            .two-columns {
+                display: flex;
+                gap: 1rem;
+                margin-top: 1rem;
+                height: calc(100vh - 200px);
+            }
+            .column {
+                flex: 1;
+                min-width: 0;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+            #data-list-container {
+                overflow-y: auto;
+            }
+            #data-display {
+                display: flex;
+                flex-direction: column;
+                overflow-y: auto;
+            }
+            .data-list {
+                display: grid;
+                gap: 0.5rem;
+                grid-template-columns: 1fr;
+                flex: 1;
+                overflow-y: auto;
+            }
+            .data-item {
+                background-color: #333;
+                border: 1px solid #444;
+                border-radius: 4px;
+                padding: 0.75rem;
+                transition: background-color 0.3s ease;
+            }
+            .data-item:hover {
+                background-color: #3a3a3a;
+            }
+            .data-preview {
+                font-size: 0.7rem;
+                color: #aaa;
+                margin-top: 0.5rem;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            .content-display {
+                background-color: #1e1e1e;
+                border: 1px solid #444;
+                border-radius: 4px;
+                padding: 1rem;
+                flex: 1;
+                min-height: 300px;
+                font-family: monospace;
+                white-space: pre-wrap;
+                overflow: auto;
+                line-height: 1.6;
+                color: #ccc;
+                margin-top: 1rem;
+            }
+            .status {
+                padding: 1rem;
+                border-radius: 4px;
+                margin-bottom: 1rem;
+                text-align: center;
+                font-weight: normal;
+            }
+            .status.info {
+                background-color: #1a3a6a;
+                border: 1px solid #2a4a7a;
+                color: #8ab4f8;
+            }
+            .status.error {
+                background-color: #5a2a2a;
+                border: 1px solid #7a3a3a;
+                color: #f8a4a4;
+            }
+            .status.success {
+                background-color: #1a4a3a;
+                border: 1px solid #2a6a5a;
+                color: #8ad4b4;
+            }
+            .section-title {
+                font-size: 1.1rem;
+                font-weight: bold;
+                color: #fff;
+                margin-bottom: 1rem;
+            }
+            /* Scrollbar styling per tema dark */
+            ::-webkit-scrollbar {
+                width: 8px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #2a2a2a;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #555;
+                border-radius: 4px;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: #777;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="sidebar">
+                <div class="card">
+                    <button id="load-databases" class="btn">
+                        <span id="load-btn-text">Carica DB</span>
+                    </button>
+                    <div id="database-list" class="db-list" style="display: none; margin-top: 1rem;"></div>
+                </div>
+                <div class="card">
+                    <button id="show-data" class="btn" disabled>
+                        <span id="show-btn-text">Mostra Dati</span>
+                    </button>
+                </div>
+                <div class="card">
+                    <div class="section-title">Info</div>
+                    <div style="font-size: 0.7rem; color: #aaa; line-height: 1.4;">
+                        <p>• Clicca "Mostra Dati"</p>
+                        <p>• Clicca elemento per dettagli</p>
+                    </div>
+                </div>
+            </div>
+            <div class="main-content">
+                <div id="status-area"></div>
+                <div class="two-columns">
+                    <div id="data-list-container" class="card column">
+                        <div id="data-list" class="data-list"></div>
+                    </div>
+                    <div id="data-display" class="card column">
+                        <div id="content-display" class="content-display">
+                            Seleziona un elemento dalla lista per visualizzarne il contenuto
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            let selectedDatabase = null;
+            let currentData = [];
+            // Elementi DOM
+            const loadDatabasesBtn = document.getElementById('load-databases');
+            const showDataBtn = document.getElementById('show-data');
+            const databaseList = document.getElementById('database-list');
+            const dataList = document.getElementById('data-list');
+            const contentDisplay = document.getElementById('content-display');
+            const statusArea = document.getElementById('status-area');
+            const dataListContainer = document.getElementById('data-list-container');
+
+            // Funzioni di utilità per lo status
+            function showStatus(message, type = 'info') {
+                statusArea.innerHTML = `<div class="status ${type}">${message}</div>`;
+            }
+
+            function clearStatus() {
+                statusArea.innerHTML = '';
+            }
+
+            // Carica la lista dei database
+            loadDatabasesBtn.addEventListener('click', async () => {
+                try {
+                    const loadBtnText = document.getElementById('load-btn-text');
+                    loadBtnText.textContent = 'Caricamento...';
+                    loadDatabasesBtn.disabled = true;
+                    showStatus('Caricamento database disponibili...', 'info');
+                    // Ottieni la lista dei database
+                    const databases = await indexedDB.databases();
+                    if (databases.length === 0) {
+                        showStatus('Nessun database IndexedDB trovato', 'info');
+                        databaseList.style.display = 'none';
+                    } else {
+                        databaseList.innerHTML = '';
+                        databases.forEach((db, index) => {
+                            const dbItem = document.createElement('div');
+                            dbItem.className = 'db-item';
+                            dbItem.innerHTML = `
+                                <div>
+                                    <div><strong>${db.name}</strong></div>
+                                    <div style="font-size: 0.7rem; color: #aaa;">v${db.version}</div>
+                                </div>
+                            `;
+                            dbItem.addEventListener('click', () => selectDatabase(db.name, dbItem));
+                            databaseList.appendChild(dbItem);
+                        });
+                        databaseList.style.display = 'block';
+                        showStatus(`Trovati ${databases.length} database`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Errore nel caricamento dei database:', error);
+                    showStatus('Errore nel caricamento dei database: ' + error.message, 'error');
+                } finally {
+                    document.getElementById('load-btn-text').textContent = 'Ricarica Database';
+                    loadDatabasesBtn.disabled = false;
+                }
+            });
+
+            // Seleziona un database
+            function selectDatabase(dbName, element) {
+                // Rimuovi selezione precedente
+                document.querySelectorAll('.db-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                // Seleziona il nuovo database
+                element.classList.add('selected');
+                selectedDatabase = dbName;
+                showDataBtn.disabled = false;
+                showStatus(`Database "${dbName}" selezionato`, 'success');
+                // Nascondi l'elenco dei database dopo la selezione
+                databaseList.style.display = 'none';
+                // Svuota la lista dati e la visualizzazione
+                dataList.innerHTML = '';
+                contentDisplay.textContent = 'Seleziona un elemento dalla lista per visualizzarne il contenuto';
+            }
+
+            // Mostra i dati del database selezionato
+            showDataBtn.addEventListener('click', async () => {
+                if (!selectedDatabase) return;
+                try {
+                    const showBtnText = document.getElementById('show-btn-text');
+                    showBtnText.textContent = 'Caricamento...';
+                    showDataBtn.disabled = true;
+                    showStatus('Caricamento dati del database...', 'info');
+                    const data = await getAllDataFromDatabase(selectedDatabase);
+                    currentData = data;
+                    displayDataList(data);
+                    if (data.length === 0) {
+                        showStatus('Il database non contiene dati', 'info');
+                    } else {
+                        showStatus(`Caricati ${data.length} elementi`, 'success');
+                    }
+                } catch (error) {
+                    console.error('Errore nel caricamento dei dati:', error);
+                    showStatus('Errore nel caricamento dei dati: ' + error.message, 'error');
+                } finally {
+                    document.getElementById('show-btn-text').textContent = 'Ricarica Dati';
+                    showDataBtn.disabled = false;
+                }
+            });
+
+            // Ottieni tutti i dati da un database
+            async function getAllDataFromDatabase(dbName) {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(dbName);
+                    request.onerror = () => reject(request.error);
+                    request.onsuccess = (event) => {
+                        const db = event.target.result;
+                        const allData = [];
+                        const objectStoreNames = Array.from(db.objectStoreNames);
+                        if (objectStoreNames.length === 0) {
+                            resolve([]);
+                            return;
+                        }
+                        let completed = 0;
+                        const transaction = db.transaction(objectStoreNames, 'readonly');
+                        objectStoreNames.forEach(storeName => {
+                            const store = transaction.objectStore(storeName);
+                            const request = store.getAll();
+                            request.onsuccess = () => {
+                                const storeData = request.result.map(item => ({
+                                    storeName: storeName,
+                                    data: item,
+                                    id: item.id || item.key || Math.random().toString(36).substr(2, 9)
+                                }));
+                                allData.push(...storeData);
+                                completed++;
+                                if (completed === objectStoreNames.length) {
+                                    resolve(allData);
+                                }
+                            };
+                            request.onerror = () => reject(request.error);
+                        });
+                    };
+                });
+            }
+
+            // Visualizza la lista dei dati
+            function displayDataList(data) {
+                dataList.innerHTML = '';
+                if (data.length === 0) {
+                    dataList.innerHTML = '<div style="padding: 1rem; text-align: center; color: #aaa;">Nessun dato trovato</div>';
+                } else {
+                    data.forEach((item, index) => {
+                        const dataItem = document.createElement('div');
+                        dataItem.className = 'data-item';
+                        const preview = JSON.stringify(item.data, null, 2);
+                        const shortPreview = preview.length > 100 ? preview.substring(0, 100) + '...' : preview;
+                        dataItem.innerHTML = `
+                        <div>
+                            <div><strong>${item.storeName}</strong></div>
+                            <div style="font-size: 0.7rem; color: #aaa;">ID: ${item.id}</div>
+                            <div class="data-preview">${shortPreview}</div>
+                        </div>
+                    `;
+                        dataItem.addEventListener('click', () => displayItemContent(item, index));
+                        dataList.appendChild(dataItem);
+                    });
+                }
+            }
+
+            // Visualizza il contenuto di un elemento
+            function displayItemContent(item, index) {
+                const formattedContent = JSON.stringify(item.data, null, 2);
+                contentDisplay.textContent = formattedContent;
+                // Scroll verso l'inizio del contenuto
+                contentDisplay.scrollTop = 0;
+                showStatus(`Visualizzando elemento ${index + 1} di ${currentData.length}`, 'success');
+            }
+
+            // Inizializzazione
+            // showStatus('Pronto! Clicca "Carica Database" per iniziare', 'info');
+        </script>
+    </body>
+</html>

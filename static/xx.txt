@@ -1,0 +1,19 @@
+Vorrei che generassi un file d./js/services/ocs_mgr.js
+che soddisfi alle seguenti spivifiche:
+utilizzi UaDb di data_mgr.js per le operazioni di salvataggio e lettura dula localSTorage.
+abbia i seeguenti metodi:
+
+init() legge da localSTorage l'elenco dei noimi dei docunti (possibilmnet auto eseguito )
+
+add(name,doc) dove name è il nome del doocumento e doc il conteuto il name è aggiutoi alla fine dei names salvati
+
+radd(name) ritorna doc
+
+names() rutorna la lista dei nomi dei documenti salvati
+
+read(name) ritoena text
+
+name(i) ritoena il nome nella di index i in names
+
+doc(i)  rirena il documento corrispondente a name(i=)
+
