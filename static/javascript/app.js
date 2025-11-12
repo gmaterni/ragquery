@@ -196,7 +196,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-const VEERSIONE = "G 0.2.3";
+const VEERSIONE = "GFL 0.2.4";
 
 var xlog = console.log;
 // var xlog = function () {};
